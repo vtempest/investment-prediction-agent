@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[next]/internal/font/google/geist_a7695b8e.module.css"],"sourcesContent":["@font-face {\n    font-family: 'Geist Fallback';\n    src: local(\"Arial\");\n    ascent-override: 95.94%;\ndescent-override: 28.16%;\nline-gap-override: 0.00%;\nsize-adjust: 104.76%;\n\n}\n.className {\n    font-family: 'Geist', 'Geist Fallback';\n    font-style: normal;\n\n}\n"],"names":[],"mappings":"AAAA;;;;;;;;;AASA","ignoreList":[0]}}]
+}

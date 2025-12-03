@@ -1,0 +1,3 @@
+{
+  "/api/sec/filings/download/route": "app/api/sec/filings/download/route.js"
+}

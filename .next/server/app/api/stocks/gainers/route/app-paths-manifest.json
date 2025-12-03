@@ -1,0 +1,3 @@
+{
+  "/api/stocks/gainers/route": "app/api/stocks/gainers/route.js"
+}

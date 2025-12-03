@@ -1,9 +1,10 @@
 "use client"
 
-import { Bell, Search, Menu, Activity } from "lucide-react"
+import { Bell, Search, Menu, Activity, Wifi, AlertOctagon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
 
@@ -62,12 +63,33 @@ export function DashboardHeader() {
       </div>
 
       <div className="flex items-center gap-3">
+        <Select defaultValue="paper">
+          <SelectTrigger className="w-[120px] h-9">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="paper">📝 Paper</SelectItem>
+            <SelectItem value="live">🔴 Live</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Wifi className="h-3 w-3 text-green-500" />
+          <span className="hidden sm:inline">32ms</span>
+        </div>
+
+        <Button variant="destructive" size="sm" className="hidden sm:flex">
+          <AlertOctagon className="h-4 w-4 mr-2" />
+          Emergency Stop
+        </Button>
+
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />
+          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
         </Button>
+
         <Avatar className="h-8 w-8 border border-border">
-          <AvatarFallback className="bg-secondary text-secondary-foreground text-sm">JD</AvatarFallback>
+          <AvatarFallback className="bg-primary text-primary-foreground text-sm">TT</AvatarFallback>
         </Avatar>
       </div>
     </header>

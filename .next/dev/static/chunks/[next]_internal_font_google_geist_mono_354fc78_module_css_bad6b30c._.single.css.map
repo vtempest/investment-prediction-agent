@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[next]/internal/font/google/geist_mono_354fc78.module.css"],"sourcesContent":["@font-face {\n    font-family: 'Geist Mono Fallback';\n    src: local(\"Arial\");\n    ascent-override: 74.67%;\ndescent-override: 21.92%;\nline-gap-override: 0.00%;\nsize-adjust: 134.59%;\n\n}\n.className {\n    font-family: 'Geist Mono', 'Geist Mono Fallback';\n    font-style: normal;\n\n}\n"],"names":[],"mappings":"AAAA;;;;;;;;;AASA","ignoreList":[0]}}]
+}

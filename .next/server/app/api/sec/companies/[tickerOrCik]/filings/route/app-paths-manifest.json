@@ -1,0 +1,3 @@
+{
+  "/api/sec/companies/[tickerOrCik]/filings/route": "app/api/sec/companies/[tickerOrCik]/filings/route.js"
+}
