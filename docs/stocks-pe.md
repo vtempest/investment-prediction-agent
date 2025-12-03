@@ -382,16 +382,6 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 
 MIT
 
-## TODO: Add 
-
-https://polymarketanalytics.com/
-
-https://site.financialmodelingprep.com/
-
-https://finnhub.io/docs/api/
-
-https://mcp.alphavantage.co
-
 
 ## Stocks API Integration
 

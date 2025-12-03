@@ -1,0 +1,56 @@
+{
+  "trading": {
+    "market_open_time": "09:30",
+    "timezone": "America/New_York"
+  },
+  "portfolio": {
+    "historical_context_count": 20
+  },
+  "news": {
+    "significance_threshold": 0.7,
+    "moderate_threshold": 0.4,
+    "max_news_per_minute": 50,
+    "sample_news_count": 30,
+    "enable_firecrawl_extraction": true,
+    "valid_sources": [
+      "Fintel", 
+      "InvestorPlace", 
+      "Seeking Alpha", 
+      "SeekingAlpha", 
+      "Yahoo", 
+      "CNBC", 
+      "TipRanks", 
+      "MarketWatch", 
+      "The Fly", 
+      "Benzinga", 
+      "TalkMarkets", 
+      "Stock Options Channel"
+    ]
+  },
+  "models": {
+    "portfolio_manager": {
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "temperature": 0.3
+    },
+    "nlp_features": {
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "temperature": 0.3
+    },
+    "assess_significance": {
+      "provider": "openai",
+      "model": "gpt-4.1-mini",
+      "temperature": 0.3
+    },
+    "enhanced_summary": {
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "temperature": 0.3
+    }
+  },
+  "output": {
+    "csv_path": "./output/csv",
+    "reports_path": "./output/reports"
+  }
+} 
