@@ -9,10 +9,24 @@ DEFAULT_CONFIG = {
         "dataflows/data_cache",
     ),
     # LLM settings
+    # Supported providers: openai, anthropic, google, groq, ollama, openrouter
     "llm_provider": "openai",
     "deep_think_llm": "o4-mini",
     "quick_think_llm": "gpt-4o-mini",
     "backend_url": "https://api.openai.com/v1",
+    "temperature": 0.3,
+
+    # Example Groq configuration (fast inference):
+    # "llm_provider": "groq",
+    # "deep_think_llm": "llama-3.1-70b-versatile",
+    # "quick_think_llm": "llama-3.1-8b-instant",
+    # "backend_url": None,
+
+    # Example Anthropic configuration:
+    # "llm_provider": "anthropic",
+    # "deep_think_llm": "claude-3-5-sonnet-20241022",
+    # "quick_think_llm": "claude-3-5-haiku-20241022",
+    # "backend_url": None,
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,

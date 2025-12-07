@@ -2,6 +2,7 @@ langgraph>=0.4.8
 langchain>=0.3.25
 langchain-core>=0.3.65
 langchain-anthropic>=0.2.0
+langchain-groq>=0.1.0
 finnhub-python>=2.4.23
 firecrawl-py>=2.8.0
 yfinance>=0.2.63

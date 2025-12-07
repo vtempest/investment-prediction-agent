@@ -1,15 +1,17 @@
 # TradingAgents/graph/trading_graph.py
 
 import os
+import sys
 from pathlib import Path
 import json
 from datetime import date
 from typing import Dict, Any, Tuple, List, Optional
 
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
-from langchain_google_genai import ChatGoogleGenerativeAI
+# Add agents directory to path for unified client import
+agents_dir = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(agents_dir))
 
+from unified_llm_client import UnifiedLLMClient, LLMConfig
 from langgraph.prebuilt import ToolNode
 
 from tradingagents.agents import *
@@ -71,18 +73,22 @@ class TradingAgentsGraph:
             exist_ok=True,
         )
 
-        # Initialize LLMs
-        if self.config["llm_provider"].lower() == "openai" or self.config["llm_provider"] == "ollama" or self.config["llm_provider"] == "openrouter":
-            self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
-        elif self.config["llm_provider"].lower() == "anthropic":
-            self.deep_thinking_llm = ChatAnthropic(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatAnthropic(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
-        elif self.config["llm_provider"].lower() == "google":
-            self.deep_thinking_llm = ChatGoogleGenerativeAI(model=self.config["deep_think_llm"])
-            self.quick_thinking_llm = ChatGoogleGenerativeAI(model=self.config["quick_think_llm"])
-        else:
-            raise ValueError(f"Unsupported LLM provider: {self.config['llm_provider']}")
+        # Initialize LLMs using Unified LLM Client
+        deep_think_config = LLMConfig(
+            provider=self.config["llm_provider"],
+            model=self.config["deep_think_llm"],
+            temperature=self.config.get("temperature", 0.3),
+            base_url=self.config.get("backend_url")
+        )
+        quick_think_config = LLMConfig(
+            provider=self.config["llm_provider"],
+            model=self.config["quick_think_llm"],
+            temperature=self.config.get("temperature", 0.3),
+            base_url=self.config.get("backend_url")
+        )
+
+        self.deep_thinking_llm = UnifiedLLMClient.create_llm(deep_think_config)
+        self.quick_thinking_llm = UnifiedLLMClient.create_llm(quick_think_config)
         
         # Initialize memories
         self.bull_memory = FinancialSituationMemory("bull_memory", self.config)

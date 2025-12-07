@@ -28,6 +28,7 @@
     ]
   },
   "models": {
+    "_comment": "Supported providers: openai, anthropic, google, groq, ollama, openrouter",
     "portfolio_manager": {
       "provider": "openai",
       "model": "gpt-4.1",
@@ -47,6 +48,24 @@
       "provider": "openai",
       "model": "gpt-4.1",
       "temperature": 0.3
+    },
+    "_examples": {
+      "_comment": "Example configurations for different providers",
+      "groq_fast": {
+        "provider": "groq",
+        "model": "llama-3.1-70b-versatile",
+        "temperature": 0.3
+      },
+      "anthropic_smart": {
+        "provider": "anthropic",
+        "model": "claude-3-5-sonnet-20241022",
+        "temperature": 0.3
+      },
+      "google_gemini": {
+        "provider": "google",
+        "model": "gemini-1.5-flash",
+        "temperature": 0.3
+      }
     }
   },
   "output": {
