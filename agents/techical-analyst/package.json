@@ -5,13 +5,21 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/esm/index.js"
+    }
+  },
   "files": [
     "/dist"
   ],
   "scripts": {
     "build": "npx rimraf dist && npm run build-esm; npm run build-cjs; npm run build-types",
-    "build-esm": "esbuild src/index.ts --bundle --outdir=dist/esm --platform=browser --format=esm --minify --sourcemap",
-    "build-cjs": "esbuild src/index.ts --bundle --outdir=dist/cjs --platform=node --format=cjs --minify --sourcemap",
+    "build-esm": "bunx esbuild src/index.ts --bundle --outdir=dist/esm --platform=browser --format=esm --minify --sourcemap",
+    "build-cjs": "bunx esbuild src/index.ts --bundle --outdir=dist/cjs --platform=node --format=cjs --minify --sourcemap",
     "build-types": "tsc --emitDeclarationOnly --declaration --outDir dist/types",
     "lint": "eslint --ignore-path .gitignore .",
     "fix": "prettier --ignore-path .gitignore --write . ; eslint --fix --ext .ts src",
