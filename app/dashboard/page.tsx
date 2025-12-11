@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "@/lib/auth-client"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
@@ -19,7 +19,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2, LogIn } from "lucide-react"
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { data: session, isPending } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -174,5 +174,21 @@ export default function DashboardPage() {
         </main>
       </div>
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Card className="p-8 text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Loading...</h2>
+          <p className="text-sm text-muted-foreground">Please wait</p>
+        </Card>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   )
 }
