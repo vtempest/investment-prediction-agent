@@ -6,7 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
- 
+  transpilePackages: ['indicatorts'],
 }
 
 export default nextConfig
