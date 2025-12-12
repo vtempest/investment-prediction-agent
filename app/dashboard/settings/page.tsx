@@ -226,7 +226,7 @@ export default function SettingsPage() {
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar activeTab="settings" setActiveTab={() => {}} />
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col lg:pl-64">
         <DashboardHeader />
         <main className="flex-1 overflow-auto p-4 pt-20 lg:pt-4 lg:p-6">
           <div className="mx-auto max-w-7xl space-y-6">

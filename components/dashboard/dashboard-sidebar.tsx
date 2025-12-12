@@ -55,12 +55,11 @@ export function DashboardSidebar({ activeTab = "overview", setActiveTab }: Dashb
   const router = useRouter()
 
   const handleTabClick = (value: string) => {
-    // If setActiveTab is provided (we are on dashboard), use it
+    // Always navigate to dashboard with tab param to ensure URL updates
+    router.push(`/dashboard?tab=${value}`)
+    // Also update local state if callback is provided
     if (setActiveTab) {
       setActiveTab(value)
-    } else {
-      // Otherwise navigate to dashboard with tab param
-      router.push(`/dashboard?tab=${value}`)
     }
     setMobileOpen(false)
   }

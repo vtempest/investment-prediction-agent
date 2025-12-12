@@ -178,37 +178,7 @@ export function BrokerPlatformsSection() {
           ))}
         </div>
 
-        {/* Features Grid */}
-        <div className="grid gap-4 md:grid-cols-4 mt-12">
-          {[
-            {
-              icon: Lock,
-              title: "Secure Connections",
-              desc: "Bank-level encryption for all API communications"
-            },
-            {
-              icon: BarChart3,
-              title: "Real-time Data",
-              desc: "Live market data and instant order execution"
-            },
-            {
-              icon: Zap,
-              title: "Fast Execution",
-              desc: "Millisecond latency for time-sensitive trades"
-            },
-            {
-              icon: DollarSign,
-              title: "Cost Effective",
-              desc: "Commission-free trading on most platforms"
-            }
-          ].map((item) => (
-            <Card key={item.title} className="p-4 text-center hover:shadow-md transition-shadow">
-              <item.icon className="h-8 w-8 text-primary mx-auto mb-2" />
-              <h4 className="font-semibold text-sm mb-1">{item.title}</h4>
-              <p className="text-xs text-muted-foreground">{item.desc}</p>
-            </Card>
-          ))}
-        </div>
+        
 
        
       </div>

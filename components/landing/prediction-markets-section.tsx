@@ -217,7 +217,7 @@ export function PredictionMarketsSection() {
         </div>
 
         {/* Platform Cards */}
-        <div className="grid md:grid-cols-2 gap-6 mb-16">
+        {/* <div className="grid md:grid-cols-2 gap-6 mb-16">
           {platforms.map((platform) => (
             <Card key={platform.name} className="bg-card/50 border-border/50 backdrop-blur">
               <CardHeader>
@@ -252,7 +252,7 @@ export function PredictionMarketsSection() {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </div> */}
 
         {/* Analysis Features */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">

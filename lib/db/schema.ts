@@ -212,6 +212,17 @@ export const portfolios = sqliteTable("portfolios", {
 // Polymarket Leaders/Traders
 export const polymarketLeaders = sqliteTable("polymarket_leaders", {
   trader: text("trader").primaryKey(),
+  rank: integer("rank"),
+  userName: text("user_name"),
+  xUsername: text("x_username"),
+  verifiedBadge: integer("verified_badge", { mode: "boolean" }),
+  profileImage: text("profile_image"),
+
+  // Volume and PnL from new leaderboard API
+  vol: real("vol"),
+  pnl: real("pnl"),
+
+  // Legacy fields from old API (keep for backward compatibility)
   overallGain: real("overall_gain"),
   winRate: real("win_rate"),
   activePositions: integer("active_positions"),
@@ -219,6 +230,7 @@ export const polymarketLeaders = sqliteTable("polymarket_leaders", {
   currentValue: real("current_value"),
   winAmount: real("win_amount"),
   lossAmount: real("loss_amount"),
+
   updatedAt: integer("updated_at", { mode: "timestamp" }),
 })
 
@@ -239,6 +251,37 @@ export const polymarketCategories = sqliteTable("polymarket_categories", {
   tag: text("tag").primaryKey(),
   pnl: real("pnl"),
   updatedAt: integer("updated_at", { mode: "timestamp" }),
+})
+
+// Polymarket Markets - Store prediction markets data
+export const polymarketMarkets = sqliteTable("polymarket_markets", {
+  id: text("id").primaryKey(),
+  question: text("question").notNull(),
+  slug: text("slug").notNull(),
+  description: text("description"),
+  image: text("image"),
+
+  // Volume metrics
+  volume24hr: real("volume_24hr"),
+  volumeTotal: real("volume_total"),
+
+  // Market status
+  active: integer("active", { mode: "boolean" }).default(true),
+  closed: integer("closed", { mode: "boolean" }).default(false),
+
+  // Outcomes and prices (stored as JSON strings)
+  outcomes: text("outcomes").notNull(), // JSON array: ["Yes", "No"]
+  outcomePrices: text("outcome_prices").notNull(), // JSON array: ["0.65", "0.35"]
+
+  // Additional metadata
+  tags: text("tags"), // JSON array
+  endDate: text("end_date"),
+  groupItemTitle: text("group_item_title"),
+  enableOrderBook: integer("enable_order_book", { mode: "boolean" }),
+
+  // Tracking
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
 // ============================================================================
@@ -297,3 +340,19 @@ export const zuluCurrencyStats = sqliteTable("zulu_currency_stats", {
   createdAt: integer("created_at", { mode: "timestamp" }),
 })
 
+// ============================================================================
+// Agent API Logs
+// ============================================================================
+
+export const agentApiLogs = sqliteTable("agent_api_logs", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }), // Optional, linking to user if authenticated
+  symbol: text("symbol").notNull(),
+  requestPayload: text("request_payload"), // JSON string
+  responseSignal: text("response_signal"), // JSON string
+  responseAnalysis: text("response_analysis"), // JSON string
+  llmProvider: text("llm_provider"),
+  model: text("model_used"),
+  timestamp: integer("timestamp", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+})

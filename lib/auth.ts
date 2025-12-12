@@ -5,7 +5,7 @@ import * as schema from "./db/schema"
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || process.env.AUTH_SECRET,
-  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   database: drizzleAdapter(db, {
     provider: "sqlite",
     schema: {
@@ -25,7 +25,7 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      redirectURI: process.env.NEXT_PUBLIC_APP_URL + "/api/auth/callback/google",
+      redirectURI: (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000') + "/api/auth/callback/google",
     },
   },
   session: {

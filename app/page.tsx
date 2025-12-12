@@ -15,9 +15,9 @@ export default function LandingPage() {
       <Header />
       <main>
         <HeroSection />
-        <BrokerPlatformsSection />
         <ArchitectureSection />
         <AgentsSection />
+        <BrokerPlatformsSection />
         <StrategiesSection />
         <PredictionMarketsSection />
         {/* <FeaturesSection /> */}

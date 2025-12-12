@@ -17,6 +17,5 @@ https://finnhub.io/docs/api/
 
 https://mcp.alphavantage.co
 
-https://github.com/bukosabino/ta
 
 https://github.com/cinar/indicatorts

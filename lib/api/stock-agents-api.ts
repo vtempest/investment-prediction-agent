@@ -151,6 +151,11 @@ export class StockAgentsAPI {
     }
   }
 
+  // Get Agent Execution Logs
+  async getAgentLogs(limit = 50) {
+    return this.fetchAPI<any[]>(`/trading-agents?action=history&limit=${limit}`)
+  }
+
   // News Researcher (Adapted to TradingAgents) Methods
   async analyzeWithNewsResearcher(
     request: NewsResearcherAnalysisRequest

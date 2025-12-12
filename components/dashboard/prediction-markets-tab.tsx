@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { TrendingUp, ExternalLink, Loader2, DollarSign, Activity, Clock } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { TrendingUp, ExternalLink, Loader2, DollarSign, Activity, Clock, RefreshCw, Filter } from "lucide-react"
 
 interface PolymarketMarket {
   id: string
@@ -26,19 +27,35 @@ interface PolymarketMarket {
 export function PredictionMarketsTab() {
   const [markets, setMarkets] = useState<PolymarketMarket[]>([])
   const [loading, setLoading] = useState(true)
-  const [limit, setLimit] = useState(20)
+  const [syncing, setSyncing] = useState(false)
+  const [limit, setLimit] = useState(50)
   const [timeWindow, setTimeWindow] = useState('24h')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [availableCategories, setAvailableCategories] = useState<string[]>([])
 
   useEffect(() => {
     fetchMarkets()
-  }, [limit, timeWindow])
+  }, [limit, timeWindow, selectedCategory])
 
-  const fetchMarkets = async () => {
+  useEffect(() => {
+    // Extract unique categories from markets
+    const categories = new Set<string>()
+    markets.forEach(market => {
+      if (market.tags) {
+        market.tags.forEach(tag => categories.add(tag))
+      }
+    })
+    setAvailableCategories(Array.from(categories).sort())
+  }, [markets])
+
+  const fetchMarkets = async (sync = false) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/polymarket/markets?limit=${limit}&window=${timeWindow}`)
+      const categoryParam = selectedCategory !== 'all' ? `&category=${selectedCategory}` : ''
+      const syncParam = sync ? '&sync=true' : ''
+      const response = await fetch(`/api/polymarket/markets?limit=${limit}&window=${timeWindow}${categoryParam}${syncParam}`)
       const data = await response.json()
-      
+
       if (data.success) {
         setMarkets(data.markets)
       }
@@ -49,16 +66,20 @@ export function PredictionMarketsTab() {
     }
   }
 
+  const syncMarkets = async () => {
+    try {
+      setSyncing(true)
+      await fetchMarkets(true)
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   const formatVolume = (volume: number | undefined | null) => {
     if (!volume || isNaN(volume)) return "$0"
     if (volume >= 1000000) return `$${(volume / 1000000).toFixed(2)}M`
     if (volume >= 1000) return `$${(volume / 1000).toFixed(0)}K`
     return `$${volume.toFixed(0)}`
-  }
-
-  const formatPrice = (price: string) => {
-    const num = parseFloat(price)
-    return `${(num * 100).toFixed(1)}%`
   }
 
   if (loading) {
@@ -75,29 +96,69 @@ export function PredictionMarketsTab() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Most Traded Prediction Markets</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Live from Polymarket • {markets.length} active markets
-          </p>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold">Most Traded Prediction Markets</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Live from Polymarket • {markets.length} active markets
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={syncMarkets}
+            disabled={syncing}
+          >
+            {syncing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Syncing...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Sync Data
+              </>
+            )}
+          </Button>
         </div>
-        
-        <div className="flex gap-2">
-          <Button
-            variant={timeWindow === '24h' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setTimeWindow('24h')}
-          >
-            24h Volume
-          </Button>
-          <Button
-            variant={timeWindow === 'total' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setTimeWindow('total')}
-          >
-            Total Volume
-          </Button>
+
+        <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2">
+            <Button
+              variant={timeWindow === '24h' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimeWindow('24h')}
+            >
+              24h Volume
+            </Button>
+            <Button
+              variant={timeWindow === 'total' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimeWindow('total')}
+            >
+              Total Volume
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {availableCategories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -136,23 +197,45 @@ export function PredictionMarketsTab() {
                   </div>
                 </div>
 
-                {/* Outcomes */}
+                {/* Outcomes - Prominent Display */}
                 {market.outcomes && market.outcomePrices && Array.isArray(market.outcomes) && Array.isArray(market.outcomePrices) && market.outcomes.length > 0 && (
-                  <div className="space-y-2 mb-4">
-                    {market.outcomes.map((outcome, idx) => (
-                      <div key={idx} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 flex-1">
-                          <span className="text-sm font-medium">{outcome}</span>
-                          <Progress 
-                            value={parseFloat(market.outcomePrices[idx]) * 100} 
-                            className="flex-1 max-w-xs"
-                          />
-                        </div>
-                        <span className="text-sm font-bold text-primary ml-4">
-                          {formatPrice(market.outcomePrices[idx])}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="mb-4">
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      {market.outcomes.map((outcome, idx) => {
+                        const percentage = parseFloat(market.outcomePrices[idx]) * 100
+                        const isYes = outcome.toLowerCase() === 'yes'
+                        const isNo = outcome.toLowerCase() === 'no'
+                        return (
+                          <div
+                            key={idx}
+                            className={`p-4 rounded-lg border-2 ${
+                              isYes
+                                ? 'bg-green-50 dark:bg-green-950/20 border-green-300 dark:border-green-800'
+                                : isNo
+                                ? 'bg-red-50 dark:bg-red-950/20 border-red-300 dark:border-red-800'
+                                : 'bg-muted border-border'
+                            }`}
+                          >
+                            <div className="text-xs font-medium text-muted-foreground mb-1">
+                              {outcome}
+                            </div>
+                            <div className={`text-3xl font-bold ${
+                              isYes
+                                ? 'text-green-600 dark:text-green-400'
+                                : isNo
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-primary'
+                            }`}>
+                              {percentage.toFixed(1)}%
+                            </div>
+                            <Progress
+                              value={percentage}
+                              className="mt-2 h-1"
+                            />
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 )}
 

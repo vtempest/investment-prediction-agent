@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { TradingAgentsGraph } from '@/lib/trading-agents'
+import { db } from '@/lib/db'
+import { agentApiLogs } from '@/lib/db/schema'
+import { nanoid } from 'nanoid'
 
 interface TradingAgentsRequest {
   symbol: string
@@ -118,6 +121,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Log the API call
+    try {
+      await db.insert(agentApiLogs).values({
+        id: nanoid(),
+        symbol,
+        requestPayload: JSON.stringify(body),
+        responseSignal: JSON.stringify(response.signal),
+        responseAnalysis: JSON.stringify(response.analysis),
+        llmProvider: tradingConfig.llmProvider,
+        model: tradingConfig.deepThinkLLM, // Using deepThinkLLM as the primary model reference
+        timestamp: new Date(),
+        createdAt: new Date()
+      })
+    } catch (logError) {
+      console.error('Failed to log agent API call:', logError)
+      // Continue execution, don't fail the request if logging fails
+    }
+
     return NextResponse.json(response)
 
   } catch (error: any) {
@@ -134,9 +155,27 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/trading-agents
- * Get information about the trading agents system
+ * Get information about the trading agents system or fetch execution logs
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const action = searchParams.get('action')
+  const limit = parseInt(searchParams.get('limit') || '50')
+
+  // If action is history, return logs
+  if (action === 'history') {
+    try {
+      const logs = await db.query.agentApiLogs.findMany({
+        orderBy: (logs, { desc }) => [desc(logs.timestamp)],
+        limit: limit
+      })
+      return NextResponse.json(logs)
+    } catch (error) {
+      console.error('Failed to fetch agent logs:', error)
+      return NextResponse.json({ error: 'Failed to fetch logs' }, { status: 500 })
+    }
+  }
+
   const currentProvider = process.env.NEXT_PUBLIC_LLM_PROVIDER ||
                          (process.env.GROQ_API_KEY ? 'groq' : 'openai')
 

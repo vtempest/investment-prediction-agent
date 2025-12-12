@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PriceChart } from "@/components/dashboard/price-chart"
+import { TechnicalChart } from "@/components/dashboard/technical-chart"
+import { Chart, CandlestickSeries, HistogramSeries } from "lightweight-charts-react-components"
 import {
   Loader2,
   TrendingUp,
@@ -18,7 +21,8 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  DollarSign
 } from "lucide-react"
 import {
   stockAgentsAPI,
@@ -32,13 +36,20 @@ export function ApiDataTab() {
   const [selectedStockList, setSelectedStockList] = useState<keyof typeof TOP_STOCKS>('mag7')
   const [selectedStock, setSelectedStock] = useState<string>('')
   const [loading, setLoading] = useState(false)
-  const [activeAgent, setActiveAgent] = useState<'news-researcher' | 'debate-analyst'>('debate-analyst')
+  const [error, setError] = useState<string | null>(null)
+  const [activeAgent, setActiveAgent] = useState<'news-researcher' | 'debate-analyst'>('news-researcher')
 
   // Analysis data
   const [newsResearcherData, setNewsResearcherData] = useState<NewsResearcherAnalysisResponse | null>(null)
   const [debateAnalystData, setDebateAnalystData] = useState<DebateAnalystAnalysisResponse | null>(null)
   const [backtestData, setBacktestData] = useState<BacktestResponse | null>(null)
   const [healthData, setHealthData] = useState<any>(null)
+  const [historyLogs, setHistoryLogs] = useState<any[]>([])
+
+  // Quote and chart data
+  const [quoteData, setQuoteData] = useState<any>(null)
+  const [historicalData, setHistoricalData] = useState<any[]>([])
+  const [loadingQuote, setLoadingQuote] = useState(false)
 
   // Get stocks for selected list
   const stocks = TOP_STOCKS[selectedStockList]
@@ -54,6 +65,59 @@ export function ApiDataTab() {
   useEffect(() => {
     loadHealthStatus()
   }, [])
+
+  // Load history on mount
+  useEffect(() => {
+    fetchHistory()
+  }, [])
+
+  // Load quote data when stock changes
+  useEffect(() => {
+    if (selectedStock) {
+      fetchQuoteAndHistorical()
+    }
+  }, [selectedStock])
+
+  const fetchQuoteAndHistorical = async () => {
+    if (!selectedStock) return
+
+    setLoadingQuote(true)
+    try {
+      // Fetch both quote and historical data in parallel
+      const [quoteResponse, historicalResponse] = await Promise.all([
+        fetch(`/api/stocks/quote/${selectedStock}`),
+        fetch(`/api/stocks/historical/${selectedStock}?range=3mo&interval=1d`)
+      ])
+
+      if (quoteResponse.ok) {
+        const quoteResult = await quoteResponse.json()
+        setQuoteData(quoteResult.data)
+      }
+
+      if (historicalResponse.ok) {
+        const historicalResult = await historicalResponse.json()
+        // Transform data for lightweight-charts format
+        const chartData = historicalResult.data.map((item: any) => ({
+          time: new Date(item.date).getTime() / 1000, // Convert to Unix timestamp
+          open: item.open,
+          high: item.high,
+          low: item.low,
+          close: item.close,
+          value: item.volume
+        })).filter((item: any) =>
+          item.open !== null &&
+          item.high !== null &&
+          item.low !== null &&
+          item.close !== null
+        )
+        setHistoricalData(chartData)
+      }
+    } catch (error) {
+      console.error('Failed to fetch quote/historical data:', error)
+    } finally {
+      setLoadingQuote(false)
+    }
+  }
 
   const loadHealthStatus = async () => {
     try {
@@ -112,6 +176,16 @@ export function ApiDataTab() {
       alert(`Backtest failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchHistory = async () => {
+    try {
+      const logs = await stockAgentsAPI.getAgentLogs()
+      setHistoryLogs(logs)
+    } catch (err) {
+      console.error('Failed to fetch history:', err)
+      setError(`Failed to fetch history: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
@@ -263,17 +337,223 @@ export function ApiDataTab() {
       </Card>
 
       {/* Results Tabs */}
-      <Tabs defaultValue="debate-analyst" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="quote" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="quote">Quote & Chart</TabsTrigger>
           <TabsTrigger value="debate-analyst">Debate Analyst</TabsTrigger>
           <TabsTrigger value="news-researcher">News Researcher</TabsTrigger>
-          <TabsTrigger value="backtest">Backtest</TabsTrigger>
+          <TabsTrigger value="backtest">Backtest Engine</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
+
+        {/* Quote & Chart Tab */}
+        <TabsContent value="quote" className="space-y-4 mt-4">
+          {loadingQuote ? (
+            <Card className="p-12 text-center">
+              <Loader2 className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+              <p className="text-muted-foreground">Loading quote data...</p>
+            </Card>
+          ) : quoteData && historicalData.length > 0 ? (
+            <>
+              {/* Quote Summary Card */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-2xl font-bold">{selectedStock}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {quoteData.price?.longName || quoteData.price?.shortName || selectedStock}
+                    </p>
+                  </div>
+                  <Button onClick={fetchQuoteAndHistorical} variant="outline" size="sm">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-4 mb-6">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Current Price</div>
+                    <div className="text-2xl font-bold">
+                      ${quoteData.price?.regularMarketPrice?.toFixed(2) || 'N/A'}
+                    </div>
+                    {quoteData.price?.regularMarketChangePercent && (
+                      <div className={`text-sm flex items-center ${
+                        quoteData.price.regularMarketChangePercent >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {quoteData.price.regularMarketChangePercent >= 0 ? (
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                        ) : (
+                          <TrendingDown className="h-3 w-3 mr-1" />
+                        )}
+                        {quoteData.price.regularMarketChange?.toFixed(2)} (
+                        {quoteData.price.regularMarketChangePercent.toFixed(2)}%)
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Market Cap</div>
+                    <div className="text-lg font-medium">
+                      {quoteData.price?.marketCap
+                        ? `$${(quoteData.price.marketCap / 1e9).toFixed(2)}B`
+                        : 'N/A'
+                      }
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Volume</div>
+                    <div className="text-lg font-medium">
+                      {quoteData.price?.regularMarketVolume?.toLocaleString() || 'N/A'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">P/E Ratio</div>
+                    <div className="text-lg font-medium">
+                      {quoteData.summaryDetail?.trailingPE?.toFixed(2) || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Day Range</div>
+                    <div className="text-sm font-medium">
+                      ${quoteData.price?.regularMarketDayLow?.toFixed(2)} - ${quoteData.price?.regularMarketDayHigh?.toFixed(2)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">52 Week Range</div>
+                    <div className="text-sm font-medium">
+                      ${quoteData.summaryDetail?.fiftyTwoWeekLow?.toFixed(2)} - ${quoteData.summaryDetail?.fiftyTwoWeekHigh?.toFixed(2)}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Avg Volume</div>
+                    <div className="text-sm font-medium">
+                      {quoteData.price?.averageDailyVolume10Day?.toLocaleString() || 'N/A'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Exchange</div>
+                    <div className="text-sm font-medium">
+                      {quoteData.price?.exchangeName || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Price Chart */}
+              <Card className="p-6">
+                <h3 className="text-lg font-bold mb-4">Price Chart (3 Months)</h3>
+                <div className="h-[400px]">
+                  <Chart
+                    options={{
+                      layout: {
+                        background: { color: 'transparent' },
+                        textColor: '#71717a',
+                      },
+                      grid: {
+                        vertLines: { color: 'rgba(197, 203, 206, 0.1)' },
+                        horzLines: { color: 'rgba(197, 203, 206, 0.1)' },
+                      },
+                      width: 0,
+                      height: 400,
+                      timeScale: {
+                        borderColor: 'rgba(197, 203, 206, 0.3)',
+                        timeVisible: true,
+                        secondsVisible: false,
+                      },
+                      rightPriceScale: {
+                        borderColor: 'rgba(197, 203, 206, 0.3)',
+                      },
+                    }}
+                  >
+                    <CandlestickSeries
+                      data={historicalData}
+                      options={{
+                        upColor: '#26a69a',
+                        downColor: '#ef5350',
+                        borderVisible: false,
+                        wickUpColor: '#26a69a',
+                        wickDownColor: '#ef5350',
+                      }}
+                    />
+                  </Chart>
+                </div>
+              </Card>
+
+              {/* Volume Chart */}
+              <Card className="p-6">
+                <h3 className="text-lg font-bold mb-4">Volume</h3>
+                <div className="h-[200px]">
+                  <Chart
+                    options={{
+                      layout: {
+                        background: { color: 'transparent' },
+                        textColor: '#71717a',
+                      },
+                      grid: {
+                        vertLines: { color: 'rgba(197, 203, 206, 0.1)' },
+                        horzLines: { color: 'rgba(197, 203, 206, 0.1)' },
+                      },
+                      width: 0,
+                      height: 200,
+                      timeScale: {
+                        borderColor: 'rgba(197, 203, 206, 0.3)',
+                        timeVisible: true,
+                        secondsVisible: false,
+                      },
+                      rightPriceScale: {
+                        borderColor: 'rgba(197, 203, 206, 0.3)',
+                      },
+                    }}
+                  >
+                    <HistogramSeries
+                      data={historicalData.map(d => ({
+                        time: d.time,
+                        value: d.value,
+                        color: d.close >= d.open ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)'
+                      }))}
+                    />
+                  </Chart>
+                </div>
+              </Card>
+            </>
+          ) : (
+            <Card className="p-12 text-center">
+              <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                {selectedStock ? 'Failed to load quote data' : 'Select a stock to view quote and chart'}
+              </p>
+            </Card>
+          )}
+        </TabsContent>
 
         {/* Debate Analyst Results */}
         <TabsContent value="debate-analyst" className="space-y-4 mt-4">
           {debateAnalystData ? (
             <>
+              {debateAnalystData && (
+                <div className="mb-6">
+                  <TechnicalChart
+                    data={[
+                      { time: '2023-11-20', open: 150.2, high: 152.5, low: 149.8, close: 151.3 },
+                      { time: '2023-11-21', open: 151.3, high: 153.2, low: 150.5, close: 152.8 },
+                      { time: '2023-11-22', open: 152.8, high: 154.1, low: 151.9, close: 153.5 },
+                      { time: '2023-11-23', open: 153.5, high: 155.0, low: 152.8, close: 154.2 },
+                      { time: '2023-11-24', open: 154.2, high: 153.8, low: 151.5, close: 152.1 },
+                      // Sample data - in production should come from marketReport or separate historical data API
+                    ]}
+                    title={`${debateAnalystData.symbol} Technical Analysis`}
+                  />
+                </div>
+              )}
+
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold">Trading Decision</h3>
@@ -404,7 +684,7 @@ export function ApiDataTab() {
                       Technical Analysis
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Data collected and analyzed
+                      {newsResearcherData.result.technical_analysis_results.summary || 'Data collected and analyzed'}
                     </p>
                   </Card>
                 )}
@@ -416,7 +696,7 @@ export function ApiDataTab() {
                       News Intelligence
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Sentiment analysis complete
+                      {newsResearcherData.result.news_intelligence_results.summary || 'Sentiment analysis complete'}
                     </p>
                   </Card>
                 )}
@@ -428,7 +708,7 @@ export function ApiDataTab() {
                       Data Collection
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Market data retrieved
+                      {newsResearcherData.result.data_collection_results.summary || 'Market data retrieved'}
                     </p>
                   </Card>
                 )}
@@ -600,6 +880,53 @@ export function ApiDataTab() {
               </p>
             </Card>
           )}
+        </TabsContent>
+
+        {/* History Tab */}
+        <TabsContent value="history" className="space-y-4 mt-4">
+          <Card className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Agent Execution History</h3>
+              <Button variant="outline" size="sm" onClick={fetchHistory}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+            
+            <div className="rounded-md border">
+              <div className="grid grid-cols-5 p-4 bg-muted/50 font-medium text-sm">
+                <div>Date</div>
+                <div>Symbol</div>
+                <div>Signal</div>
+                <div>Confidence</div>
+                <div>Model</div>
+              </div>
+              <div className="divide-y">
+                {historyLogs.length > 0 ? (
+                  historyLogs.map((log) => {
+                    const signal = JSON.parse(log.responseSignal || '{}')
+                    return (
+                      <div key={log.id} className="grid grid-cols-5 p-4 text-sm items-center hover:bg-muted/30">
+                        <div>{new Date(log.timestamp).toLocaleString()}</div>
+                        <div className="font-bold">{log.symbol}</div>
+                        <div>
+                          <Badge variant={signal.action === 'BUY' ? 'default' : signal.action === 'SELL' ? 'destructive' : 'secondary'}>
+                            {signal.action}
+                          </Badge>
+                        </div>
+                        <div>{(signal.confidence * 100).toFixed(1)}%</div>
+                        <div className="text-muted-foreground truncate">{log.model}</div>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground">
+                    No history available
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

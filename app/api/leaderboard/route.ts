@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getZuluTraders } from '@/lib/prediction/zulu'
-import { getLeaders } from '@/lib/prediction/polymarket'
+import { getLeaders, syncLeaderboard } from '@/lib/prediction/polymarket'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const source = searchParams.get('source') || 'zulu'
   const limit = parseInt(searchParams.get('limit') || '50')
+  const orderBy = searchParams.get('orderBy') as 'vol' | 'pnl' | 'overallGain' || 'vol'
+  const sync = searchParams.get('sync') === 'true'
 
   try {
     let data: any[] = []
@@ -27,12 +29,22 @@ export async function GET(request: NextRequest) {
         type: t.isEa ? 'bot' : 'expert'
       }))
     } else if (source === 'polymarket') {
-      const polyLeaders = await getLeaders()
-      data = polyLeaders.slice(0, limit).map((t, index) => ({
+      // Sync if requested
+      if (sync) {
+        await syncLeaderboard({ limit, orderBy: orderBy === 'pnl' ? 'PNL' : 'VOL' })
+      }
+
+      const polyLeaders = await getLeaders(orderBy, limit)
+      data = polyLeaders.map((t) => ({
         id: t.trader,
-        rank: index + 1,
-        name: t.trader.substring(0, 8) + '...', // Shorten address
-        overallPnL: t.overallGain || 0,
+        rank: t.rank || 0,
+        name: t.userName || (t.trader ? t.trader.substring(0, 8) + '...' : 'Anonymous'),
+        userName: t.userName,
+        xUsername: t.xUsername,
+        verifiedBadge: t.verifiedBadge,
+        profileImage: t.profileImage,
+        overallPnL: t.pnl || t.overallGain || 0,
+        volume: t.vol || 0,
         winRate: (t.winRate || 0) * 100,
         activePositions: t.activePositions || 0,
         currentValue: t.currentValue || 0,
@@ -40,13 +52,15 @@ export async function GET(request: NextRequest) {
         markets: ['Prediction'],
         maxDrawdown: 'N/A',
         volatility: 'High',
-        type: 'whale'
+        type: 'whale',
+        proxyWallet: t.trader
       }))
     }
 
     return NextResponse.json({
       success: true,
-      data
+      data,
+      count: data.length
     })
   } catch (error: any) {
     console.error('Leaderboard fetch failed:', error)
