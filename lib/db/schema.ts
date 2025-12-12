@@ -162,3 +162,49 @@ export const portfolios = sqliteTable("portfolios", {
 
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
+
+// User Settings
+export const userSettings = sqliteTable("user_settings", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+
+  // LLM API Keys (encrypted)
+  groqApiKey: text("groq_api_key"),
+  openaiApiKey: text("openai_api_key"),
+  anthropicApiKey: text("anthropic_api_key"),
+  xaiApiKey: text("xai_api_key"),
+  googleApiKey: text("google_api_key"),
+  togetheraiApiKey: text("togetherai_api_key"),
+  perplexityApiKey: text("perplexity_api_key"),
+  cloudflareApiKey: text("cloudflare_api_key"),
+  ollamaEndpoint: text("ollama_endpoint"),
+
+  // Preferred LLM Provider
+  preferredProvider: text("preferred_provider").default("groq"),
+
+  // Broker API Keys (encrypted)
+  alpacaApiKey: text("alpaca_api_key"),
+  alpacaApiSecret: text("alpaca_api_secret"),
+  alpacaPaper: integer("alpaca_paper", { mode: "boolean" }).default(true),
+
+  webullUsername: text("webull_username"),
+  webullPassword: text("webull_password"),
+  webullDeviceId: text("webull_device_id"),
+
+  robinhoodUsername: text("robinhood_username"),
+  robinhoodPassword: text("robinhood_password"),
+
+  ibkrUsername: text("ibkr_username"),
+  ibkrPassword: text("ibkr_password"),
+
+  tdaApiKey: text("tda_api_key"),
+  tdaRefreshToken: text("tda_refresh_token"),
+
+  // Data Provider API Keys
+  alphaVantageApiKey: text("alpha_vantage_api_key"),
+  finnhubApiKey: text("finnhub_api_key"),
+  polygonApiKey: text("polygon_api_key"),
+
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+})

@@ -15,6 +15,7 @@ import {
   HelpCircle,
   Menu,
   X,
+  Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -31,13 +32,14 @@ const navigation = [
   { name: "Alpaca Trading", value: "alpaca", icon: TrendingUp },
   { name: "Signals", value: "signals", icon: Signal },
   { name: "Agents", value: "agents", icon: Users },
-  { name: "Strategies", value: "strategies", icon: Settings },
+  { name: "Strategies", value: "strategies", icon: Zap },
   { name: "Prediction Markets", value: "prediction-markets", icon: Target },
   { name: "Copy Trading", value: "copy-trading", icon: Copy },
   { name: "Risk & Portfolio", value: "risk", icon: Shield },
 ]
 
 const secondaryNav = [
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
   { name: "Help", value: "help", icon: HelpCircle },
 ]
 
@@ -76,19 +78,34 @@ function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSideb
         </div>
 
         <div className="mt-auto space-y-1">
-          {secondaryNav.map((item) => (
-            <button
-              key={item.value}
-              onClick={() => {
-                setActiveTab?.(item.value)
-                onItemClick?.()
-              }}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground text-left"
-            >
-              <item.icon className="h-4 w-4" />
-              {item.name}
-            </button>
-          ))}
+          {secondaryNav.map((item) => {
+            if ('href' in item && item.href) {
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
+                  onClick={onItemClick}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.name}
+                </Link>
+              )
+            }
+            return (
+              <button
+                key={item.value}
+                onClick={() => {
+                  setActiveTab?.(item.value)
+                  onItemClick?.()
+                }}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground text-left"
+              >
+                <item.icon className="h-4 w-4" />
+                {item.name}
+              </button>
+            )
+          })}
         </div>
       </nav>
     </>
