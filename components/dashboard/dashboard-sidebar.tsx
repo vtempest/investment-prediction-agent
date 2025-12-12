@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   Activity,
@@ -45,14 +45,36 @@ const navigation = [
   { name: "Risk & Portfolio", value: "risk", icon: Shield },
 ]
 
-
-
-
+const secondaryNav = [
+  { name: "Settings", value: "settings", icon: Settings, href: "/dashboard/settings" },
+  { name: "Help", value: "help", icon: HelpCircle, href: "/help" },
+]
 
 export function DashboardSidebar({ activeTab = "overview", setActiveTab }: DashboardSidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [tradingMode, setTradingMode] = useState<'paper' | 'live'>('paper')
+  const [mounted, setMounted] = useState(false)
   const { data: session } = useSession()
   const router = useRouter()
+
+  // Load trading mode from localStorage on mount
+  useEffect(() => {
+    setMounted(true)
+    if (typeof window !== 'undefined') {
+      const savedMode = localStorage.getItem('tradingMode') as 'paper' | 'live' | null
+      if (savedMode) {
+        setTradingMode(savedMode)
+      }
+    }
+  }, [])
+
+  const toggleTradingMode = () => {
+    const newMode = tradingMode === 'paper' ? 'live' : 'paper'
+    setTradingMode(newMode)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tradingMode', newMode)
+    }
+  }
 
   const handleTabClick = (value: string) => {
     // Always navigate to dashboard with tab param to ensure URL updates
@@ -127,6 +149,31 @@ export function DashboardSidebar({ activeTab = "overview", setActiveTab }: Dashb
             )
           })}
           
+          {/* Paper/Live Trading Toggle */}
+          {mounted && (
+            <div className="pt-2 mt-2 border-t border-border">
+              <div className="flex items-center justify-between rounded-lg px-3 py-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "h-2 w-2 rounded-full",
+                    tradingMode === 'live' ? "bg-green-500" : "bg-yellow-500"
+                  )} />
+                  <span className="font-medium text-muted-foreground">
+                    {tradingMode === 'live' ? 'Live' : 'Paper'}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={toggleTradingMode}
+                >
+                  Switch to {tradingMode === 'live' ? 'Paper' : 'Live'}
+                </Button>
+              </div>
+            </div>
+          )}
+          
           <div className="pt-2 mt-2 border-t border-border">
             <Link 
               href="/dashboard/profile" 
@@ -148,56 +195,6 @@ export function DashboardSidebar({ activeTab = "overview", setActiveTab }: Dashb
           </div>
         </div>
       </nav>
-
-      {/* User Profile Section */}
-      {user && (
-        <div className="border-t border-border p-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.image || undefined} alt={user.name || user.email || "User"} />
-                  <AvatarFallback className="rounded-lg">{userInitials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 text-left">
-                  <p className="truncate font-medium">{user.name || "User"}</p>
-                  <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                </div>
-                <ChevronUp className="h-4 w-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-56"
-              align="end"
-              side="top"
-              sideOffset={8}
-            >
-              <div className="flex items-center gap-2 px-2 py-1.5 text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.image || undefined} alt={user.name || user.email || "User"} />
-                  <AvatarFallback className="rounded-lg">{userInitials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <p className="truncate font-medium">{user.name || "User"}</p>
-                  <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings" className="cursor-pointer" onClick={onItemClick}>
-                  <User2 className="mr-2 h-4 w-4" />
-                  Account Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} disabled={isSigningOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                {isSigningOut ? "Signing out..." : "Sign out"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
     </>
   )
 

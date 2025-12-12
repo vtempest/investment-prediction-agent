@@ -5,8 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next start",
+    "import:stategies": "bun lib/algo-stategies/tv-scraper.ts",
     "import:stocks": "bun lib/stocks/import-stock-names.ts",
+    "build": "next build && next start",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate",

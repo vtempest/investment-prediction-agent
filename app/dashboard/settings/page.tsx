@@ -228,7 +228,7 @@ export default function SettingsPage() {
       <DashboardSidebar activeTab="settings" setActiveTab={() => {}} />
       <div className="flex flex-1 flex-col lg:pl-64">
         <DashboardHeader />
-        <main className="flex-1 overflow-auto p-4 pt-20 lg:pt-4 lg:p-6">
+        <main className="flex-1 overflow-auto p-4 pt-16 lg:p-6">
           <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex justify-between items-center">
               <div>
