@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "cd agents/techical-analyst && npm install && npm run build",
+    "prebuild": "cd third-party/techical-analyst && npm install && npm run build",
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
