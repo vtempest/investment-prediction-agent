@@ -20,6 +20,7 @@ export const sessions = sqliteTable("sessions", {
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
 // Account table (for OAuth)
