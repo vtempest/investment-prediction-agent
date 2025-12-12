@@ -14,7 +14,7 @@ export function GoogleSignIn() {
 
   useEffect(() => {
     if (session?.user) {
-      router.push("/app")
+      router.push("/dashboard")
     }
     if (typeof window !== "undefined") {
       setIsLocalhost(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
@@ -25,14 +25,14 @@ export function GoogleSignIn() {
     setIsLoading(true)
     await signIn.social({
       provider: "google",
-      callbackURL: "/app",
+      callbackURL: "/dashboard",
     })
   }
 
   const handleDevLogin = async () => {
     setIsLoading(true)
     await signIn.anonymous({
-      callbackURL: "/app",
+      callbackURL: "/dashboard",
     })
   }
 
