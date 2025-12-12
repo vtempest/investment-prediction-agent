@@ -72,13 +72,13 @@ export function Header() {
             <TrendingUp className="h-4 w-4" />
             Prediction Markets
           </Link>
-          {/* <Link
-            href="#features"
+          <Link
+            href="#copy-trading"
             className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <Sparkles className="h-4 w-4" />
-            Features
-          </Link> */}
+            Copy Trading
+          </Link>
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">

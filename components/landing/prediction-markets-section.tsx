@@ -275,7 +275,7 @@ export function PredictionMarketsSection() {
         {/* Copy Trading Leaderboard */}
         <Card className="bg-card/50 border-border/50 backdrop-blur max-w-4xl mx-auto">
           <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div id="copy-trading" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Trophy className="w-5 h-5 text-amber-400" />

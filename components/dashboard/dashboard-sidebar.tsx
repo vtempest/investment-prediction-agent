@@ -19,6 +19,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+import { useSession } from "@/lib/auth-client"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
@@ -111,7 +113,7 @@ export function DashboardSidebar({ activeTab = "overview", setActiveTab }: Dashb
             return (
               <button
                 key={item.value}
-                onClick={() => handleTabClick(item.value)}
+                onClick={() => handleTabClick(item.value as string)}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground text-left"
               >
                 <item.icon className="h-4 w-4" />
