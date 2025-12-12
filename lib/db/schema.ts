@@ -48,6 +48,44 @@ export const verifications = sqliteTable("verifications", {
   updatedAt: integer("updated_at", { mode: "timestamp" }),
 })
 
+// User Settings (API Keys & Broker Credentials)
+export const userSettings = sqliteTable("user_settings", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+
+  // LLM Provider API Keys
+  groqApiKey: text("groq_api_key"),
+  openaiApiKey: text("openai_api_key"),
+  anthropicApiKey: text("anthropic_api_key"),
+  xaiApiKey: text("xai_api_key"),
+  googleApiKey: text("google_api_key"),
+  togetheraiApiKey: text("togetherai_api_key"),
+  perplexityApiKey: text("perplexity_api_key"),
+  cloudflareApiKey: text("cloudflare_api_key"),
+
+  // Broker API Keys
+  alpacaApiKey: text("alpaca_api_key"),
+  alpacaApiSecret: text("alpaca_api_secret"),
+  alpacaBaseUrl: text("alpaca_base_url"),
+
+  // Broker Credentials
+  webullUsername: text("webull_username"),
+  webullPassword: text("webull_password"),
+  robinhoodUsername: text("robinhood_username"),
+  robinhoodPassword: text("robinhood_password"),
+  ibkrUsername: text("ibkr_username"),
+  ibkrPassword: text("ibkr_password"),
+
+  // Data Provider API Keys
+  alphaVantageApiKey: text("alpha_vantage_api_key"),
+  finnhubApiKey: text("finnhub_api_key"),
+  polygonApiKey: text("polygon_api_key"),
+
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+})
+
+
 // User Strategies
 export const strategies = sqliteTable("strategies", {
   id: text("id").primaryKey(),
