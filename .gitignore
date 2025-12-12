@@ -50,3 +50,6 @@ supabase/**/*.env
 */.next/*
 .next/
 .next/*
+local.db
+*.db
+drizzle/

@@ -152,7 +152,8 @@ The platform includes 4 distinct AI-powered trading strategies designed for diff
 
 **Database**
 - **ORM**: Drizzle ORM
-- **Databases**: LibSQL, Neon (PostgreSQL)
+- **Database**: Turso (LibSQL) - Edge-ready SQLite database
+- **API Documentation**: Scalar - Interactive OpenAPI documentation
 
 ---
 
@@ -223,6 +224,19 @@ cp .env.example .env
 
 # Edit .env with your API keys
 nano .env
+```
+
+5. **Initialize the database**
+```bash
+# For local development (uses local SQLite file)
+npm run db:push
+
+# For production with Turso
+# See docs/TURSO_SETUP.md for detailed instructions
+turso db create stock-prediction-db
+turso db tokens create stock-prediction-db
+# Update .env with Turso URL and token
+npm run db:push
 ```
 
 ### Environment Variables
@@ -375,11 +389,13 @@ const results = await stockAgentsAPI.analyzeTopStocks('mag7', 'debate-analyst')
 ### Interactive API Documentation
 
 Once the services are running, visit:
-- **Unified Gateway**: http://localhost:8000/docs
-- **News Researcher**: http://localhost:8002/docs
-- **Debate Analyst**: http://localhost:8001/docs
+- **Next.js API (Scalar)**: http://localhost:3000/api/docs - Modern, interactive API documentation
+- **OpenAPI Spec**: http://localhost:3000/api/openapi - Raw OpenAPI specification
+- **Unified Gateway**: http://localhost:8000/docs - Python agents Swagger UI
+- **News Researcher**: http://localhost:8002/docs - News Researcher API
+- **Debate Analyst**: http://localhost:8001/docs - Debate Analyst API
 
-Interactive Swagger UI documentation is automatically available at these endpoints.
+The Scalar documentation provides a modern, searchable interface for exploring all Next.js API endpoints.
 
 ### Supported Stock Lists
 
@@ -486,6 +502,8 @@ docker run -p 8001:8001 --env-file .env debate-analyst
 
 ### Additional Documentation
 
+- **[Turso Database Setup](docs/TURSO_SETUP.md)** - Turso/LibSQL database configuration guide
+- **[Scalar API Documentation](docs/SCALAR_API_DOCS.md)** - Interactive API documentation setup
 - **[Agent Services Documentation](agents/README.md)** - Trading bot services setup
 - **[API Integration Guide](docs/DASHBOARD_API_README.md)** - Dashboard API integration
 - **[Unified LLM API](agents/UNIFIED_API_README.md)** - LLM client documentation
@@ -578,6 +596,14 @@ For issues, questions, or feature requests:
 - [ ] Advanced backtesting with slippage and fees
 - [ ] Machine learning model ensemble
 - [ ] Custom indicator builder
+
+---
+
+## 📄 Research Paper
+
+For more details on the technical implementation and research behind this project, see our paper:
+
+[Investment Prediction Agent Research Paper](https://drive.google.com/file/d/1haVl0uguVYnLh8D3EUdaIyi3Tl4kSOIP/view?usp=drive_link)
 
 ---
 
