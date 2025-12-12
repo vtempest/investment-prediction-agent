@@ -96,7 +96,7 @@ async function testGroqAgentAPI() {
   console.log('Test 3: Running Analysis with Explicit Groq Config...')
   console.log('   Symbol: TSLA')
   console.log('   Provider: groq')
-  console.log('   Deep Think: llama-3.1-70b-versatile')
+  console.log('   Deep Think: llama-3.3-70b-versatile')
   console.log('   Quick Think: llama-3.1-8b-instant')
 
   const groqStartTime = Date.now()
@@ -111,7 +111,7 @@ async function testGroqAgentAPI() {
         symbol: 'TSLA',
         config: {
           llmProvider: 'groq',
-          deepThinkLLM: 'llama-3.1-70b-versatile',
+          deepThinkLLM: 'llama-3.3-70b-versatile',
           quickThinkLLM: 'llama-3.1-8b-instant',
           temperature: 0.3,
         },

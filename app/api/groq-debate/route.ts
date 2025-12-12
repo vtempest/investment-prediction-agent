@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
     },
     llm_provider: 'Groq',
     models: {
-      deep_think: 'llama-3.1-70b-versatile',
+      deep_think: 'llama-3.3-70b-versatile',
       quick_think: 'llama-3.1-8b-instant',
     },
   })

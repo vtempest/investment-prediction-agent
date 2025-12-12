@@ -18,13 +18,13 @@ import { BullResearcher, BearResearcher, InvestmentJudge } from '../agents/resea
 import { Trader } from '../agents/trader'
 
 const DEFAULT_CONFIG: TradingConfig = {
-  llmProvider: 'openai',
-  deepThinkLLM: 'gpt-4o',
-  quickThinkLLM: 'gpt-4o-mini',
+  llmProvider: 'groq',
+  deepThinkLLM: 'llama3-70b-8192',
+  quickThinkLLM: 'llama3-8b-8192',
   temperature: 0.3,
   projectDir: './data',
   apiKeys: {
-    openai: process.env.OPENAI_API_KEY || ''
+    groq: process.env.GROQ_API_KEY || ''
   }
 }
 

@@ -180,7 +180,7 @@ class UnifiedLLMClient:
 
 
 # Convenience functions for common use cases
-def create_groq_llm(model: str = "llama-3.1-70b-versatile", temperature: float = 0.3, **kwargs) -> BaseChatModel:
+def create_groq_llm(model: str = "llama-3.3-70b-versatile", temperature: float = 0.3, **kwargs) -> BaseChatModel:
     """Create a Groq LLM instance with sensible defaults"""
     config = LLMConfig(provider="groq", model=model, temperature=temperature, **kwargs)
     return UnifiedLLMClient.create_llm(config)

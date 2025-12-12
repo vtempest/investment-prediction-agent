@@ -22,16 +22,11 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+import { useSession } from "@/lib/auth-client"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useSession, signOut } from "@/lib/auth-client"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import Image from "next/image"
 
 interface DashboardSidebarProps {
   activeTab?: string
@@ -51,49 +46,48 @@ const navigation = [
 ]
 
 
-function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSidebarProps & { onItemClick?: () => void }) {
-  const { data: session } = useSession()
-  const [isSigningOut, setIsSigningOut] = useState(false)
 
-  const handleSignOut = async () => {
-    setIsSigningOut(true)
-    try {
-      await signOut()
-      window.location.href = '/login'
-    } catch (error) {
-      console.error('Sign out error:', error)
-    } finally {
-      setIsSigningOut(false)
+
+
+export function DashboardSidebar({ activeTab = "overview", setActiveTab }: DashboardSidebarProps) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const { data: session } = useSession()
+  const router = useRouter()
+
+  const handleTabClick = (value: string) => {
+    // If setActiveTab is provided (we are on dashboard), use it
+    if (setActiveTab) {
+      setActiveTab(value)
+    } else {
+      // Otherwise navigate to dashboard with tab param
+      router.push(`/dashboard?tab=${value}`)
     }
+    setMobileOpen(false)
   }
 
-  const user = session?.user
-  const userInitials = user?.name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"
-
-  return (
+  const SidebarContent = () => (
     <>
       <div className="flex h-16 items-center gap-2 border-b border-border px-6">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Activity className="h-4 w-4 text-primary-foreground" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden">
+            <Image
+              src="/apple-touch-icon.png"
+              alt="Logo"
+              width={36}
+              height={36}
+              className="h-full w-full object-cover"
+            />
           </div>
-          <span className="text-lg font-semibold">PrimoAgent</span>
+          <span className="text-lg font-semibold">TimeTravel</span>
         </Link>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 p-4">
+      <nav className="flex flex-1 flex-col gap-1 p-4 overflow-y-auto">
         <div className="space-y-1">
           {navigation.map((item) => (
             <button
               key={item.value}
-              onClick={() => {
-                setActiveTab?.(item.value)
-                onItemClick?.()
-              }}
+              onClick={() => handleTabClick(item.value)}
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-left",
                 activeTab === item.value
@@ -108,14 +102,51 @@ function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSideb
         </div>
 
         <div className="mt-auto space-y-1">
-          <Link
-            href="/dashboard/settings"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
-            onClick={onItemClick}
-          >
-            <Settings className="h-4 w-4" />
-            Settings
-          </Link>
+          {secondaryNav.map((item) => {
+            if ('href' in item && item.href) {
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.name}
+                </Link>
+              )
+            }
+            return (
+              <button
+                key={item.value}
+                onClick={() => handleTabClick(item.value as string)}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground text-left"
+              >
+                <item.icon className="h-4 w-4" />
+                {item.name}
+              </button>
+            )
+          })}
+          
+          <div className="pt-2 mt-2 border-t border-border">
+            <Link 
+              href="/dashboard/profile" 
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent/50 transition-colors"
+              onClick={() => setMobileOpen(false)}
+            >
+              <Avatar className="h-8 w-8 border border-border">
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {session?.user?.name
+                    ? (session.user.name as string).split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase()
+                    : "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col text-left overflow-hidden">
+                <span className="text-sm font-medium truncate">{session?.user?.name || "Guest User"}</span>
+                <span className="text-xs text-muted-foreground truncate">{session?.user?.email || "Sign in"}</span>
+              </div>
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -170,10 +201,6 @@ function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSideb
       )}
     </>
   )
-}
-
-export function DashboardSidebar({ activeTab = "overview", setActiveTab }: DashboardSidebarProps) {
-  const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
     <>
@@ -191,18 +218,14 @@ export function DashboardSidebar({ activeTab = "overview", setActiveTab }: Dashb
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
-            <SidebarContent
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              onItemClick={() => setMobileOpen(false)}
-            />
+            <SidebarContent />
           </SheetContent>
         </Sheet>
       </div>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden w-64 flex-col border-r border-border bg-card lg:flex">
-        <SidebarContent activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Desktop Sidebar - Fixed */}
+      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-card fixed top-0 left-0 bottom-0 z-30">
+        <SidebarContent />
       </aside>
     </>
   )

@@ -18,21 +18,14 @@ export function ArchitectureSection() {
   return (
     <section id="workflow" className="border-t border-border px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Agent Workflow</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            A sequential pipeline where specialized agents analyze, debate, and execute trading decisions.
-          </p>
-        </div>
-
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
-          <div className="relative overflow-hidden rounded-2xl border border-border">
+          <div className="relative flex items-center justify-center overflow-hidden rounded-2xl ">
             <Image
               src="/images/banner-trading-floor.jpeg"
               alt="AI Trading Floor with Multiple Agents"
-              width={800}
-              height={500}
-              className="w-full object-cover"
+              width={400}
+              height={400}
+              className="object-cover"
             />
           </div>
           <div className="flex flex-col justify-center">
@@ -97,33 +90,7 @@ export function ArchitectureSection() {
             ))}
           </div>
 
-          <div className="mt-16 rounded-xl border border-border bg-card p-6">
-            <div className="font-mono text-sm">
-              <div className="text-muted-foreground">{"// Agent Workflow Pipeline"}</div>
-              <div className="mt-4">
-                <span className="text-chart-1">Analyst Team</span>
-                <span className="text-muted-foreground"> (Fundamentals, Sentiment, News, Technical)</span>
-              </div>
-              <div className="ml-4 text-muted-foreground">{"↓ Insights and market analysis"}</div>
-              <div className="mt-2">
-                <span className="text-chart-2">Researcher Team</span>
-                <span className="text-muted-foreground"> (Bullish vs Bearish Debate)</span>
-              </div>
-              <div className="ml-4 text-muted-foreground">{"↓ Structured debates balance risks and gains"}</div>
-              <div className="mt-2">
-                <span className="text-chart-3">Trader Agent</span>
-              </div>
-              <div className="ml-4 text-muted-foreground">{"↓ Synthesizes reports, determines timing & magnitude"}</div>
-              <div className="mt-2">
-                <span className="text-chart-4">Risk Management Team</span>
-              </div>
-              <div className="ml-4 text-muted-foreground">{"↓ Evaluates volatility, liquidity, adjusts strategy"}</div>
-              <div className="mt-2">
-                <span className="text-chart-5">Portfolio Manager</span>
-              </div>
-              <div className="ml-4 text-muted-foreground">{"→ Approves/rejects → Exchange Execution"}</div>
-            </div>
-          </div>
+          
         </div>
       </div>
     </section>

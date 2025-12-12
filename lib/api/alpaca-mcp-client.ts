@@ -328,8 +328,7 @@ export class AlpacaMCPClient {
 
   async chatWithAI(messages: ChatMessage[]): Promise<ChatMessage> {
     try {
-      // Call the strategy chat API which uses Groq with LangChain-style tools
-      const response = await fetch('/api/strategy-chat', {
+      const response = await fetch('/api/alpaca/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -342,36 +341,24 @@ export class AlpacaMCPClient {
       }
 
       const data = await response.json()
-
-      // Handle fallback responses
-      if (data.fallback || data.error) {
-        return {
-          role: 'assistant',
-          content: data.content,
-          timestamp: new Date(data.timestamp),
-          suggestions: data.suggestions,
-        }
-      }
-
-      return {
-        role: data.role,
-        content: data.content,
-        timestamp: new Date(data.timestamp),
-        suggestions: data.suggestions,
-      }
-    } catch (error) {
-      console.error('Error in chatWithAI:', error)
-
-      // Fallback response if API fails
+      
       return {
         role: 'assistant',
-        content: 'I apologize, but I\'m having trouble connecting to the AI service. Please try again.\n\nIn the meantime, here are some general strategy suggestions:\n\n1. **Momentum Strategy**: Buy when price crosses above 20-day MA, sell when crosses below\n2. **Mean Reversion**: Buy on RSI < 30, sell on RSI > 70\n3. **Breakout Strategy**: Buy when price breaks above resistance with volume',
+        content: data.content,
+        timestamp: new Date(data.timestamp),
+        suggestions: data.suggestions || [],
+      }
+    } catch (error: any) {
+      console.error('Chat error:', error)
+      return {
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${error.message}\n\nPlease try again or check your GROQ API key configuration.`,
         timestamp: new Date(),
         suggestions: [
-          'Tell me about momentum strategies',
-          'Explain mean reversion trading',
-          'Show me breakout strategy examples'
-        ]
+          'What is a momentum trading strategy?',
+          'How do I set stop loss and take profit?',
+          'Explain technical indicators for trading',
+        ],
       }
     }
   }

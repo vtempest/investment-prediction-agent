@@ -2,8 +2,8 @@
 
 import { GoogleSignIn } from "@/components/auth/google-signin"
 import { Card } from "@/components/ui/card"
-import { Activity } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function LoginPage() {
   return (
@@ -11,10 +11,16 @@ export default function LoginPage() {
       <Card className="w-full max-w-md p-8">
         <div className="flex flex-col items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-              <Activity className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold">TimeTravel.AI</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden">
+            <Image
+              src="/apple-touch-icon.png"
+              alt="Logo"
+              width={36}
+              height={36}
+              className="h-full w-full object-cover"
+            />
+          </div>
+            <span className="text-2xl font-bold">TimeTravel</span>
           </div>
 
           <div className="text-center">

@@ -21,13 +21,17 @@ const OUTPUT_FILE = 'data/stock-names.json';
 // Configuration for output fields
 // 'symbol' is the ticker
 // 'name' is the company name (will be cleaned)
+// 'cik' is the SEC Central Index Key
 // Other available fields from API: lastsale, netchange, pctchange, marketCap, country, ipoyear, volume, sector, industry, url
 const CONFIG = {
-    fields: ['symbol', 'name', 'sector', 'industry', 'marketCap']
+    fields: ['symbol', 'name', 'sector', 'industry', 'marketCap', 'cik']
 };
 
 const SEC_URL = 'https://www.sec.gov/files/company_tickers.json';
 
+/*
+"0":{"cik_str":1045810,"ticker":"NVDA","title":"NVIDIA CORP"},"1":{"cik_str":320193,"ticker":"AAPL","title":"Apple Inc."},"2":{"cik_str":1652044,"ticker":"GOOGL","title":"Alphabet Inc."},"3":{"cik_str":789019,"ticker":"MSFT","title":"MICROSOFT CORP"},"4":{"cik_str":1018724,"ticker":"AMZN","title":"AMAZON COM INC"},"5":{"cik_str":1730168,"ticker":"AVGO","title":"Broadcom Inc."},"6":{"cik_str":1326801,"ticker":"META","title":"Meta Platforms, Inc."},"7":{"cik_str":1318605,"ticker":"TSLA","title":"Tesla, Inc."},"8":{"cik_str":1067983,"ticker":"BRK-B","title":"BERKSHIRE HATHAWAY INC"},"9":{"cik_str":104169,"ticker":"WMT","title":"Walmart Inc."},"10":{"cik_str":59478,"ticker":"LLY","title":"ELI LILLY & Co"},"11":{"cik_str":19617,"ticker":"JPM","title":"JPMORGAN CHASE & CO"},"12":{"cik_str":1403161,"ticker":"V","title":"VISA INC."},"13":{"cik_str":1341439,"ticker":"ORCL","title":"ORACLE CORP"},"14":{"cik_str":884394,"ti
+*/
 const EXCHANGES = ['nasdaq', 'nyse', 'amex'];
 const BASE_URL = 'https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=25&offset=0&download=true';
 
@@ -49,7 +53,7 @@ const SUFFIXES = [
     " Common Share"      // Singular
 ];
 
-const cleanName = (name) => {
+const cleanName = (name: string) => {
     let cleaned = name;
     for (const suffix of SUFFIXES) {
         // Escape special regex chars if any (though our list is simple text)
@@ -65,7 +69,7 @@ const cleanName = (name) => {
     return cleaned;
 };
 
-const formatMarketCap = (cap) => {
+const formatMarketCap = (cap: string | number) => {
     if (!cap) return null;
     // Remove ',' and '$' if present, then parse
     const num = parseFloat(String(cap).replace(/,/g, '').replace(/\$/g, ''));
@@ -74,7 +78,7 @@ const formatMarketCap = (cap) => {
     return Math.round(num / 1000000);
 };
 
-async function fetchData(exchange) {
+async function fetchData(exchange: string) {
     const url = `${BASE_URL}&exchange=${exchange}`;
     const options = {
         headers: {
@@ -94,6 +98,45 @@ async function fetchData(exchange) {
     }
 }
 
+async function fetchSecData() {
+    const SEC_FILE = 'data/company_tickers.json';
+    
+    try {
+        console.log('Loading SEC CIK data from local file...');
+        
+        // Check if file exists
+        if (!fs.existsSync(SEC_FILE)) {
+            console.warn(`SEC data file not found: ${SEC_FILE}`);
+            console.warn('Skipping CIK data. Download from: https://www.sec.gov/files/company_tickers.json');
+            return { tickerToCik: new Map(), secCompanies: new Map() };
+        }
+        
+        const fileContent = fs.readFileSync(SEC_FILE, 'utf-8');
+        const data = JSON.parse(fileContent);
+        
+        // Parse SEC data: {"0": {"cik_str": 1045810, "ticker": "NVDA", "title": "NVIDIA CORP"}, ...}
+        const tickerToCik = new Map();
+        const secCompanies = new Map();
+        
+        Object.values(data).forEach((item: any) => {
+            if (item.ticker && item.cik_str) {
+                tickerToCik.set(item.ticker, item.cik_str);
+                secCompanies.set(item.ticker, {
+                    ticker: item.ticker,
+                    name: item.title,
+                    cik: item.cik_str
+                });
+            }
+        });
+        
+        console.log(`Loaded ${tickerToCik.size} SEC tickers with CIK numbers from local file`);
+        return { tickerToCik, secCompanies };
+    } catch (err) {
+        console.error('Error loading SEC data:', err);
+        return { tickerToCik: new Map(), secCompanies: new Map() };
+    }
+}
+
 async function main() {
     try {
         console.log('Fetching stock data...');
@@ -103,16 +146,22 @@ async function main() {
             fs.mkdirSync('data');
         }
 
-        const results = await Promise.all(EXCHANGES.map(fetchData));
+        // Fetch both NASDAQ and SEC data concurrently
+        const [nasdaqResults, secData] = await Promise.all([
+            Promise.all(EXCHANGES.map(fetchData)),
+            fetchSecData()
+        ]);
 
-        const allRows = [];
-        results.forEach(result => {
+        const { tickerToCik, secCompanies } = secData;
+
+        const allRows: any[] = [];
+        nasdaqResults.forEach(result => {
              if (result && result.data && result.data.rows) {
                  allRows.push(...result.data.rows);
              }
-        });
+         });
 
-        console.log(`Fetched ${allRows.length} total rows.`);
+        console.log(`Fetched ${allRows.length} total rows from NASDAQ/NYSE/AMEX.`);
 
         const uniqueTickers = new Map();
         
@@ -122,19 +171,42 @@ async function main() {
                 
                 // Deduplicate by symbol
                 if (!uniqueTickers.has(symbol)) {
+                    // Get CIK from SEC data
+                    const cik = tickerToCik.get(symbol) || null;
+                    
                     // Map config fields to values
                     const entry = CONFIG.fields.map(field => {
                         if (field === 'symbol') return symbol;
                         if (field === 'name') return cleanName(row.name ? row.name.trim() : '');
                         if (field === 'marketCap') return formatMarketCap(row.marketCap);
-                        return row[field];
+                        if (field === 'cik') return cik;
+                        return (row as any)[field];
                     });
                     uniqueTickers.set(symbol, entry);
                 }
             }
         });
 
-        console.log(`Unique tickers after processing: ${uniqueTickers.size}`);
+        console.log(`Unique tickers from NASDAQ/NYSE/AMEX: ${uniqueTickers.size}`);
+
+        // Add missing tickers from SEC that weren't in NASDAQ data
+        let addedFromSec = 0;
+        secCompanies.forEach((secCompany, ticker) => {
+            if (!uniqueTickers.has(ticker)) {
+                // Create entry with SEC data: [symbol, name, null, null, null, cik]
+                const entry = CONFIG.fields.map(field => {
+                    if (field === 'symbol') return ticker;
+                    if (field === 'name') return cleanName(secCompany.name);
+                    if (field === 'cik') return secCompany.cik;
+                    return null; // sector, industry, marketCap will be null
+                });
+                uniqueTickers.set(ticker, entry);
+                addedFromSec++;
+            }
+        });
+
+        console.log(`Added ${addedFromSec} additional tickers from SEC data`);
+        console.log(`Total unique tickers: ${uniqueTickers.size}`);
         console.log(`Output fields: ${JSON.stringify(CONFIG.fields)}`);
 
         // One output as a Map values iterator
@@ -156,9 +228,9 @@ async function main() {
         // console.log(`Successfully wrote to ${OUTPUT_FILE_SYMBOLS}`);
 
         // Generate sector info
-        // entry indices based on CONFIG: 0=symbol, 1=name, 2=sector, 3=industry, 4=marketCap
-        const sectorInfo = {};
-        const overallInfo = {
+        // entry indices based on CONFIG: 0=symbol, 1=name, 2=sector, 3=industry, 4=marketCap, 5=cik
+        const sectorInfo: Record<string, any> = {};
+        const overallInfo: any = {
              sector: "Overall US Public Stocks",
              totalCompanies: 0,
              totalMarketCap: 0,
@@ -171,8 +243,9 @@ async function main() {
             const name = item[1];
             const sector = item[2] || 'Unknown';
             // Trim industry name
-            const industry = (item[3] || 'Unknown').trim();
+            const industry = String(item[3] || 'Unknown').trim();
             const marketCap = typeof item[4] === 'number' ? item[4] : 0; 
+            // item[5] is CIK, not needed for sector aggregation 
 
             // Sector aggregation
             if (!sectorInfo[sector]) {
@@ -221,21 +294,21 @@ async function main() {
             overallInfo.companies.push({ symbol, name, marketCap });
         });
 
-        const processInfo = (info, sectorName, includeIndustries = true) => {
+        const processInfo = (info: any, sectorName: string, includeIndustries = true) => {
              // Sort companies by market cap desc
-            info.companies.sort((a, b) => b.marketCap - a.marketCap);
+            info.companies.sort((a: any, b: any) => b.marketCap - a.marketCap);
             
             // Top 10
             const top10 = info.companies.slice(0, 10);
 
             // Process and sort industries
-            let industriesList = [];
+            let industriesList = [] as any;
             if (includeIndustries) {
                 industriesList = Object.values(info.industries)
-                    .sort((a, b) => b.totalMarketCap - a.totalMarketCap);
+                    .sort((a: any, b: any) => b.totalMarketCap - a.totalMarketCap);
             }
 
-            const result = {
+            const result: any = {
                 sector: sectorName,
                 totalCompanies: info.totalCompanies,
                 totalMarketCap: info.totalMarketCap,

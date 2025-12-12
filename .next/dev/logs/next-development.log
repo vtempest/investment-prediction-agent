@@ -1,2 +1,48 @@
-[00:00:00.790] Server  WARN     ⚠ Minimum recommended TypeScript version is v5.1.0, older versions can potentially be incompatible with Next.js. Detected: 5.0.2
-[00:00:00.928] Server  LOG      ✓ Ready in 592ms
+[00:00:01.471] Server  LOG      ✓ Ready in 1037ms
+[00:00:49.032] Server  LOG      ○ Compiling / ...
+[00:00:53.775] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:54.230] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:00:54.230] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:00:54.230] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3001/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3001/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1765541396009}
+[00:03:11.834] Server  LOG      ✓ Compiled in 362ms
+[00:03:11.943] Browser ERROR   ./components/landing/broker-platforms-section.tsx:181:21
+Parsing ecmascript source code failed
+  179 |   {
+  180 |     name: "Fidelity",
+> 181 |                     <div>
+      |                     ^
+  182 |                       <h3 className="text-xl font-bold">{broker.name}</h3>
+  183 |                       <div className="flex items-center gap-2 mt-1">
+  184 |                         <Badge
+
+Expression expected
+
+Import trace:
+  Server Component:
+    ./components/landing/broker-platforms-section.tsx
+    ./app/page.tsx
+[00:03:14.603] Server  LOG      ✓ Compiled in 174ms
+[00:03:14.704] Browser ERROR   ./components/landing/broker-platforms-section.tsx:202:20
+Parsing ecmascript source code failed
+  200 |                       </div>
+  201 |                     </div>
+> 202 |                   </div>
+      |                    ^^^^^
+  203 |
+  204 |                   <broker.icon className={`h-8 w-8 text-primary opacity-50`} />
+  205 |                 </div>
+
+Unterminated regexp literal
+
+Import trace:
+  Server Component:
+    ./components/landing/broker-platforms-section.tsx
+    ./app/page.tsx
+[00:03:32.557] Server  LOG      ✓ Compiled in 167ms
+[00:10:53.175] Server  LOG      ✓ Compiled in 285ms
+[00:11:04.925] Server  LOG      ✓ Compiled in 142ms
+[00:11:13.777] Server  LOG      ✓ Compiled in 156ms
+[00:11:20.755] Server  LOG      ✓ Compiled in 160ms
+[00:13:28.938] Server  LOG      ✓ Compiled in 189ms
+[00:14:42.588] Server  LOG      ✓ Compiled in 338ms
+[00:14:47.407] Server  LOG      ✓ Compiled in 153ms

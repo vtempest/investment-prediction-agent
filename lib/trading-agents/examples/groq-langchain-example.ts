@@ -24,7 +24,7 @@ async function simpleGroqChat() {
 
   const config: TradingConfig = {
     llmProvider: 'groq',
-    deepThinkLLM: 'llama-3.1-70b-versatile',
+    deepThinkLLM: 'llama-3.3-70b-versatile',
     quickThinkLLM: 'llama-3.1-8b-instant',
     temperature: 0.3,
     apiKeys: {
@@ -50,7 +50,7 @@ async function groqWithTools() {
 
   const config: TradingConfig = {
     llmProvider: 'groq',
-    deepThinkLLM: 'llama-3.1-70b-versatile',
+    deepThinkLLM: 'llama-3.3-70b-versatile',
     quickThinkLLM: 'llama-3.1-8b-instant',
     temperature: 0.3,
     apiKeys: {
@@ -83,7 +83,7 @@ async function groqDebateAnalysis() {
 
   const config: TradingConfig = {
     llmProvider: 'groq',
-    deepThinkLLM: 'llama-3.1-70b-versatile',
+    deepThinkLLM: 'llama-3.3-70b-versatile',
     quickThinkLLM: 'llama-3.1-8b-instant',
     temperature: 0.3,
     apiKeys: {
@@ -112,7 +112,7 @@ async function comprehensiveAnalysis() {
 
   const config: TradingConfig = {
     llmProvider: 'groq',
-    deepThinkLLM: 'llama-3.1-70b-versatile',
+    deepThinkLLM: 'llama-3.3-70b-versatile',
     quickThinkLLM: 'llama-3.1-8b-instant',
     temperature: 0.3,
     apiKeys: {
@@ -173,7 +173,7 @@ async function compareStocks() {
 
   const config: TradingConfig = {
     llmProvider: 'groq',
-    deepThinkLLM: 'llama-3.1-70b-versatile',
+    deepThinkLLM: 'llama-3.3-70b-versatile',
     quickThinkLLM: 'llama-3.1-8b-instant',
     temperature: 0.3,
     apiKeys: {

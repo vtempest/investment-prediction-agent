@@ -1,6 +1,6 @@
 // Company Filings API Route
 import { NextRequest, NextResponse } from 'next/server';
-import { Downloader } from '@/lib/stocks/sec-downloader';
+import { Downloader } from '@/lib/stocks/sec-filing-api';
 
 const downloader = new Downloader('Investment Prediction Agent', 'api@example.com');
 
@@ -16,18 +16,20 @@ export async function GET(
         const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10;
 
         if (!formType) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: 'formType parameter is required',
-                    code: 'MISSING_FORM_TYPE',
-                    timestamp: new Date().toISOString()
-                },
-                { status: 400 }
-            );
+             // Default to 10-K if not specified
+             // return NextResponse.json(
+             //     {
+             //         success: false,
+             //         error: 'formType parameter is required',
+             //         code: 'MISSING_FORM_TYPE',
+             //         timestamp: new Date().toISOString()
+             //     },
+             //     { status: 400 }
+             // );
         }
-
-        const query = `${tickerOrCik}/${formType}/${limit}`;
+        
+        const typeToFetch = formType || '10-K';
+        const query = `${tickerOrCik}/${typeToFetch}/${limit}`;
         const metadatas = await downloader.getFilingMetadatas(query);
 
         return NextResponse.json({

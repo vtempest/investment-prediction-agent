@@ -1,6 +1,8 @@
 // Stock Screener API Route
 import { NextRequest, NextResponse } from 'next/server';
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
+
+const yahooFinance = new YahooFinance();
 
 export async function GET(request: NextRequest) {
     try {
@@ -19,7 +21,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const result = await yahooFinance.screener({ scrIds: scrIds.split(',') });
+        const result = await yahooFinance.screener({ scrIds: scrIds as any });
 
         return NextResponse.json({
             success: true,

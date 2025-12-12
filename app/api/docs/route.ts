@@ -4,6 +4,7 @@ const config = {
   spec: {
     url: '/api/openapi.json',
   },
+  theme: 'solarized',
 }
 
 export async function GET() {

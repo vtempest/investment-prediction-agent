@@ -7,6 +7,81 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Link from "next/link"
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+
+function AutocompleteSearch() {
+  const [query, setQuery] = useState("")
+  const [results, setResults] = useState<{symbol: string, name: string}[]>([])
+  const [isOpen, setIsOpen] = useState(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [wrapperRef])
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (query.length < 1) {
+        setResults([])
+        return
+      }
+
+      try {
+        const res = await fetch(`/api/stocks/autocomplete?q=${encodeURIComponent(query)}&limit=5`)
+        const data = await res.json()
+        if (data.success) {
+          setResults(data.data)
+          setIsOpen(true)
+        }
+      } catch (err) {
+        console.error("Autocomplete failed", err)
+      }
+    }
+
+    const timeoutId = setTimeout(fetchResults, 300)
+    return () => clearTimeout(timeoutId)
+  }, [query])
+
+  const handleSelect = (symbol: string) => {
+    setQuery(symbol)
+    setIsOpen(false)
+    router.push(`/dashboard/quote/${symbol}`)
+  }
+
+  return (
+    <div ref={wrapperRef} className="relative w-64">
+      <Input 
+        placeholder="Search stocks..." 
+        className="pl-9 bg-secondary border-border" 
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onFocus={() => { if(results.length > 0) setIsOpen(true) }}
+      />
+      {isOpen && results.length > 0 && (
+        <div className="absolute top-full left-0 w-full mt-1 bg-popover border border-border rounded-md shadow-md z-50 max-h-60 overflow-y-auto">
+          {results.map((item) => (
+            <div 
+              key={item.symbol}
+              className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex justify-between items-center"
+              onClick={() => handleSelect(item.symbol)}
+            >
+              <span className="font-bold">{item.symbol}</span>
+              <span className="text-muted-foreground truncate max-w-[120px]">{item.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function DashboardHeader() {
   return (
@@ -58,7 +133,7 @@ export function DashboardHeader() {
 
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search stocks, analysis..." className="w-64 pl-9 bg-secondary border-border" />
+          <AutocompleteSearch />
         </div>
       </div>
 

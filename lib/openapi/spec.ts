@@ -11,12 +11,12 @@ export const openApiSpec = {
   },
   servers: [
     {
-      url: "http://localhost:3000/api",
-      description: "Development server"
+      url: "https://timetravel.investments/api",
+      description: "Production server"
     },
     {
-      url: "https://your-domain.com/api",
-      description: "Production server"
+      url: "http://localhost:3000/api",
+      description: "Development server"
     }
   ],
   tags: [
@@ -47,6 +47,10 @@ export const openApiSpec = {
     {
       name: "User Signals",
       description: "User watchlist and trading signals"
+    },
+    {
+      name: "Statistics",
+      description: "Statistical analysis and predictive modeling"
     }
   ],
   paths: {
@@ -67,6 +71,414 @@ export const openApiSpec = {
                     data: {
                       type: "array",
                       items: { $ref: "#/components/schemas/Stock" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stocks/delisted": {
+      get: {
+        tags: ["Stocks"],
+        summary: "Get delisted stocks",
+        description: "Retrieve list of delisted stocks or check if a specific symbol is delisted",
+        parameters: [
+          {
+            name: "symbol",
+            in: "query",
+            description: "Optional: Check if specific symbol is delisted",
+            schema: { type: "string" }
+          },
+          {
+            name: "exchange",
+            in: "query",
+            description: "Exchange code (default: US). Examples: US, LSE, TO",
+            schema: { type: "string", default: "US" }
+          },
+          {
+            name: "limit",
+            in: "query",
+            description: "Number of results to return (default: 50)",
+            schema: { type: "integer", default: 50 }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Successful response",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    delisted: { type: "boolean" },
+                    count: { type: "integer" },
+                    total: { type: "integer" },
+                    data: {
+                      oneOf: [
+                        {
+                          type: "object",
+                          properties: {
+                            symbol: { type: "string" },
+                            name: { type: "string" },
+                            delistedDate: { type: "string" },
+                            reason: { type: "string" }
+                          }
+                        },
+                        {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              symbol: { type: "string" },
+                              name: { type: "string" },
+                              delistedDate: { type: "string" },
+                              reason: { type: "string" }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/settings": {
+      get: {
+        tags: ["User"],
+        summary: "Get user settings",
+        description: "Retrieve user settings and API keys (masked)",
+        responses: {
+          "200": {
+            description: "Successful response",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Settings" }
+              }
+            }
+          },
+          "401": {
+            description: "Unauthorized"
+          }
+        }
+      },
+      post: {
+        tags: ["User"],
+        summary: "Save user settings",
+        description: "Save or update user settings and API keys",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/Settings" }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Settings saved successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            description: "Unauthorized"
+          }
+        }
+      }
+    },
+    "/zulu/sync": {
+      post: {
+        tags: ["Zulu Social Trading"],
+        summary: "Sync Zulu Traders",
+        description: "Manually trigger a sync of top traders from ZuluTrade",
+        responses: {
+          "200": {
+            description: "Successful response",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: { 
+                      type: "object",
+                      properties: {
+                        traders: { type: "integer" }
+                      }
+                    },
+                    message: { type: "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/zulu/search": {
+      get: {
+        tags: ["Zulu"],
+        summary: "Search Zulu traders",
+        description: "Search for Zulu traders with performance filters",
+        parameters: [
+          {
+            name: "minRoi",
+            in: "query",
+            description: "Minimum ROI percentage",
+            schema: { type: "number" }
+          },
+          {
+            name: "minWinRate",
+            in: "query",
+            description: "Minimum Win Rate percentage",
+            schema: { type: "number" }
+          },
+          {
+            name: "maxDrawdown",
+            in: "query",
+            description: "Maximum Drawdown percentage",
+            schema: { type: "number" }
+          },
+          {
+            name: "isEa",
+            in: "query",
+            description: "Filter by EA (Expert Advisor) usage",
+            schema: { type: "boolean" }
+          },
+          {
+            name: "limit",
+            in: "query",
+            description: "Max results (default: 50)",
+            schema: { type: "integer", default: 50 }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Successful response"
+          }
+        }
+      }
+    },
+    "/zulu/top-rank": {
+      get: {
+        tags: ["Zulu"],
+        summary: "Get top ranked traders",
+        description: "Get list of top ranked Zulu traders",
+        parameters: [
+          {
+            name: "limit",
+            in: "query",
+            description: "Max results (default: 50)",
+            schema: { type: "integer", default: 50 }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Successful response"
+          }
+        }
+      }
+    },
+    "/polymarket/markets": {
+      get: {
+        tags: ["Polymarket"],
+        summary: "Get prediction markets",
+        description: "Get active Polymarket prediction markets",
+        parameters: [
+          {
+            name: "limit",
+            in: "query",
+            description: "Max results (default: 20)",
+            schema: { type: "integer", default: 20 }
+          },
+          {
+            name: "window",
+            in: "query",
+            description: "Time window for sorting (24h, total)",
+            schema: { type: "string", default: "24h" }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Successful response"
+          }
+        }
+      }
+    },
+    "/polymarket/positions": {
+      post: {
+        tags: ["Polymarket"],
+        summary: "Get trader positions",
+        description: "Get positions for a specific Polymarket trader",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  trader_id: { type: "string" }
+                },
+                required: ["trader_id"]
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Successful response"
+          }
+        }
+      }
+    },
+    "/stocks/autocomplete": {
+      get: {
+        tags: ["Stocks"],
+        summary: "Autocomplete stock search",
+        description: "Search for stocks by symbol or name prefix",
+        parameters: [
+          {
+            name: "q",
+            in: "query",
+            required: true,
+            description: "Search query string",
+            schema: { type: "string" }
+          },
+          {
+            name: "limit",
+            in: "query",
+            description: "Max results (default: 10)",
+            schema: { type: "integer", default: 10 }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Successful response",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    count: { type: "integer" },
+                    data: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          symbol: { type: "string" },
+                          name: { type: "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stocks/sectors": {
+      get: {
+        tags: ["Stocks"],
+        summary: "Get sector information",
+        description: "Retrieve aggregated sector data, including total companies, market cap, and top companies. Can filter by specific sector.",
+        parameters: [
+          {
+            name: "sector",
+            in: "query",
+            description: "Optional: Filter by specific sector name (e.g., 'Technology')",
+            schema: { type: "string" }
+          },
+          {
+            name: "includeCompanies",
+            in: "query",
+            description: "Include top 10 companies for each sector (default: false)",
+            schema: { type: "boolean" }
+          },
+          {
+            name: "includeIndustries",
+            in: "query",
+            description: "Include industry breakdown for each sector (default: false)",
+            schema: { type: "boolean" }
+          }
+        ],
+        responses: {
+          "200": {
+            description: "Successful response",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    count: { type: "integer" },
+                    data: {
+                      oneOf: [
+                        {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              sector: { type: "string" },
+                              totalCompanies: { type: "integer" },
+                              totalMarketCap: { type: "number" },
+                              top10Companies: { 
+                                type: "array",
+                                items: { $ref: "#/components/schemas/Stock" }
+                              },
+                              industries: {
+                                type: "array",
+                                items: {
+                                  type: "object",
+                                  properties: {
+                                    name: { type: "string" },
+                                    totalCompanies: { type: "integer" },
+                                    totalMarketCap: { type: "number" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          type: "object",
+                          properties: {
+                            sector: { type: "string" },
+                            totalCompanies: { type: "integer" },
+                            totalMarketCap: { type: "number" },
+                            top10Companies: { 
+                              type: "array",
+                              items: { $ref: "#/components/schemas/Stock" }
+                            },
+                             industries: {
+                                type: "array",
+                                items: {
+                                  type: "object",
+                                  properties: {
+                                    name: { type: "string" },
+                                    totalCompanies: { type: "integer" },
+                                    totalMarketCap: { type: "number" }
+                                  }
+                                }
+                              }
+                          }
+                        }
+                      ]
                     }
                   }
                 }
@@ -228,6 +640,52 @@ export const openApiSpec = {
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stocks/predict/statistics": {
+      post: {
+        tags: ["Statistics"],
+        summary: "Calculate stock statistics",
+        description: "Perform advanced statistical analysis including rolling statistics and timeseries correlation (e.g., price vs volume, cross-asset correlation).",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/StatisticsRequest" },
+              examples: {
+                "rolling_stats": {
+                  summary: "Calculate Rolling Stats",
+                  value: {
+                    symbol: "AAPL",
+                    period: "1y",
+                    metrics: ["rolling_mean", "rolling_std"],
+                    window: 20
+                  }
+                },
+                "correlation": {
+                  summary: "Timeseries Correlation",
+                  value: {
+                    symbol: "TSLA",
+                    correlation: {
+                      target: "price",
+                      features: ["volume", "rsi", "macd"],
+                      window: 50
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Successful response",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/StatisticsResponse" }
               }
             }
           }
@@ -549,7 +1007,7 @@ export const openApiSpec = {
         properties: {
           symbol: { type: "string", example: "AAPL" },
           agent: { type: "string", enum: ["debate-analyst", "news-researcher"], example: "debate-analyst" },
-          deep_think_llm: { type: "string", example: "llama-3.1-70b-versatile" },
+          deep_think_llm: { type: "string", example: "llama-3.3-70b-versatile" },
           quick_think_llm: { type: "string", example: "llama-3.1-8b-instant" },
           max_debate_rounds: { type: "integer", example: 1 }
         }
@@ -665,6 +1123,56 @@ export const openApiSpec = {
           technicalScore: { type: "number" },
           sentimentScore: { type: "number" },
           suggestedAction: { type: "string" }
+        }
+      },
+      StatisticsRequest: {
+        type: "object",
+        properties: {
+          symbol: { type: "string", example: "AAPL" },
+          period: { type: "string", default: "1y" },
+          metrics: { 
+            type: "array", 
+            items: { type: "string", enum: ["rolling_mean", "rolling_std", "bollinger_bands"] }
+          },
+          window: { type: "integer", default: 14 },
+          correlation: {
+            type: "object",
+            description: "Configuration for correlating different timeseries data",
+            properties: {
+              target: { type: "string", example: "price", description: "Primary series to correlate against" },
+              features: { 
+                type: "array", 
+                items: { type: "string" },
+                example: ["volume", "sector_etf_price", "market_index_price"],
+                description: "List of other timeseries to test for correlation" 
+              },
+              method: { type: "string", enum: ["pearson", "spearman"], default: "pearson" }
+            }
+          }
+        }
+      },
+      StatisticsResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          symbol: { type: "string" },
+          data: {
+            type: "object",
+            properties: {
+              timestamps: { type: "array", items: { type: "string" } },
+              values: { type: "object", additionalProperties: { type: "array", items: { type: "number" } } },
+              correlations: {
+                type: "object",
+                description: "Correlation coefficients between target and features",
+                additionalProperties: { type: "number" },
+                example: {
+                  "volume": 0.45,
+                  "sector_etf_price": 0.89,
+                  "market_index_price": 0.92
+                }
+              }
+            }
+          }
         }
       }
     },

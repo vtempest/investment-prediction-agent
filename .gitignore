@@ -14,7 +14,7 @@ frontend/.env
 # next.js
 /.next/
 /out/
-
+.next/*
 # production
 /build
 

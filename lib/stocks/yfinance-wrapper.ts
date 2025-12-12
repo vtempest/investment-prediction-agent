@@ -1,6 +1,10 @@
 // Yahoo Finance Wrapper for TypeScript
 // Uses yahoo-finance2 package
-import yahooFinance from 'yahoo-finance2'
+// Yahoo Finance API wrapper with error handling
+import { NextResponse } from 'next/server'
+import YahooFinance from 'yahoo-finance2'
+
+const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] })
 
 export interface HistoricalDataOptions {
   symbol: string

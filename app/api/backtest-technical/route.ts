@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { yfinance } from '@/lib/stocks/yfinance-wrapper'
-import { backtest, STRATEGY_INFOS, StrategyInfo } from '@/third-party/techical-analyst/src'
-
+import { backtest, STRATEGY_INFOS, StrategyInfo } from 'indicatorts'
 interface BacktestRequest {
   symbol: string
   startDate: string

@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     let defaultQuickThink = 'gpt-4o-mini'
 
     if (llmProvider === 'groq') {
-      defaultDeepThink = process.env.NEXT_PUBLIC_GROQ_DEEP_THINK_MODEL || 'llama-3.1-70b-versatile'
+      defaultDeepThink = process.env.NEXT_PUBLIC_GROQ_DEEP_THINK_MODEL || 'llama-3.3-70b-versatile'
       defaultQuickThink = process.env.NEXT_PUBLIC_GROQ_QUICK_THINK_MODEL || 'llama-3.1-8b-instant'
     } else if (llmProvider === 'anthropic') {
       defaultDeepThink = 'claude-3-5-sonnet-20241022'

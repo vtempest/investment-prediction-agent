@@ -53,7 +53,7 @@
       "_comment": "Example configurations for different providers",
       "groq_fast": {
         "provider": "groq",
-        "model": "llama-3.1-70b-versatile",
+        "model_name": "llama-3.3-70b-versatile",
         "temperature": 0.3
       },
       "anthropic_smart": {

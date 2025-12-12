@@ -7,6 +7,8 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).default(false),
   image: text("image"),
+  apiKey: text("api_key").unique(),
+  usageCount: integer("usage_count").default(0),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
@@ -202,3 +204,96 @@ export const portfolios = sqliteTable("portfolios", {
 
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
+
+// ============================================================================
+// Polymarket Trader Tracking
+// ============================================================================
+
+// Polymarket Leaders/Traders
+export const polymarketLeaders = sqliteTable("polymarket_leaders", {
+  trader: text("trader").primaryKey(),
+  overallGain: real("overall_gain"),
+  winRate: real("win_rate"),
+  activePositions: integer("active_positions"),
+  totalPositions: integer("total_positions"),
+  currentValue: real("current_value"),
+  winAmount: real("win_amount"),
+  lossAmount: real("loss_amount"),
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
+})
+
+// Polymarket Positions
+export const polymarketPositions = sqliteTable("polymarket_positions", {
+  id: text("id").primaryKey(),
+  traderId: text("trader_id").notNull(),
+  marketId: text("market_id"),
+  marketTitle: text("market_title"),
+  cashPnl: real("cash_pnl"),
+  realizedPnl: real("realized_pnl"),
+  tags: text("tags"), // JSON array
+  createdAt: integer("created_at", { mode: "timestamp" }),
+})
+
+// Polymarket Categories
+export const polymarketCategories = sqliteTable("polymarket_categories", {
+  tag: text("tag").primaryKey(),
+  pnl: real("pnl"),
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
+})
+
+// ============================================================================
+// Zulu Traders Tracking
+// ============================================================================
+
+// Zulu Traders
+export const zuluTraders = sqliteTable("zulu_traders", {
+  providerId: integer("provider_id").primaryKey(),
+  name: text("name"),
+  strategyDesc: text("strategy_desc"),
+  countryCode: text("country_code"),
+  countryName: text("country_name"),
+  brokerName: text("broker_name"),
+  balance: real("balance"),
+  equity: real("equity"),
+  followers: integer("followers"),
+  liveFollowers: integer("live_followers"),
+  roiAnnualized: real("roi_annualized"),
+  roiProfit: real("roi_profit"),
+  zuluRank: integer("zulu_rank"),
+  bestTrade: real("best_trade"),
+  worstTrade: real("worst_trade"),
+  profitableTrades: integer("profitable_trades"),
+  losingTrades: integer("losing_trades"),
+  avgDrawdown: real("avg_drawdown"),
+  maxDrawdown: real("max_drawdown"),
+  maxDrawdownPercent: real("max_drawdown_percent"),
+  leverage: real("leverage"),
+  isEa: integer("is_ea"), // 1 for EA (Expert Advisor), 0 for manual
+  currencies: text("currencies"),
+  weeks: integer("weeks"),
+  demo: integer("demo"), // 1 for demo, 0 for live
+  avgTradeSeconds: integer("avg_trade_seconds"),
+  avgPnlPerTrade: real("avg_pnl_per_trade"),
+  winRate: real("win_rate"),
+  totalTrades: integer("total_trades"),
+  pageVisits: integer("page_visits"),
+  includedInWatchlist: integer("included_in_watchlist"),
+  registrationDate: integer("registration_date", { mode: "timestamp" }),
+  lastOpenTradeDate: integer("last_open_trade_date", { mode: "timestamp" }),
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
+})
+
+// Zulu Currency Stats
+export const zuluCurrencyStats = sqliteTable("zulu_currency_stats", {
+  id: text("id").primaryKey(),
+  providerId: integer("provider_id").notNull(),
+  currencyName: text("currency_name"),
+  totalCount: integer("total_count"),
+  winCount: integer("win_count"),
+  winPercent: real("win_percent"),
+  totalBuyCount: integer("total_buy_count"),
+  totalSellCount: integer("total_sell_count"),
+  pips: real("pips"),
+  createdAt: integer("created_at", { mode: "timestamp" }),
+})
+

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ExternalLink, Eye, EyeOff, Save } from "lucide-react";
+import { ExternalLink, Eye, EyeOff, Save, Moon, Sun, Monitor } from "lucide-react";
 
 const LLM_PROVIDERS = [
   {
@@ -163,8 +166,11 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+  const{ theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     fetchSettings();
   }, []);
 
@@ -213,266 +219,325 @@ export default function SettingsPage() {
     setShowKeys((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  if (loading) {
+  if (loading || !mounted) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Manage your API keys and broker connections</p>
-        </div>
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="mr-2 h-4 w-4" />
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
-      </div>
-
-      <Tabs defaultValue="llm" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="llm">LLM Providers</TabsTrigger>
-          <TabsTrigger value="brokers">Brokers</TabsTrigger>
-          <TabsTrigger value="data">Data Providers</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="llm" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>LLM API Keys</CardTitle>
-              <CardDescription>
-                Configure your API keys for various LLM providers. These will be used for AI-powered analysis.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Provider Comparison Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">Provider</th>
-                      <th className="text-left py-2">Models</th>
-                      <th className="text-left py-2">Docs</th>
-                      <th className="text-left py-2">Keys</th>
-                      <th className="text-right py-2">Valuation</th>
-                      <th className="text-right py-2">Revenue (2024)</th>
-                      <th className="text-right py-2">Cost (1M Output)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {LLM_PROVIDERS.map((provider) => (
-                      <tr key={provider.name} className="border-b hover:bg-muted/50">
-                        <td className="py-3 font-medium">{provider.name}</td>
-                        <td className="py-3 text-muted-foreground text-xs">{provider.models}</td>
-                        <td className="py-3">
-                          <a
-                            href={provider.docs}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline flex items-center gap-1"
-                          >
-                            Docs <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </td>
-                        <td className="py-3">
-                          <a
-                            href={provider.keys}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline flex items-center gap-1"
-                          >
-                            Keys <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </td>
-                        <td className="py-3 text-right">{provider.valuation}</td>
-                        <td className="py-3 text-right">{provider.revenue}</td>
-                        <td className="py-3 text-right font-medium">{provider.cost}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+    <div className="flex min-h-screen bg-background">
+      <DashboardSidebar activeTab="settings" setActiveTab={() => {}} />
+      <div className="flex flex-1 flex-col">
+        <DashboardHeader />
+        <main className="flex-1 overflow-auto p-4 pt-20 lg:pt-4 lg:p-6">
+          <div className="mx-auto max-w-7xl space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold">Settings</h1>
+                <p className="text-muted-foreground">Manage your API keys and preferences</p>
               </div>
+              <Button onClick={handleSave} disabled={saving}>
+                <Save className="mr-2 h-4 w-4" />
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
 
-              {/* API Key Input Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
-                {LLM_PROVIDERS.map((provider) => (
-                  <div key={provider.field} className="space-y-2">
-                    <Label htmlFor={provider.field}>
-                      {provider.name} {provider.isEndpoint ? "Endpoint" : "API Key"}
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id={provider.field}
-                        type={showKeys[provider.field] ? "text" : "password"}
-                        placeholder={provider.isEndpoint ? "http://localhost:11434" : "sk-..."}
-                        value={settings[provider.field] || ""}
-                        onChange={(e) => updateField(provider.field, e.target.value)}
-                      />
+            <Tabs defaultValue="appearance" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="appearance">Appearance</TabsTrigger>
+                <TabsTrigger value="llm">LLM Providers</TabsTrigger>
+                <TabsTrigger value="brokers">Brokers</TabsTrigger>
+                <TabsTrigger value="data">Data Providers</TabsTrigger>
+              </TabsList>
+
+              {/* Appearance Tab */}
+              <TabsContent value="appearance" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Theme</CardTitle>
+                    <CardDescription>
+                      Choose your preferred color scheme
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
                       <button
-                        type="button"
-                        onClick={() => toggleShowKey(provider.field)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setTheme("light")}
+                        className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${
+                          theme === "light" ? "border-primary" : "border-muted"
+                        }`}
                       >
-                        {showKeys[provider.field] ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        <Sun className="h-8 w-8" />
+                        <span className="font-medium">Light</span>
+                        {theme === "light" && (
+                          <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => setTheme("dark")}
+                        className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${
+                          theme === "dark" ? "border-primary" : "border-muted"
+                        }`}
+                      >
+                        <Moon className="h-8 w-8" />
+                        <span className="font-medium">Dark</span>
+                        {theme === "dark" && (
+                          <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => setTheme("system")}
+                        className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${
+                          theme === "system" ? "border-primary" : "border-muted"
+                        }`}
+                      >
+                        <Monitor className="h-8 w-8" />
+                        <span className="font-medium">System</span>
+                        {theme === "system" && (
+                          <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
                         )}
                       </button>
                     </div>
-                  </div>
-                ))}
-              </div>
+                    <p className="text-sm text-muted-foreground mt-4">
+                      {theme === "system"
+                        ? "Your theme will match your system preferences"
+                        : `Currently using ${theme} mode`}
+                    </p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-              {/* Preferred Provider */}
-              <div className="pt-4 border-t">
-                <Label htmlFor="preferredProvider">Preferred LLM Provider</Label>
-                <select
-                  id="preferredProvider"
-                  className="w-full mt-2 p-2 border rounded-md"
-                  value={settings.preferredProvider || "groq"}
-                  onChange={(e) => updateField("preferredProvider", e.target.value)}
-                >
-                  {LLM_PROVIDERS.map((provider) => (
-                    <option key={provider.field} value={provider.field.replace("ApiKey", "").replace("Endpoint", "")}>
-                      {provider.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="brokers" className="space-y-6">
-          {BROKERS.map((broker) => (
-            <Card key={broker.name}>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>{broker.name}</CardTitle>
-                    <CardDescription>Configure your {broker.name} connection</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <a href={broker.docs} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm">
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        Docs
-                      </Button>
-                    </a>
-                    <a href={broker.keys} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm">
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        Get Keys
-                      </Button>
-                    </a>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {broker.fields.map((field) => (
-                  <div key={field} className="space-y-2">
-                    <Label htmlFor={field}>
-                      {field
-                        .replace(/([A-Z])/g, " $1")
-                        .replace(/^./, (str) => str.toUpperCase())
-                        .trim()}
-                    </Label>
-                    {field === "alpacaPaper" ? (
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id={field}
-                          checked={settings[field] !== false}
-                          onCheckedChange={(checked) => updateField(field, checked)}
-                        />
-                        <Label htmlFor={field} className="font-normal">
-                          Use Paper Trading
-                        </Label>
-                      </div>
-                    ) : (
-                      <div className="relative">
-                        <Input
-                          id={field}
-                          type={showKeys[field] ? "text" : "password"}
-                          placeholder={field.includes("Key") || field.includes("Secret") ? "••••••••" : ""}
-                          value={settings[field] || ""}
-                          onChange={(e) => updateField(field, e.target.value)}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => toggleShowKey(field)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2"
-                        >
-                          {showKeys[field] ? (
-                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="data" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Provider API Keys</CardTitle>
-              <CardDescription>
-                Configure API keys for market data providers
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {DATA_PROVIDERS.map((provider) => (
-                <div key={provider.field} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor={provider.field}>{provider.name}</Label>
-                    <div className="flex gap-2">
-                      <a href={provider.docs} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="sm">
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          Docs
-                        </Button>
-                      </a>
-                      <a href={provider.keys} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="sm">
-                          <ExternalLink className="mr-1 h-3 w-3" />
-                          Keys
-                        </Button>
-                      </a>
+              {/* LLM Tab - keeping existing code */}
+              <TabsContent value="llm" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>LLM API Keys</CardTitle>
+                    <CardDescription>
+                      Configure your API keys for various LLM providers. These will be used for AI-powered analysis.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Provider Comparison Table */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2 w-[15%]">Provider</th>
+                            <th className="text-left py-2 w-[30%]">API Key</th>
+                            <th className="text-left py-2 w-[25%]">Models</th>
+                            <th className="text-left py-2 w-[15%]">Links</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {LLM_PROVIDERS.map((provider) => (
+                            <tr key={provider.name} className="border-b hover:bg-muted/50">
+                              <td className="py-3 font-medium align-middle">{provider.name}</td>
+                              <td className="py-3 align-middle pr-4">
+                                <div className="relative">
+                                  <Input
+                                    id={provider.field}
+                                    type={showKeys[provider.field] ? "text" : "password"}
+                                    placeholder={provider.isEndpoint ? "http://localhost:11434" : "sk-..."}
+                                    value={settings[provider.field] || ""}
+                                    onChange={(e) => updateField(provider.field, e.target.value)}
+                                    className="h-9"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleShowKey(provider.field)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                                  >
+                                    {showKeys[provider.field] ? (
+                                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                      <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="py-3 text-muted-foreground text-xs align-middle">
+                                {provider.models}
+                              </td>
+                              <td className="py-3 align-middle">
+                                <div className="flex flex-col gap-1">
+                                  <a
+                                    href={provider.docs}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline flex items-center gap-1 text-xs"
+                                  >
+                                    Docs <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                  <a
+                                    href={provider.keys}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline flex items-center gap-1 text-xs"
+                                  >
+                                    Get Key <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      id={provider.field}
-                      type={showKeys[provider.field] ? "text" : "password"}
-                      placeholder="API Key"
-                      value={settings[provider.field] || ""}
-                      onChange={(e) => updateField(provider.field, e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => toggleShowKey(provider.field)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2"
-                    >
-                      {showKeys[provider.field] ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+
+                    {/* Preferred Provider */}
+                    <div className="pt-4 border-t">
+                      <Label htmlFor="preferredProvider">Preferred LLM Provider</Label>
+                      <select
+                        id="preferredProvider"
+                        className="w-full mt-2 p-2 border rounded-md bg-background"
+                        value={settings.preferredProvider || "groq"}
+                        onChange={(e) => updateField("preferredProvider", e.target.value)}
+                      >
+                        {LLM_PROVIDERS.map((provider) => (
+                          <option key={provider.field} value={provider.field.replace("ApiKey", "").replace("Endpoint", "")}>
+                            {provider.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Brokers Tab - keeping existing code */}
+              <TabsContent value="brokers" className="space-y-6">
+                {BROKERS.map((broker) => (
+                  <Card key={broker.name}>
+                    <CardHeader>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <CardTitle>{broker.name}</CardTitle>
+                          <CardDescription>Configure your {broker.name} connection</CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                          <a href={broker.docs} target="_blank" rel="noopener noreferrer">
+                            <Button variant="outline" size="sm">
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Docs
+                            </Button>
+                          </a>
+                          <a href={broker.keys} target="_blank" rel="noopener noreferrer">
+                            <Button variant="outline" size="sm">
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Get Keys
+                            </Button>
+                          </a>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {broker.fields.map((field) => (
+                        <div key={field} className="space-y-2">
+                          <Label htmlFor={field}>
+                            {field
+                              .replace(/([A-Z])/g, " $1")
+                              .replace(/^./, (str) => str.toUpperCase())
+                              .trim()}
+                          </Label>
+                          {field === "alpacaPaper" ? (
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                id={field}
+                                checked={settings[field] !== false}
+                                onCheckedChange={(checked) => updateField(field, checked)}
+                              />
+                              <Label htmlFor={field} className="font-normal">
+                                Use Paper Trading
+                              </Label>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <Input
+                                id={field}
+                                type={showKeys[field] ? "text" : "password"}
+                                placeholder={field.includes("Key") || field.includes("Secret") ? "••••••••" : ""}
+                                value={settings[field] || ""}
+                                onChange={(e) => updateField(field, e.target.value)}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => toggleShowKey(field)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2"
+                              >
+                                {showKeys[field] ? (
+                                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <Eye className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </TabsContent>
+
+              {/* Data Providers Tab - keeping existing code */}
+              <TabsContent value="data" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Data Provider API Keys</CardTitle>
+                    <CardDescription>
+                      Configure API keys for market data providers
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {DATA_PROVIDERS.map((provider) => (
+                      <div key={provider.field} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label htmlFor={provider.field}>{provider.name}</Label>
+                          <div className="flex gap-2">
+                            <a href={provider.docs} target="_blank" rel="noopener noreferrer">
+                              <Button variant="ghost" size="sm">
+                                <ExternalLink className="mr-1 h-3 w-3" />
+                                Docs
+                              </Button>
+                            </a>
+                            <a href={provider.keys} target="_blank" rel="noopener noreferrer">
+                              <Button variant="ghost" size="sm">
+                                <ExternalLink className="mr-1 h-3 w-3" />
+                                Keys
+                              </Button>
+                            </a>
+                          </div>
+                        </div>
+                        <div className="relative">
+                          <Input
+                            id={provider.field}
+                            type={showKeys[provider.field] ? "text" : "password"}
+                            placeholder="API Key"
+                            value={settings[provider.field] || ""}
+                            onChange={(e) => updateField(provider.field, e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => toggleShowKey(provider.field)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2"
+                          >
+                            {showKeys[provider.field] ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

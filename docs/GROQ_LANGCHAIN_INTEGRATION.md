@@ -31,7 +31,7 @@ import { TradingConfig } from '@/lib/trading-agents/types'
 
 const config: TradingConfig = {
   llmProvider: 'groq',
-  deepThinkLLM: 'llama-3.1-70b-versatile',
+  deepThinkLLM: 'llama-3.3-70b-versatile',
   quickThinkLLM: 'llama-3.1-8b-instant',
   temperature: 0.3,
   apiKeys: {
@@ -255,7 +255,7 @@ Repeat (max iterations)
 ```typescript
 // Groq (fast, cheap)
 llmProvider: 'groq'
-deepThinkLLM: 'llama-3.1-70b-versatile'
+deepThinkLLM: 'llama-3.3-70b-versatile'
 quickThinkLLM: 'llama-3.1-8b-instant'
 
 // OpenAI (powerful)
@@ -278,7 +278,7 @@ quickThinkLLM: 'claude-3-haiku-20240307'
 'llama-3.2-3b-preview'      // 3B params
 
 // More capable
-'llama-3.1-70b-versatile'   // 70B params, ~200-400 tok/s
+'llama-3.1-70b-versatile'   // 70B params, ~200-400 tok/s (Legacy)
 'llama-3.3-70b-versatile'   // 70B params, latest
 
 // Alternative models
@@ -293,7 +293,7 @@ quickThinkLLM: 'claude-3-haiku-20240307'
 | Model | Tokens/Second | Use Case |
 |-------|--------------|----------|
 | llama-3.1-8b-instant | 500-1000 | Quick queries, simple analysis |
-| llama-3.1-70b-versatile | 200-400 | Complex reasoning, debates |
+| llama-3.3-70b-versatile | 200-400 | Complex reasoning, debates |
 | llama-3.3-70b-versatile | 200-400 | Latest model, improved quality |
 
 ### Cost
@@ -318,7 +318,7 @@ export async function POST(request: NextRequest) {
 
   const config = {
     llmProvider: 'groq',
-    deepThinkLLM: 'llama-3.1-70b-versatile',
+    deepThinkLLM: 'llama-3.3-70b-versatile',
     apiKeys: { groq: process.env.GROQ_API_KEY }
   }
 

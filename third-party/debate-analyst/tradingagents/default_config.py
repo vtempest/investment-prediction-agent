@@ -11,7 +11,7 @@ DEFAULT_CONFIG = {
     # LLM settings
     # Supported providers: openai, anthropic, google, groq, ollama, openrouter
     "llm_provider": "groq",  # Using Groq for fast, cost-effective inference
-    "deep_think_llm": "llama-3.1-70b-versatile",
+    "deep_think_model": "llama-3.3-70b-versatile",
     "quick_think_llm": "llama-3.1-8b-instant",
     "backend_url": None,
     "temperature": 0.3,

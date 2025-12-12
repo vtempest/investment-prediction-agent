@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Calendar } from "lucide-react"
+import { Calendar, FileText } from "lucide-react"
 import Link from "next/link"
 
 export function CTASection() {
@@ -12,11 +12,18 @@ export function CTASection() {
         <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
           Join traders who trust TimeTravel.investments for daily insights and next-day predictions.
         </p>
-        <div className="mt-10 flex items-center justify-center">
+        <div className="mt-10 flex flex-col items-center justify-center gap-4">
           <Button size="lg" asChild>
             <Link href="https://takemymoney.timetravel.investments" target="_blank">
               <Calendar className="mr-2 h-5 w-5" />
               Book a Demo
+            </Link>
+          </Button>
+          
+          <Button variant="outline" size="lg" asChild>
+            <Link href="https://drive.google.com/file/d/1haVl0uguVYnLh8D3EUdaIyi3Tl4kSOIP/view?usp=drive_link" target="_blank" rel="noopener noreferrer">
+              <FileText className="mr-2 h-5 w-5" />
+              Read White Paper
             </Link>
           </Button>
         </div>

@@ -1,23 +1,75 @@
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
-import { demoTopTraders, type TopTrader } from "@/lib/demo-data"
-import { Trophy, TrendingUp, Activity, Clock, AlertTriangle, Copy } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Trophy, TrendingUp, Activity, Clock, AlertTriangle, Copy, RefreshCw, Loader2 } from "lucide-react"
 
 export function CopyTradingTab() {
-  const [traders] = useState(demoTopTraders)
+  const [traders, setTraders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [syncing, setSyncing] = useState(false)
+  const [source, setSource] = useState("zulu")
+
+  const fetchData = async (currentSource: string) => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/leaderboard?source=${currentSource}`)
+      const data = await res.json()
+      if (data.success) {
+        setTraders(data.data)
+      }
+    } catch (error) {
+      console.error("Failed to fetch leaderboard:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSync = async () => {
+    setSyncing(true)
+    try {
+      await fetch('/api/leaderboard/sync', { method: 'POST' })
+      await fetchData(source)
+    } catch (error) {
+      console.error("Failed to sync:", error)
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData(source)
+  }, [source])
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Top Traders Leaderboard</h2>
-        <Badge variant="outline">Updated 5 min ago</Badge>
+        <div className="flex items-center gap-4">
+          <Tabs value={source} onValueChange={setSource}>
+            <TabsList>
+              <TabsTrigger value="zulu">ZuluTrade</TabsTrigger>
+              <TabsTrigger value="polymarket">Polymarket</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleSync} 
+            disabled={syncing}
+          >
+            {syncing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Sync Data
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -36,7 +88,13 @@ export function CopyTradingTab() {
               </tr>
             </thead>
             <tbody>
-              {traders.map((trader) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="text-center p-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                  </td>
+                </tr>
+              ) : traders.map((trader) => (
                 <tr key={trader.id} className="border-b hover:bg-muted/50 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-2">
@@ -49,7 +107,7 @@ export function CopyTradingTab() {
                   </td>
                   <td className="p-4">
                     <div className="text-green-500 font-bold">
-                      +${(trader.overallPnL / 1000000).toFixed(2)}M
+                      {source === 'zulu' ? `$${trader.overallPnL.toLocaleString()}` : `${trader.overallPnL.toFixed(2)}%`}
                     </div>
                   </td>
                   <td className="p-4">
@@ -60,7 +118,7 @@ export function CopyTradingTab() {
                   </td>
                   <td className="p-4">
                     <div className="font-semibold">
-                      ${(trader.currentValue / 1000000).toFixed(1)}M
+                      ${trader.currentValue.toLocaleString()}
                     </div>
                   </td>
                   <td className="p-4">
@@ -84,7 +142,7 @@ export function CopyTradingTab() {
                             <div className="p-3 bg-muted rounded-lg">
                               <div className="text-xs text-muted-foreground mb-1">Overall P&L</div>
                               <div className="text-lg font-bold text-green-500">
-                                +${(trader.overallPnL / 1000000).toFixed(2)}M
+                                {source === 'zulu' ? `$${trader.overallPnL.toLocaleString()}` : `${trader.overallPnL.toFixed(2)}%`}
                               </div>
                             </div>
                             <div className="p-3 bg-muted rounded-lg">
@@ -104,7 +162,7 @@ export function CopyTradingTab() {
                           <div>
                             <h3 className="font-semibold mb-2">Trading Markets</h3>
                             <div className="flex gap-2 flex-wrap">
-                              {trader.markets.map((market, i) => (
+                                {trader.markets?.map((market: any, i: number) => (
                                 <Badge key={i} variant="secondary">{market}</Badge>
                               ))}
                             </div>

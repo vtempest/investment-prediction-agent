@@ -1,6 +1,6 @@
 // SEC Filing Metadata API Route
 import { NextRequest, NextResponse } from 'next/server';
-import { Downloader } from '@/lib/stocks/sec-downloader';
+import { Downloader } from '@/lib/stocks/sec-filing-api';
 
 const downloader = new Downloader('Investment Prediction Agent', 'api@example.com');
 
