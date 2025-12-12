@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { syncLeadersAndCategories } from '@/lib/sync/polymarket'
+import { syncLeadersAndCategories } from '@/lib/prediction/polymarket'
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')

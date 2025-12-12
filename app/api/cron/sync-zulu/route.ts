@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { syncZuluTraders, syncZuluTraderDetails, getZuluTopByRank } from '@/lib/sync/zulu'
+import { syncZuluTraders, syncZuluTraderDetails, getZuluTopByRank } from '@/lib/prediction/zulu'
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')

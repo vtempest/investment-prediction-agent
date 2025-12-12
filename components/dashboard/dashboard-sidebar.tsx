@@ -44,8 +44,26 @@ const secondaryNav = [
   { name: "Help", value: "help", icon: HelpCircle },
 ]
 
-function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSidebarProps & { onItemClick?: () => void }) {
-  return (
+
+
+
+export function DashboardSidebar({ activeTab = "overview", setActiveTab }: DashboardSidebarProps) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const { data: session } = useSession()
+  const router = useRouter()
+
+  const handleTabClick = (value: string) => {
+    // If setActiveTab is provided (we are on dashboard), use it
+    if (setActiveTab) {
+      setActiveTab(value)
+    } else {
+      // Otherwise navigate to dashboard with tab param
+      router.push(`/dashboard?tab=${value}`)
+    }
+    setMobileOpen(false)
+  }
+
+  const SidebarContent = () => (
     <>
       <div className="flex h-16 items-center gap-2 border-b border-border px-6">
         <Link href="/" className="flex items-center gap-2">
@@ -56,15 +74,12 @@ function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSideb
         </Link>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 p-4">
+      <nav className="flex flex-1 flex-col gap-1 p-4 overflow-y-auto">
         <div className="space-y-1">
           {navigation.map((item) => (
             <button
               key={item.value}
-              onClick={() => {
-                setActiveTab?.(item.value)
-                onItemClick?.()
-              }}
+              onClick={() => handleTabClick(item.value)}
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-left",
                 activeTab === item.value
@@ -86,7 +101,7 @@ function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSideb
                   key={item.name}
                   href={item.href}
                   className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
-                  onClick={onItemClick}
+                  onClick={() => setMobileOpen(false)}
                 >
                   <item.icon className="h-4 w-4" />
                   {item.name}
@@ -96,10 +111,7 @@ function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSideb
             return (
               <button
                 key={item.value}
-                onClick={() => {
-                  setActiveTab?.(item.value || '')
-                  onItemClick?.()
-                }}
+                onClick={() => handleTabClick(item.value)}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground text-left"
               >
                 <item.icon className="h-4 w-4" />
@@ -112,14 +124,18 @@ function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSideb
             <Link 
               href="/dashboard/profile" 
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent/50 transition-colors"
-              onClick={onItemClick}
+              onClick={() => setMobileOpen(false)}
             >
               <Avatar className="h-8 w-8 border border-border">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">TT</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {session?.user?.name
+                    ? (session.user.name as string).split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase()
+                    : "U"}
+                </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col text-left">
-                <span className="text-sm font-medium">Time Traveler</span>
-                <span className="text-xs text-muted-foreground">Pro Plan</span>
+              <div className="flex flex-col text-left overflow-hidden">
+                <span className="text-sm font-medium truncate">{session?.user?.name || "Guest User"}</span>
+                <span className="text-xs text-muted-foreground truncate">{session?.user?.email || "Sign in"}</span>
               </div>
             </Link>
           </div>
@@ -127,10 +143,6 @@ function SidebarContent({ activeTab, setActiveTab, onItemClick }: DashboardSideb
       </nav>
     </>
   )
-}
-
-export function DashboardSidebar({ activeTab = "overview", setActiveTab }: DashboardSidebarProps) {
-  const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
     <>
@@ -148,18 +160,14 @@ export function DashboardSidebar({ activeTab = "overview", setActiveTab }: Dashb
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
-            <SidebarContent
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              onItemClick={() => setMobileOpen(false)}
-            />
+            <SidebarContent />
           </SheetContent>
         </Sheet>
       </div>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden w-64 flex-col border-r border-border bg-card lg:flex">
-        <SidebarContent activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Desktop Sidebar - Fixed */}
+      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-card fixed top-0 left-0 bottom-0 z-30">
+        <SidebarContent />
       </aside>
     </>
   )

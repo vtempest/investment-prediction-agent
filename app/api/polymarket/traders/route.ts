@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getLeaders } from '@/lib/sync/polymarket'
+import { getLeaders } from '@/lib/prediction/polymarket'
 
 export async function GET(request: NextRequest) {
   try {

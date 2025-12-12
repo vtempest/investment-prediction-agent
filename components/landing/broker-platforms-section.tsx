@@ -19,7 +19,7 @@ export function BrokerPlatformsSection() {
   const brokers = [
     {
       name: "Alpaca",
-      logo: "https://dka575ofm4ao0.cloudfront.net/pages-transactional_logos/retina/135537/logo.png",
+      logo: "https://raw.githubusercontent.com/alpacahq/alpaca-mcp-server/main/assets/01-primary-alpaca-logo.png",
       description: "Commission-free API-first trading for stocks, ETFs, and crypto",
       features: [
         "Developer-friendly REST & WebSocket API",

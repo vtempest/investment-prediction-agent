@@ -53,7 +53,7 @@ const SUFFIXES = [
     " Common Share"      // Singular
 ];
 
-const cleanName = (name) => {
+const cleanName = (name: string) => {
     let cleaned = name;
     for (const suffix of SUFFIXES) {
         // Escape special regex chars if any (though our list is simple text)
@@ -69,7 +69,7 @@ const cleanName = (name) => {
     return cleaned;
 };
 
-const formatMarketCap = (cap) => {
+const formatMarketCap = (cap: string | number) => {
     if (!cap) return null;
     // Remove ',' and '$' if present, then parse
     const num = parseFloat(String(cap).replace(/,/g, '').replace(/\$/g, ''));
@@ -78,7 +78,7 @@ const formatMarketCap = (cap) => {
     return Math.round(num / 1000000);
 };
 
-async function fetchData(exchange) {
+async function fetchData(exchange: string) {
     const url = `${BASE_URL}&exchange=${exchange}`;
     const options = {
         headers: {
@@ -159,7 +159,7 @@ async function main() {
              if (result && result.data && result.data.rows) {
                  allRows.push(...result.data.rows);
              }
-        });
+         });
 
         console.log(`Fetched ${allRows.length} total rows from NASDAQ/NYSE/AMEX.`);
 
@@ -229,8 +229,8 @@ async function main() {
 
         // Generate sector info
         // entry indices based on CONFIG: 0=symbol, 1=name, 2=sector, 3=industry, 4=marketCap, 5=cik
-        const sectorInfo = {};
-        const overallInfo = {
+        const sectorInfo: Record<string, any> = {};
+        const overallInfo: any = {
              sector: "Overall US Public Stocks",
              totalCompanies: 0,
              totalMarketCap: 0,
@@ -243,7 +243,7 @@ async function main() {
             const name = item[1];
             const sector = item[2] || 'Unknown';
             // Trim industry name
-            const industry = (item[3] || 'Unknown').trim();
+            const industry = String(item[3] || 'Unknown').trim();
             const marketCap = typeof item[4] === 'number' ? item[4] : 0; 
             // item[5] is CIK, not needed for sector aggregation 
 
@@ -294,21 +294,21 @@ async function main() {
             overallInfo.companies.push({ symbol, name, marketCap });
         });
 
-        const processInfo = (info, sectorName, includeIndustries = true) => {
+        const processInfo = (info: any, sectorName: string, includeIndustries = true) => {
              // Sort companies by market cap desc
-            info.companies.sort((a, b) => b.marketCap - a.marketCap);
+            info.companies.sort((a: any, b: any) => b.marketCap - a.marketCap);
             
             // Top 10
             const top10 = info.companies.slice(0, 10);
 
             // Process and sort industries
-            let industriesList = [];
+            let industriesList = [] as any;
             if (includeIndustries) {
                 industriesList = Object.values(info.industries)
-                    .sort((a, b) => b.totalMarketCap - a.totalMarketCap);
+                    .sort((a: any, b: any) => b.totalMarketCap - a.totalMarketCap);
             }
 
-            const result = {
+            const result: any = {
                 sector: sectorName,
                 totalCompanies: info.totalCompanies,
                 totalMarketCap: info.totalMarketCap,

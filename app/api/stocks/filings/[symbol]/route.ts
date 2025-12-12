@@ -1,14 +1,6 @@
 // SEC Filings API Route
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const STOCK_NAMES_FILE = path.join(process.cwd(), 'lib/data/stock-names.json');
-
-// Helper to pad CIK with zeros to 10 digits as required by SEC API
-function padCik(cik: string | number): string {
-    return String(cik).padStart(10, '0');
-}
+import { createClient } from 'sec-edgar-toolkit';
 
 export async function GET(
     request: NextRequest,
@@ -19,124 +11,83 @@ export async function GET(
         const { searchParams } = new URL(request.url);
         const limit = parseInt(searchParams.get('limit') || '20');
 
-        // Check if stock names file exists
-        if (!fs.existsSync(STOCK_NAMES_FILE)) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: 'Stock data not available. Please run import:stocks first.',
-                    code: 'DATA_UNAVAILABLE',
-                    timestamp: new Date().toISOString()
-                },
-                { status: 503 }
-            );
-        }
+        // Initialize toolkit client
+        // Using a generic user agent for this example, but in production ideally this comes from env or config
+        const client = createClient({
+            userAgent: "StockPredictionAgent/1.0 (admin@example.com)"
+        });
 
-        // Read and parse stock data to find CIK
-        const fileContent = fs.readFileSync(STOCK_NAMES_FILE, 'utf-8');
-        const stocks = JSON.parse(fileContent); // Array of arrays: [symbol, name, sector, industry, marketCap, cik]
+        console.log(`Fetching filings for ${symbol} using sec-edgar-toolkit...`);
+
+        // Lookup company by symbol (works for Ticker or CIK)
+        // The toolkit handles looking up the CIK automatically from the ticker
+        const company = await client.companies.lookup(symbol);
         
-        // Find stock by symbol (case insensitive)
-        const stockData = stocks.find((s: any[]) => 
-            String(s[0]).toLowerCase() === symbol.toLowerCase()
-        );
-
-        if (!stockData) {
+        if (!company) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: `Symbol ${symbol} not found`,
+                    error: `Symbol ${symbol} not found in SEC EDGAR`,
                     code: 'SYMBOL_NOT_FOUND',
                     timestamp: new Date().toISOString()
                 },
                 { status: 404 }
             );
         }
-
-        const cik = stockData[5]; // CIK is at index 5
-
-        if (!cik) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: `No CIK found for ${symbol}. Cannot fetch filings.`,
-                    code: 'CIK_NOT_FOUND',
-                    timestamp: new Date().toISOString()
-                },
-                { status: 404 }
-            );
-        }
-
-        // Fetch filings from SEC EDGAR API
-        // NOTE: SEC requires a valid User-Agent with contact info (email/website)
-        const paddedCik = padCik(cik);
-        // Using submissions endpoint which contains recent filings
-        const secUrl = `https://data.sec.gov/submissions/CIK${paddedCik}.json`;
         
-        console.log(`Fetching filings for ${symbol} (CIK: ${cik}) from ${secUrl}`);
+        // Fetch recent filings
+        // We default to strictly 10-K, 10-Q, 8-K for relevance, unless specific requirements exist
+        // The previous implementation fetched 'submission' history which contains everything.
+        // Let's broaden to common useful forms.
+        const filings = await company.filings
+            .formTypes(['10-K', '10-Q', '8-K', '3', '4', '5']) // Include ownership forms as requested by user context feature list
+            .recent(limit)
+            .fetch();
 
-        const response = await fetch(secUrl, {
-            headers: {
-                // SEC requires specific User-Agent format: AppName ContactEmail
-                'User-Agent': 'StockPredictionAgent (admin@example.com)',
-                'Accept-Encoding': 'gzip, deflate',
-                'Host': 'data.sec.gov'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`SEC API returned ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        
-        // Transform the messy separate arrays into array of objects
-        const filings = [];
-        if (data.filings && data.filings.recent) {
-            const recent = data.filings.recent;
-            const count = recent.accessionNumber.length;
-            
-            for (let i = 0; i < Math.min(count, limit); i++) {
-                filings.push({
-                    accessionNumber: recent.accessionNumber[i],
-                    filingDate: recent.filingDate[i],
-                    reportDate: recent.reportDate[i],
-                    acceptanceDateTime: recent.acceptanceDateTime[i],
-                    act: recent.act[i],
-                    form: recent.form[i],
-                    fileNumber: recent.fileNumber[i],
-                    filmNumber: recent.filmNumber[i],
-                    items: recent.items[i],
-                    size: recent.size[i],
-                    isXBRL: recent.isXBRL[i],
-                    isInlineXBRL: recent.isInlineXBRL[i],
-                    primaryDocument: recent.primaryDocument[i],
-                    primaryDocDescription: recent.primaryDocDescription[i],
-                    url: `https://www.sec.gov/Archives/edgar/data/${cik}/${recent.accessionNumber[i].replace(/-/g, '')}/${recent.primaryDocument[i]}`
-                });
-            }
-        }
+        // Map toolkit result to our API response format
+        // The toolkit returns Filing objects. We extract properties.
+        const mappedFilings = filings.map((f: any) => ({
+            accessionNumber: f.accessionNumber,
+            filingDate: f.filingDate,
+            reportDate: f.reportDate || null,
+            acceptanceDateTime: f.acceptanceDateTime || null,
+            act: f.act || null,
+            form: f.form || f.type || 'Unknown',
+            fileNumber: f.fileNumber || null,
+            filmNumber: f.filmNumber || null,
+            items: f.items || [],
+            size: f.size || 0,
+            isXBRL: f.isXBRL || false,
+            isInlineXBRL: f.isInlineXBRL || false,
+            primaryDocument: f.primaryDocument || '',
+            primaryDocDescription: f.primaryDocDescription || '',
+             // Construct standard EDGAR URL if not provided directly
+            url: `https://www.sec.gov/Archives/edgar/data/${company.cik}/${f.accessionNumber ? f.accessionNumber.replace(/-/g, '') : ''}/${f.primaryDocument || ''}`
+        }));
 
         return NextResponse.json({
             success: true,
             symbol: symbol.toUpperCase(),
-            cik: cik,
-            companyName: data.name,
-            sic: data.sic,
-            sicDescription: data.sicDescription,
-            fiscalYearEnd: data.fiscalYearEnd,
-            stateOfIncorporation: data.stateOfIncorporation,
-            filings: filings,
+            cik: company.cik,
+            companyName: company.name,
+            // Toolkit might not provide these immediately without extra calls, so we omit or null them
+            // The previous manual call to 'submissions' had them. 
+            // The 'company' object likely defines basic props.
+            sic: (company as any).sic || null, 
+            sicDescription: (company as any).sicDescription || null,
+            fiscalYearEnd: (company as any).fiscalYearEnd || null,
+            stateOfIncorporation: (company as any).stateOfIncorporation || null, 
+            filings: mappedFilings,
             timestamp: new Date().toISOString()
         });
 
     } catch (error: any) {
-        console.error('SEC Filings Error:', error);
+        console.error('SEC Toolkit Error:', error);
         return NextResponse.json(
             {
                 success: false,
                 error: error.message || 'Failed to fetch SEC filings',
-                code: 'SEC_FETCH_ERROR',
+                code: 'SEC_TOOLKIT_ERROR',
                 timestamp: new Date().toISOString()
             },
             { status: 500 }

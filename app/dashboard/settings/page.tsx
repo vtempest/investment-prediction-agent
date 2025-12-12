@@ -323,78 +323,68 @@ export default function SettingsPage() {
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b">
-                            <th className="text-left py-2">Provider</th>
-                            <th className="text-left py-2">Models</th>
-                            <th className="text-left py-2">Docs</th>
-                            <th className="text-left py-2">Keys</th>
-                            <th className="text-right py-2">Valuation</th>
-                            <th className="text-right py-2">Revenue (2024)</th>
-                            <th className="text-right py-2">Cost (1M Output)</th>
+                            <th className="text-left py-2 w-[15%]">Provider</th>
+                            <th className="text-left py-2 w-[30%]">API Key</th>
+                            <th className="text-left py-2 w-[25%]">Models</th>
+                            <th className="text-left py-2 w-[15%]">Links</th>
+                            <th className="text-right py-2 w-[15%]">Cost (1M Output)</th>
                           </tr>
                         </thead>
                         <tbody>
                           {LLM_PROVIDERS.map((provider) => (
                             <tr key={provider.name} className="border-b hover:bg-muted/50">
-                              <td className="py-3 font-medium">{provider.name}</td>
-                              <td className="py-3 text-muted-foreground text-xs">{provider.models}</td>
-                              <td className="py-3">
-                                <a
-                                  href={provider.docs}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline flex items-center gap-1"
-                                >
-                                  Docs <ExternalLink className="h-3 w-3" />
-                                </a>
+                              <td className="py-3 font-medium align-middle">{provider.name}</td>
+                              <td className="py-3 align-middle pr-4">
+                                <div className="relative">
+                                  <Input
+                                    id={provider.field}
+                                    type={showKeys[provider.field] ? "text" : "password"}
+                                    placeholder={provider.isEndpoint ? "http://localhost:11434" : "sk-..."}
+                                    value={settings[provider.field] || ""}
+                                    onChange={(e) => updateField(provider.field, e.target.value)}
+                                    className="h-9"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleShowKey(provider.field)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                                  >
+                                    {showKeys[provider.field] ? (
+                                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                      <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                  </button>
+                                </div>
                               </td>
-                              <td className="py-3">
-                                <a
-                                  href={provider.keys}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline flex items-center gap-1"
-                                >
-                                  Keys <ExternalLink className="h-3 w-3" />
-                                </a>
+                              <td className="py-3 text-muted-foreground text-xs align-middle">
+                                {provider.models}
                               </td>
-                              <td className="py-3 text-right">{provider.valuation}</td>
-                              <td className="py-3 text-right">{provider.revenue}</td>
-                              <td className="py-3 text-right font-medium">{provider.cost}</td>
+                              <td className="py-3 align-middle">
+                                <div className="flex flex-col gap-1">
+                                  <a
+                                    href={provider.docs}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline flex items-center gap-1 text-xs"
+                                  >
+                                    Docs <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                  <a
+                                    href={provider.keys}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline flex items-center gap-1 text-xs"
+                                  >
+                                    Get Key <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
+                              </td>
+                              <td className="py-3 text-right font-medium align-middle">{provider.cost}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
-                    </div>
-
-                    {/* API Key Input Fields */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
-                      {LLM_PROVIDERS.map((provider) => (
-                        <div key={provider.field} className="space-y-2">
-                          <Label htmlFor={provider.field}>
-                            {provider.name} {provider.isEndpoint ? "Endpoint" : "API Key"}
-                          </Label>
-                          <div className="relative">
-                            <Input
-                              id={provider.field}
-                              type={showKeys[provider.field] ? "text" : "password"}
-                              placeholder={provider.isEndpoint ? "http://localhost:11434" : "sk-..."}
-                              value={settings[provider.field] || ""}
-                              onChange={(e) => updateField(provider.field, e.target.value)}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => toggleShowKey(provider.field)}
-                              className="absolute right-2 top-1/2 -translate-y-1/2"
-                            >
-                              {showKeys[provider.field] ? (
-                                <EyeOff className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <Eye className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
                     </div>
 
                     {/* Preferred Provider */}
@@ -402,7 +392,7 @@ export default function SettingsPage() {
                       <Label htmlFor="preferredProvider">Preferred LLM Provider</Label>
                       <select
                         id="preferredProvider"
-                        className="w-full mt-2 p-2 border rounded-md"
+                        className="w-full mt-2 p-2 border rounded-md bg-background"
                         value={settings.preferredProvider || "groq"}
                         onChange={(e) => updateField("preferredProvider", e.target.value)}
                       >
