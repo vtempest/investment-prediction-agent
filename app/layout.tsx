@@ -1,11 +1,13 @@
 import type React from "react"
 import type { Metadata } from "next"
-// import { Geist, Geist_Mono } from "next/font/google"
+import { Open_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-// const _geist = Geist({ subsets: ["latin"] })
-// const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const openSans = Open_Sans({ 
+  subsets: ["latin"],
+  variable: "--font-open-sans"
+})
 
 export const metadata: Metadata = {
   title: "TimeTravel.investments - Multi-Agent AI Stock Analysis",
@@ -23,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className={`${openSans.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
