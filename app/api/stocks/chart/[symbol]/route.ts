@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import YahooFinance from 'yahoo-finance2';
 
-const yahooFinance = new YahooFinance();
+const yahooFinance = new YahooFinance({ suppressNotices: ['ripHistorical'] });
 
 export async function GET(
     request: NextRequest,
@@ -39,7 +39,7 @@ export async function GET(
         const queryPeriod1 = startDate.toISOString().split('T')[0];
         const queryPeriod2 = endDate.toISOString().split('T')[0];
 
-        const result = await yahooFinance.historical(symbol, {
+        const result = await yahooFinance.chart(symbol, {
             period1: queryPeriod1,
             period2: queryPeriod2,
             interval: interval as any

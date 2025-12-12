@@ -278,7 +278,7 @@ quickThinkLLM: 'claude-3-haiku-20240307'
 'llama-3.2-3b-preview'      // 3B params
 
 // More capable
-'llama-3.1-70b-versatile'   // 70B params, ~200-400 tok/s (Legacy) (Legacy)
+'llama-3.1-70b-versatile'   // 70B params, ~200-400 tok/s (Legacy)
 'llama-3.3-70b-versatile'   // 70B params, latest
 
 // Alternative models

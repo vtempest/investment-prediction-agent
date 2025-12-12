@@ -323,7 +323,7 @@ curl -X POST http://localhost:8000/debate-analyst/analyze \
   -H "Content-Type: application/json" \
   -d '{
     "symbol": "AAPL",
-    "deep_think_llm": "llama-3.1-70b-versatile",
+    "deep_think_llm": "llama-3.3-70b-versatile",
     "quick_think_llm": "llama-3.1-8b-instant"
   }'
 ```
@@ -419,7 +419,7 @@ The platform supports multiple LLM providers. Configure in agent config files:
   "models": {
     "portfolio_manager": {
       "provider": "groq",
-      "model": "llama-3.1-70b-versatile",
+      "model": "llama-3.3-70b-versatile",
       "temperature": 0.3
     }
   }
@@ -430,7 +430,7 @@ The platform supports multiple LLM providers. Configure in agent config files:
 ```python
 DEFAULT_CONFIG = {
     "llm_provider": "groq",
-    "deep_think_llm": "llama-3.1-70b-versatile",
+    "deep_think_llm": "llama-3.3-70b-versatile",
     "quick_think_llm": "llama-3.1-8b-instant"
 }
 ```
@@ -439,7 +439,7 @@ DEFAULT_CONFIG = {
 
 **Recommended for Production:**
 - Use **Groq** for fast inference (up to 500 tokens/sec)
-- Use `llama-3.1-70b-versatile` for complex analysis
+- Use `llama-3.3-70b-versatile` for complex analysis
 - Use `llama-3.1-8b-instant` for quick responses
 - Enable caching with React Query (5-10 minute stale time)
 - Implement batch requests for multiple stocks
