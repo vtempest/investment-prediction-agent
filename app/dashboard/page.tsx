@@ -116,8 +116,8 @@ function DashboardContent() {
 
   // Show dashboard for authenticated users
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-0   ml-[250px]">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full " >
 
 
         <TabsContent value="overview" className="space-y-6 mt-6">

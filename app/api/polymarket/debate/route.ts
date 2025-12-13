@@ -74,12 +74,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse market data
-    const outcomes = JSON.parse(market.outcomes as string)
-    const outcomePrices = JSON.parse(market.outcomePrices as string)
-    const tags = market.tags ? JSON.parse(market.tags as string) : []
+    const outcomes = (market.outcomes)
+    const outcomePrices = market.outcomePrices;
+    const tags = market.tags;
 
-    const yesIndex = outcomes.findIndex((o: string) => o.toLowerCase() === 'yes')
-    const noIndex = outcomes.findIndex((o: string) => o.toLowerCase() === 'no')
+    const yesIndex = outcomes.indexOf('yes')
+    const noIndex = outcomes.indexOf('no')
 
     const currentYesPrice = yesIndex >= 0 ? parseFloat(outcomePrices[yesIndex]) : 0.5
     const currentNoPrice = noIndex >= 0 ? parseFloat(outcomePrices[noIndex]) : 0.5

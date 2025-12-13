@@ -107,7 +107,7 @@ function SidebarSearch() {
 
   if (state === "collapsed") {
     return (
-      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toggleSidebar()}>
+      <Button variant="ghost" size="icon" className="h-7 w-2" onClick={() => toggleSidebar()}>
         <Search className="h-4 w-4" />
       </Button>
     )

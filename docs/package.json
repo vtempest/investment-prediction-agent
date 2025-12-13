@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "build": "next build --turbo",
-    
     "build:api": "node ./scripts/generate-api-docs.mjs ./openapi.yml",
     "dev": "next dev --turbo",
     "copy": "rm -rf ../web/static/docs; mkdir ../web/static/docs; cp -r ./dist/* ../web/static/docs/",
