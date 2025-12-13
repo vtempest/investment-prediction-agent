@@ -9,6 +9,13 @@ interface BacktestRequest {
   strategyIds?: string[]
 }
 
+interface TradeSignal {
+  date: string
+  time: number
+  action: 'BUY' | 'SELL'
+  price: number
+}
+
 interface BacktestResult {
   success: boolean
   symbol: string
@@ -27,6 +34,7 @@ interface BacktestResult {
     winRate: number
     sharpeRatio?: number
     maxDrawdown: number
+    signals: TradeSignal[]
   }[]
 }
 
@@ -58,7 +66,7 @@ const STRATEGY_ID_MAP: Record<string, string> = {
   'vwap': 'Volume Weighted Average Price',
 }
 
-function calculateMetrics(actions: number[], closingPrices: number[], initialCapital: number) {
+function calculateMetrics(actions: number[], closingPrices: number[], dates: Date[], initialCapital: number) {
   let cash = initialCapital
   let shares = 0
   let trades = 0
@@ -67,11 +75,13 @@ function calculateMetrics(actions: number[], closingPrices: number[], initialCap
   let maxValue = initialCapital
   let minValue = initialCapital
   const returns: number[] = []
+  const signals: TradeSignal[] = []
   let lastBuyPrice = 0
 
   for (let i = 0; i < actions.length; i++) {
     const action = actions[i]
     const price = closingPrices[i]
+    const date = dates[i]
 
     if (action === 1 && shares === 0) {
       // Buy signal
@@ -79,6 +89,12 @@ function calculateMetrics(actions: number[], closingPrices: number[], initialCap
       if (shares > 0) {
         cash -= shares * price
         lastBuyPrice = price
+        signals.push({
+          date: date.toISOString(),
+          time: Math.floor(date.getTime() / 1000),
+          action: 'BUY',
+          price: price
+        })
       }
     } else if (action === -1 && shares > 0) {
       // Sell signal
@@ -91,6 +107,13 @@ function calculateMetrics(actions: number[], closingPrices: number[], initialCap
       } else if (price < lastBuyPrice) {
         losingTrades++
       }
+
+      signals.push({
+        date: date.toISOString(),
+        time: Math.floor(date.getTime() / 1000),
+        action: 'SELL',
+        price: price
+      })
 
       shares = 0
     }
@@ -108,6 +131,7 @@ function calculateMetrics(actions: number[], closingPrices: number[], initialCap
   // Close any open positions
   if (shares > 0) {
     const lastPrice = closingPrices[closingPrices.length - 1]
+    const lastDate = dates[dates.length - 1]
     cash += shares * lastPrice
     trades++
     if (lastPrice > lastBuyPrice) {
@@ -115,6 +139,12 @@ function calculateMetrics(actions: number[], closingPrices: number[], initialCap
     } else if (lastPrice < lastBuyPrice) {
       losingTrades++
     }
+    signals.push({
+      date: lastDate.toISOString(),
+      time: Math.floor(lastDate.getTime() / 1000),
+      action: 'SELL',
+      price: lastPrice
+    })
     shares = 0
   }
 
@@ -143,6 +173,7 @@ function calculateMetrics(actions: number[], closingPrices: number[], initialCap
     winRate,
     sharpeRatio,
     maxDrawdown,
+    signals,
   }
 }
 
@@ -207,7 +238,7 @@ export async function POST(request: NextRequest) {
 
       // Run strategy to get actions
       const actions = strategyInfo.strategy(asset)
-      const metrics = calculateMetrics(actions, asset.closings, initialCapital)
+      const metrics = calculateMetrics(actions, asset.closings, asset.dates, initialCapital)
 
       // Find strategy ID
       const strategyId = Object.entries(STRATEGY_ID_MAP).find(

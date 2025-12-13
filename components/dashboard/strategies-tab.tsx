@@ -15,6 +15,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { demoStrategies, Strategy } from "@/lib/demo-data"
 import { Play, Pause, Settings, TrendingUp, Activity, ChevronDown, ChevronUp, ExternalLink } from "lucide-react"
 
+interface TradeSignal {
+  date: string
+  time: number
+  action: 'BUY' | 'SELL'
+  price: number
+}
+
 interface BacktestResult {
   strategyName: string
   strategyId: string
@@ -27,6 +34,7 @@ interface BacktestResult {
   winRate: number
   sharpeRatio?: number
   maxDrawdown: number
+  signals: TradeSignal[]
 }
 
 export function StrategiesTab() {
@@ -49,6 +57,7 @@ export function StrategiesTab() {
   const [backtestResults, setBacktestResults] = useState<BacktestResult[]>([])
   const [isBacktesting, setIsBacktesting] = useState(false)
   const [backtestError, setBacktestError] = useState<string | null>(null)
+  const [selectedBacktestSignals, setSelectedBacktestSignals] = useState<TradeSignal[]>([])
 
   // Update symbol when URL parameter changes
   useEffect(() => {
@@ -166,6 +175,7 @@ export function StrategiesTab() {
 
     setIsBacktesting(true)
     setBacktestError(null)
+    setSelectedBacktestSignals([])
 
     try {
       const response = await fetch('/api/backtest-technical', {
@@ -249,7 +259,11 @@ export function StrategiesTab() {
           
         {/* QuoteView Section */}
         <div className="mb-6 border rounded-lg overflow-hidden bg-background">
-             <QuoteView symbol={backtestParams.symbol} showBackButton={false} />
+             <QuoteView
+               symbol={backtestParams.symbol}
+               showBackButton={false}
+               tradeSignals={selectedBacktestSignals}
+             />
         </div>
 
           <div>
@@ -312,10 +326,25 @@ export function StrategiesTab() {
               <h3 className="font-semibold mb-4">Backtest Results - {backtestParams.symbol}</h3>
               <div className="text-sm text-muted-foreground mb-4">
                 Period: {backtestParams.startDate} to {backtestParams.endDate} | Initial Capital: ${backtestParams.initialCapital.toLocaleString()}
+                <br />
+                <span className="italic">Click on a strategy below to display buy/sell indicators on the chart above</span>
+                {selectedBacktestSignals.length > 0 && (
+                  <span className="ml-4 text-primary font-medium">
+                    • {selectedBacktestSignals.length} trade signals displayed
+                  </span>
+                )}
               </div>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {backtestResults.map((result, index) => (
-                  <div key={result.strategyId} className="flex items-center justify-between p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
+                  <div
+                    key={result.strategyId}
+                    onClick={() => setSelectedBacktestSignals(result.signals)}
+                    className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer border-2 ${
+                      selectedBacktestSignals === result.signals
+                        ? 'bg-primary/10 border-primary'
+                        : 'bg-muted border-transparent hover:bg-muted/80 hover:border-muted-foreground/20'
+                    }`}
+                  >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <div className="font-medium">{index + 1}. {result.strategyName}</div>

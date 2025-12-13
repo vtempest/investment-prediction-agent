@@ -54,12 +54,20 @@ interface QuoteData {
   }
 }
 
+interface TradeSignal {
+  date: string
+  time: number
+  action: 'BUY' | 'SELL'
+  price: number
+}
+
 interface QuoteViewProps {
   symbol: string
   showBackButton?: boolean
+  tradeSignals?: TradeSignal[]
 }
 
-export function QuoteView({ symbol, showBackButton = true }: QuoteViewProps) {
+export function QuoteView({ symbol, showBackButton = true, tradeSignals = [] }: QuoteViewProps) {
   const router = useRouter()
   const { data: session } = useSession()
   const [data, setData] = useState<QuoteData | null>(null)
@@ -515,6 +523,7 @@ export function QuoteView({ symbol, showBackButton = true }: QuoteViewProps) {
                 data={chartData}
                 symbol={symbol}
                 onRangeChange={handleRangeChange}
+                tradeSignals={tradeSignals}
               />
             )}
           </CardContent>

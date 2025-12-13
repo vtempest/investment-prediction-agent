@@ -20,20 +20,31 @@ interface ChartData {
   volume: number
 }
 
+interface TradeSignal {
+  date: string
+  time: number
+  action: 'BUY' | 'SELL'
+  price: number
+}
+
 interface StockChartProps {
   data: ChartData[]
   symbol: string
   onRangeChange?: (range: string, interval: string) => void
+  tradeSignals?: TradeSignal[]
 }
 
 type IndicatorType = "none" | "rsi" | "macd" | "atr" | "stochastic" | "cci" | "obv"
 type ChartType = "candlestick" | "line" | "area"
 
-export function StockChart({ data, symbol, onRangeChange }: StockChartProps) {
+export function StockChart({ data, symbol, onRangeChange, tradeSignals = [] }: StockChartProps) {
   const [selectedIndicator, setSelectedIndicator] = useState<IndicatorType>("none")
   const [showVolume, setShowVolume] = useState(true)
   const [chartType, setChartType] = useState<ChartType>("candlestick")
   const [selectedRange, setSelectedRange] = useState("1y")
+  const candlestickSeriesRef = useRef<any>(null)
+  const lineSeriesRef = useRef<any>(null)
+  const areaSeriesRef = useRef<any>(null)
 
   if (data.length === 0) {
     return (
@@ -254,6 +265,40 @@ export function StockChart({ data, symbol, onRangeChange }: StockChartProps) {
     }
   }
 
+  // Convert trade signals to markers format
+  const markers = useMemo(() => {
+    if (!tradeSignals || tradeSignals.length === 0) return []
+
+    return tradeSignals.map(signal => ({
+      time: signal.time as any,
+      position: signal.action === 'BUY' ? 'belowBar' : 'aboveBar' as any,
+      color: signal.action === 'BUY' ? '#22c55e' : '#ef4444',
+      shape: signal.action === 'BUY' ? 'arrowUp' : 'arrowDown' as any,
+      text: signal.action,
+    }))
+  }, [tradeSignals])
+
+  // Set markers on the active series
+  useEffect(() => {
+    let activeSeries: any = null
+
+    if (chartType === 'candlestick' && candlestickSeriesRef.current) {
+      activeSeries = candlestickSeriesRef.current
+    } else if (chartType === 'line' && lineSeriesRef.current) {
+      activeSeries = lineSeriesRef.current
+    } else if (chartType === 'area' && areaSeriesRef.current) {
+      activeSeries = areaSeriesRef.current
+    }
+
+    if (activeSeries && markers.length > 0) {
+      try {
+        activeSeries.setMarkers(markers)
+      } catch (error) {
+        console.error('Error setting markers:', error)
+      }
+    }
+  }, [markers, chartType, candlestickSeriesRef.current, lineSeriesRef.current, areaSeriesRef.current])
+
   return (
     <div className="w-full space-y-4">
       {/* Chart Controls - Reorganized Layout */}
@@ -325,10 +370,16 @@ export function StockChart({ data, symbol, onRangeChange }: StockChartProps) {
         {/* Main price pane */}
         <Pane stretchFactor={3}>
           {chartType === "candlestick" && (
-            <CandlestickSeries data={candlestickData} options={candlestickOptions} reactive />
+            <CandlestickSeries
+              ref={candlestickSeriesRef}
+              data={candlestickData}
+              options={candlestickOptions}
+              reactive
+            />
           )}
           {chartType === "line" && (
             <LineSeries
+              ref={lineSeriesRef}
               data={lineData}
               options={{
                 color: "#2196F3",
@@ -339,6 +390,7 @@ export function StockChart({ data, symbol, onRangeChange }: StockChartProps) {
           )}
           {chartType === "area" && (
             <AreaSeries
+              ref={areaSeriesRef}
               data={lineData}
               options={{
                 topColor: "rgba(33, 150, 243, 0.4)",
