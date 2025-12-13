@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TrendingUp, TrendingDown, DollarSign, Hash, Loader2 } from "lucide-react"
 
 interface TradeModalProps {
@@ -31,26 +32,36 @@ export function TradeModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
-  const [portfolio, setPortfolio] = useState<any>(null)
+  const [portfolios, setPortfolios] = useState<any[]>([])
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string>("")
 
-  // Fetch portfolio data
+  // Fetch portfolios data
   useEffect(() => {
     if (open) {
-      fetchPortfolio()
+      fetchPortfolios()
     }
   }, [open])
 
-  const fetchPortfolio = async () => {
+  const fetchPortfolios = async () => {
     try {
-      const res = await fetch('/api/user/portfolio')
+      const res = await fetch('/api/portfolios')
       const json = await res.json()
-      if (json.success && json.data) {
-        setPortfolio(json.data)
+      if (json.portfolios) {
+        setPortfolios(json.portfolios)
+        // Auto-select active portfolio
+        const activePortfolio = json.portfolios.find((p: any) => p.isActive)
+        if (activePortfolio) {
+          setSelectedPortfolio(activePortfolio.id)
+        } else if (json.portfolios.length > 0) {
+          setSelectedPortfolio(json.portfolios[0].id)
+        }
       }
     } catch (err) {
-      console.error('Error fetching portfolio:', err)
+      console.error('Error fetching portfolios:', err)
     }
   }
+
+  const currentPortfolio = portfolios.find((p) => p.id === selectedPortfolio)
 
   const calculateShares = () => {
     if (orderType === "shares") {
@@ -76,6 +87,11 @@ export function TradeModal({
     setError("")
     setSuccess(false)
 
+    if (!selectedPortfolio) {
+      setError("Please select a portfolio")
+      return
+    }
+
     const shares = calculateShares()
     const total = calculateTotal()
 
@@ -84,24 +100,26 @@ export function TradeModal({
       return
     }
 
-    if (action === "buy" && portfolio && total > portfolio.cash) {
-      setError(`Insufficient funds. Available: $${portfolio.cash.toLocaleString()}`)
+    if (action === "buy" && currentPortfolio && total > currentPortfolio.cash) {
+      setError(`Insufficient funds. Available: $${currentPortfolio.cash.toLocaleString()}`)
       return
     }
 
     setLoading(true)
 
     try {
-      const res = await fetch('/api/user/trades', {
+      const res = await fetch('/api/paper-trading/trade', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          portfolioId: selectedPortfolio,
           symbol: symbol.toUpperCase(),
-          action,
-          shares,
+          action: action === "buy" ? "buy" : "sell",
+          quantity: shares,
           price: currentPrice,
+          type: "market",
         }),
       })
 
@@ -110,8 +128,8 @@ export function TradeModal({
       if (json.success) {
         setSuccess(true)
         setAmount("")
-        // Refresh portfolio
-        await fetchPortfolio()
+        // Refresh portfolios
+        await fetchPortfolios()
         setTimeout(() => {
           onOpenChange(false)
           setSuccess(false)
@@ -150,6 +168,23 @@ export function TradeModal({
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
+          {/* Portfolio Selection */}
+          <div className="space-y-2">
+            <Label>Portfolio</Label>
+            <Select value={selectedPortfolio} onValueChange={setSelectedPortfolio}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select portfolio" />
+              </SelectTrigger>
+              <SelectContent>
+                {portfolios.map((portfolio) => (
+                  <SelectItem key={portfolio.id} value={portfolio.id}>
+                    {portfolio.name} - ${portfolio.cash.toLocaleString()} cash
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Buy/Short Tabs */}
           <Tabs value={action} onValueChange={(v) => setAction(v as "buy" | "short")}>
             <TabsList className="grid w-full grid-cols-2">
@@ -241,12 +276,18 @@ export function TradeModal({
           )}
 
           {/* Portfolio Info */}
-          {portfolio && (
+          {currentPortfolio && (
             <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-md border border-blue-200 dark:border-blue-800">
               <div className="flex justify-between text-sm">
                 <span className="text-blue-800 dark:text-blue-200">Available Cash:</span>
                 <span className="font-bold text-blue-800 dark:text-blue-200">
-                  {formatCurrency(portfolio.cash)}
+                  {formatCurrency(currentPortfolio.cash)}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-blue-800 dark:text-blue-200">Total Equity:</span>
+                <span className="font-bold text-blue-800 dark:text-blue-200">
+                  {formatCurrency(currentPortfolio.totalEquity)}
                 </span>
               </div>
             </div>

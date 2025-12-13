@@ -101,10 +101,16 @@ export const userSettings = sqliteTable("user_settings", {
 export const strategies = sqliteTable("strategies", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  portfolioId: text("portfolio_id").references(() => portfolios.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  type: text("type").notNull(), // momentum, mean-reversion, breakout, day-scalp
-  status: text("status").notNull().default("paused"), // running, paused, paper
+  type: text("type").notNull(), // momentum, mean-reversion, breakout, day-scalp, technical, llm-agent
+  status: text("status").notNull().default("paused"), // running, paused, paper, auto
   riskLevel: text("risk_level").notNull().default("medium"),
+
+  // Auto-Trading Settings
+  autoExecute: integer("auto_execute", { mode: "boolean" }).default(false),
+  autoExecuteSignalThreshold: real("auto_execute_signal_threshold").default(0.7), // Min signal score to execute
+  autoExecutePositionSize: real("auto_execute_position_size").default(0.1), // % of portfolio per trade
 
   // Performance metrics
   todayPnL: real("today_pnl").default(0),
@@ -164,12 +170,13 @@ export const signals = sqliteTable("signals", {
 export const positions = sqliteTable("positions", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  portfolioId: text("portfolio_id").references(() => portfolios.id, { onDelete: "cascade" }),
   asset: text("asset").notNull(),
   type: text("type").notNull(), // stock, prediction_market
 
   entryPrice: real("entry_price").notNull(),
   currentPrice: real("current_price").notNull(),
-  size: real("size").notNull(),
+  size: real("size").notNull(), // Supports fractional shares
 
   unrealizedPnL: real("unrealized_pnl").default(0),
   unrealizedPnLPercent: real("unrealized_pnl_percent").default(0),
@@ -187,16 +194,19 @@ export const positions = sqliteTable("positions", {
 export const trades = sqliteTable("trades", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  portfolioId: text("portfolio_id").references(() => portfolios.id, { onDelete: "cascade" }),
   asset: text("asset").notNull(),
   type: text("type").notNull(), // stock, prediction_market
   action: text("action").notNull(), // buy, sell
 
   price: real("price").notNull(),
-  size: real("size").notNull(),
+  size: real("size").notNull(), // Supports fractional shares
+  totalValue: real("total_value"), // price * size
   pnl: real("pnl"),
 
   strategy: text("strategy"),
   copiedFrom: text("copied_from"),
+  autoTraded: integer("auto_traded", { mode: "boolean" }).default(false), // Whether trade was auto-executed
 
   timestamp: integer("timestamp", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
@@ -205,19 +215,48 @@ export const trades = sqliteTable("trades", {
 // Portfolio Summary
 export const portfolios = sqliteTable("portfolios", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
 
+  // Portfolio Configuration
+  name: text("name").notNull().default("Main Portfolio"),
+  type: text("type").notNull().default("paper"), // paper, alpaca, webull, robinhood, ibkr, tda
+  isActive: integer("is_active", { mode: "boolean" }).default(true), // Currently selected portfolio
+
+  // Broker Linking
+  brokerAccountId: text("broker_account_id"), // External broker account ID
+  linkedBroker: text("linked_broker"), // alpaca, webull, robinhood, ibkr, tda
+
+  // Time Travel Configuration
+  timeTravelEnabled: integer("time_travel_enabled", { mode: "boolean" }).default(false),
+  simulationDate: integer("simulation_date", { mode: "timestamp" }), // Current date in simulation (null = real-time)
+  startDate: integer("start_date", { mode: "timestamp" }).notNull(), // Portfolio creation/reset date
+
+  // Auto-Trading Configuration
+  autoTradingEnabled: integer("auto_trading_enabled", { mode: "boolean" }).default(false),
+  autoTradingStrategies: text("auto_trading_strategies"), // JSON array of strategy IDs to auto-execute
+  autoTradingRiskLimit: real("auto_trading_risk_limit").default(0.02), // Max % of portfolio per auto-trade
+  autoTradingMaxDaily: integer("auto_trading_max_daily").default(10), // Max auto-trades per day
+
+  // Initial Conditions
+  initialBalance: real("initial_balance").default(100000),
+
+  // Current State
   totalEquity: real("total_equity").default(100000),
   cash: real("cash").default(100000),
   stocks: real("stocks").default(0),
   predictionMarkets: real("prediction_markets").default(0),
   margin: real("margin").default(0),
 
+  // Performance Metrics
   dailyPnL: real("daily_pnl").default(0),
   dailyPnLPercent: real("daily_pnl_percent").default(0),
+  totalPnL: real("total_pnl").default(0),
+  totalPnLPercent: real("total_pnl_percent").default(0),
   winRate: real("win_rate").default(0),
   openPositions: integer("open_positions").default(0),
+  totalTrades: integer("total_trades").default(0),
 
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
 
