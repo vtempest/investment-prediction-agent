@@ -12,6 +12,7 @@ import { OptionsAdvisor } from "@/components/dashboard/options-advisor"
 import { PredictionMarketsTab } from "@/components/dashboard/prediction-markets-tab"
 import { CopyTradingTab } from "@/components/dashboard/copy-trading-tab"
 import { RiskPortfolioTab } from "@/components/dashboard/risk-portfolio-tab"
+import { OrdersTab } from "@/components/dashboard/orders-tab"
 
 import { AlpacaTradingTab } from "@/components/dashboard/alpaca-trading-tab"
 import { MarketScanner } from "@/components/dashboard/market-scanner"
@@ -150,6 +151,9 @@ function DashboardContent() {
           <StrategiesTab />
         </TabsContent>
 
+        <TabsContent value="options-advisor" className="space-y-6 mt-6">
+          <OptionsAdvisor />
+        </TabsContent>
 
         <TabsContent value="prediction-markets" className="space-y-6 mt-6">
           <PredictionMarketsTab />
@@ -161,6 +165,10 @@ function DashboardContent() {
 
         <TabsContent value="risk" className="space-y-6 mt-6">
           <RiskPortfolioTab />
+        </TabsContent>
+
+        <TabsContent value="orders" className="space-y-6 mt-6">
+          <OrdersTab />
         </TabsContent>
       </Tabs>
     </div>

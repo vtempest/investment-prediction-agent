@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, TrendingDown, DollarSign, Hash, Loader2, Brain } from "lucide-react"
+import { TrendingUp, DollarSign, Hash, Loader2, Brain } from "lucide-react"
 import { OptionsAdvisor } from "@/components/dashboard/options-advisor"
 
 interface TradeModalProps {
@@ -26,7 +26,7 @@ export function TradeModal({
   currentPrice,
   stockName,
 }: TradeModalProps) {
-  const [action, setAction] = useState<"buy" | "short" | "options">("buy")
+  const [action, setAction] = useState<"buy" | "options">("buy")
   const [orderType, setOrderType] = useState<"shares" | "dollars">("shares")
   const [amount, setAmount] = useState("")
   const [loading, setLoading] = useState(false)
@@ -158,14 +158,10 @@ export function TradeModal({
         <div className="space-y-6 mt-4">
           {/* Tabs */}
           <Tabs value={action} onValueChange={(v) => setAction(v as any)}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="buy" className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Buy
-              </TabsTrigger>
-              <TabsTrigger value="short" className="flex items-center gap-2">
-                <TrendingDown className="h-4 w-4" />
-                Short
               </TabsTrigger>
               <TabsTrigger value="options" className="flex items-center gap-2">
                 <Brain className="h-4 w-4" />
@@ -289,114 +285,6 @@ export function TradeModal({
                     </Button>
                   </div>
               </div>
-            </TabsContent>
-
-            <TabsContent value="short" className="space-y-4 mt-4">
-              <div className="p-3 bg-red-50 dark:bg-red-950 rounded-md border border-red-200 dark:border-red-800">
-                <p className="text-sm text-red-800 dark:text-red-200">
-                  Short sell shares and profit when the price goes down
-                </p>
-              </div>
-
-               {/* Short Form Content (Reused logic) */}
-               <div className="space-y-4">
-                 <div className="space-y-3">
-                    <Label>Order Type</Label>
-                    <RadioGroup value={orderType} onValueChange={(v) => setOrderType(v as "shares" | "dollars")}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="shares" id="shares-short" />
-                        <Label htmlFor="shares-short" className="flex items-center gap-2 cursor-pointer">
-                          <Hash className="h-4 w-4" />
-                          Number of Shares
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="dollars" id="dollars-short" />
-                        <Label htmlFor="dollars-short" className="flex items-center gap-2 cursor-pointer">
-                          <DollarSign className="h-4 w-4" />
-                          Dollar Amount
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="amount-short">
-                      {orderType === "shares" ? "Number of Shares" : "Dollar Amount"}
-                    </Label>
-                    <Input
-                      id="amount-short"
-                      type="number"
-                      step={orderType === "shares" ? "0.001" : "0.01"}
-                      min="0"
-                      placeholder={orderType === "shares" ? "e.g., 10 or 0.5" : "e.g., 1000"}
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {orderType === "shares" ? "Fractional shares supported" : "Minimum $1"}
-                    </p>
-                  </div>
-
-                  {amount && parseFloat(amount) > 0 && (
-                    <div className="p-4 bg-muted rounded-lg space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Shares:</span>
-                        <span className="font-medium">
-                          {calculateShares().toFixed(6)} {symbol}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Price per Share:</span>
-                        <span className="font-medium">{formatCurrency(currentPrice)}</span>
-                      </div>
-                      <div className="border-t pt-2 flex justify-between">
-                        <span className="font-semibold">Total:</span>
-                        <span className="font-bold text-lg">{formatCurrency(calculateTotal())}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {error && (
-                    <div className="p-3 bg-red-50 dark:bg-red-950 rounded-md border border-red-200 dark:border-red-800">
-                      <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-                    </div>
-                  )}
-
-                  {success && (
-                    <div className="p-3 bg-green-50 dark:bg-green-950 rounded-md border border-green-200 dark:border-green-800">
-                      <p className="text-sm text-green-800 dark:text-green-200">
-                        Trade executed successfully!
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => onOpenChange(false)}
-                      disabled={loading}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      className="flex-1"
-                      onClick={handleSubmit}
-                      disabled={loading || !amount || parseFloat(amount) <= 0}
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        "Short " + symbol
-                      )}
-                    </Button>
-                  </div>
-               </div>
             </TabsContent>
 
             <TabsContent value="options" className="space-y-4 mt-4">
