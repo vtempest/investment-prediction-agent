@@ -100,17 +100,17 @@ const topTraders = [
     badge: "sharp",
     type: "trader",
   },
-  {
-    rank: 10,
-    name: "Nancy Pelosi",
-    pnl: 12847293,
-    winRate: 78.4,
-    activePositions: 67,
-    currentValue: 4340000,
-    specialty: "Tech & Finance",
-    badge: "senate",
-    type: "politician",
-  },
+  // {
+  //   rank: 10,
+  //   name: "Nancy Pelosi",
+  //   pnl: 12847293,
+  //   winRate: 78.4,
+  //   activePositions: 67,
+  //   currentValue: 4340000,
+  //   specialty: "Tech & Finance",
+  //   badge: "senate",
+  //   type: "politician",
+  // },
 ]
 
 const platforms = [

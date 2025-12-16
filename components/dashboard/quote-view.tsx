@@ -10,9 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Loader2, TrendingUp, TrendingDown, DollarSign, Activity, BarChart3, Star } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "@/lib/auth-client"
-import { ReactGrid, Column, Row } from "@silevis/reactgrid"
-import "@silevis/reactgrid/styles.css"
-import { StockChart } from "@/components/dashboard/stock-chart"
+import { DynamicStockChart } from "@/components/dashboard/dynamic-stock-chart"
 import { TradeModal } from "@/components/dashboard/trade-modal"
 
 interface QuoteData {
@@ -79,10 +77,6 @@ export function QuoteView({ symbol, showBackButton = true, tradeSignals = [] }: 
   const [data, setData] = useState<QuoteData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [chartData, setChartData] = useState<any[]>([])
-  const [chartLoading, setChartLoading] = useState(true)
-  const [chartRange, setChartRange] = useState("1y")
-  const [chartInterval, setChartInterval] = useState("1d")
   const [isInWatchlist, setIsInWatchlist] = useState(false)
   const [watchlistLoading, setWatchlistLoading] = useState(false)
   const [tradeModalOpen, setTradeModalOpen] = useState(false)
@@ -132,40 +126,6 @@ export function QuoteView({ symbol, showBackButton = true, tradeSignals = [] }: 
     fetchQuote()
   }, [symbol])
 
-  useEffect(() => {
-    if (!symbol) return
-
-    const fetchChart = async () => {
-      try {
-        setChartLoading(true)
-        const res = await fetch(`/api/stocks/chart/${symbol}?range=${chartRange}&interval=${chartInterval}`)
-        const json = await res.json()
-
-        if (json.success && json.data) {
-          // Handle both possible response structures
-          const quotes = json.data.quotes || json.data
-          if (Array.isArray(quotes)) {
-            setChartData(quotes.map((item: any) => ({
-               date: item.date,
-               open: Number(item.open),
-               high: Number(item.high),
-               low: Number(item.low),
-               close: Number(item.close),
-               volume: Number(item.volume),
-               // Format date for display (for ReactGrid)
-               dateStr: new Date(item.date).toLocaleDateString(),
-            })))
-          }
-        }
-      } catch (err) {
-        console.error("Chart fetch error:", err)
-      } finally {
-        setChartLoading(false)
-      }
-    }
-
-    fetchChart()
-  }, [symbol, chartRange, chartInterval])
 
   // New state for performance metrics
   const [performance, setPerformance] = useState<{
@@ -243,11 +203,6 @@ export function QuoteView({ symbol, showBackButton = true, tradeSignals = [] }: 
     fetchPerformanceData()
   }, [symbol])
 
-  const handleRangeChange = (range: string, interval: string) => {
-    setChartRange(range)
-    setChartInterval(interval)
-  }
-
   const toggleWatchlist = async () => {
     if (!session?.user) {
       alert('Please sign in to add to watchlist')
@@ -316,45 +271,6 @@ export function QuoteView({ symbol, showBackButton = true, tradeSignals = [] }: 
       maximumFractionDigits: 0
     }).format(num)
   }
-
-  // ReactGrid generic columns setup
-  const getColumns = (): Column[] => [
-    { columnId: "date", width: 120 },
-    { columnId: "open", width: 100 },
-    { columnId: "high", width: 100 },
-    { columnId: "low", width: 100 },
-    { columnId: "close", width: 100 },
-    { columnId: "volume", width: 120 }
-  ];
-
-  const headerRow: Row = {
-    rowId: "header",
-    cells: [
-      { type: "header", text: "Date" },
-      { type: "header", text: "Open" },
-      { type: "header", text: "High" },
-      { type: "header", text: "Low" },
-      { type: "header", text: "Close" },
-      { type: "header", text: "Volume" }
-    ]
-  };
-
-  const getRows = (data: any[]): Row[] => {
-    return [
-      headerRow,
-      ...data.slice(0, 50).map<Row>((item, idx) => ({
-        rowId: idx,
-        cells: [
-          { type: "text", text: item.dateStr },
-          { type: "number", value: item.open, format: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }) },
-          { type: "number", value: item.high, format: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }) },
-          { type: "number", value: item.low, format: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }) },
-          { type: "number", value: item.close, format: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }) },
-          { type: "number", value: item.volume }
-        ]
-      }))
-    ];
-  };
 
   if (loading) {
     return (
@@ -517,23 +433,12 @@ export function QuoteView({ symbol, showBackButton = true, tradeSignals = [] }: 
          
         </div>
 
-        {/* Price Chart (Lightweight Charts) */}
-        <Card>
-          <CardContent>
-            {chartLoading ? (
-              <div className="h-[400px] flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <StockChart
-                data={chartData}
-                symbol={symbol}
-                onRangeChange={handleRangeChange}
-                tradeSignals={tradeSignals}
-              />
-            )}
-          </CardContent>
-        </Card>
+        {/* Price Chart with Lazy Loading */}
+        <DynamicStockChart
+          symbol={symbol}
+          initialRange="1y"
+          interval="1d"
+        />
 
         {/* Key Stats Grid */}
         

@@ -6,6 +6,7 @@ import { authClient, useSession } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { Loader2, Wallet } from "lucide-react"
 import { BrowserProvider } from "ethers"
+import { SiweMessage } from "siwe"
 
 export function MetaMaskSignIn() {
   const { data: session } = useSession()
@@ -38,53 +39,56 @@ export function MetaMaskSignIn() {
       // Request wallet connection
       const provider = new BrowserProvider(window.ethereum)
       const signer = await provider.getSigner()
-      const walletAddress = await signer.getAddress()
-      const chainId = Number((await provider.getNetwork()).chainId)
+      const address = await signer.getAddress()
+      const network = await provider.getNetwork()
+      const chainId = Number(network.chainId)
 
       // Step 1: Get nonce from backend
-      const nonceResponse = await fetch("/api/auth/siwe/nonce", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: walletAddress, chainId }),
+      const nonceResponse = await (authClient as any).siwe.nonce({
+        walletAddress: address,
+        chainId: chainId,
       })
 
-      if (!nonceResponse.ok) {
-        throw new Error("Failed to get nonce")
+      if (nonceResponse.error || !nonceResponse.data?.nonce) {
+        console.error("Failed to get nonce:", nonceResponse.error)
+        throw new Error("Failed to generate nonce")
       }
 
-      const { nonce } = await nonceResponse.json()
+      const nonce = nonceResponse.data.nonce
 
-      // Step 2: Create SIWE message
-      const domain = window.location.hostname
-      const origin = window.location.origin
-      const message = `${domain} wants you to sign in with your Ethereum account:
-${walletAddress}
-
-Sign in with Ethereum to authenticate.
-
-URI: ${origin}
-Version: 1
-Chain ID: ${chainId}
-Nonce: ${nonce}
-Issued At: ${new Date().toISOString()}`
-
-      // Step 3: Sign message with MetaMask
-      const signature = await signer.signMessage(message)
-
-      // Step 4: Verify signature on backend
-      const verifyResponse = await authClient.siwe.verify({
-        message,
-        signature,
-        address: walletAddress,
+      // Step 2: Create SIWE message using the siwe library
+      const message = new SiweMessage({
+        domain: window.location.host,
+        address,
+        statement: "Sign in with Ethereum to the app.",
+        uri: window.location.origin,
+        version: "1",
         chainId,
+        nonce,
       })
 
-      if (verifyResponse.error) {
-        throw new Error(verifyResponse.error.message || "Verification failed")
+      const preparedMessage = message.prepareMessage()
+
+      // Step 3: Sign message with MetaMask
+      const signature = await signer.signMessage(preparedMessage)
+
+      // Step 4: Verify signature on backend
+      const { data, error: verifyError } = await (authClient as any).siwe.verify({
+        message: preparedMessage,
+        signature,
+        walletAddress: address,
+        chainId: chainId,
+      })
+
+      if (verifyError) {
+        throw new Error(verifyError.message || "Verification failed")
       }
 
       // Success - redirect to dashboard
-      router.push("/dashboard")
+      if (data) {
+        router.refresh()
+        router.push("/dashboard")
+      }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error"

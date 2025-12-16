@@ -1,6 +1,4 @@
 "use server"
-
-//Docs: https://www.better-auth.com/docs/plugins/stripe
 import { auth } from "@/lib/auth"
 import type { Subscription } from "@better-auth/stripe"
 import { headers } from "next/headers"
@@ -29,9 +27,9 @@ export async function getActiveSubscription(): Promise<{
         const activeSub =
             activeSubs.length > 1
                 ? activeSubs.find(
-                      (sub) =>
-                          sub.status === "active" || sub.status === "trialing"
-                  )
+                    (sub) =>
+                        sub.status === "active" || sub.status === "trialing"
+                )
                 : activeSubs[0]
         return {
             subscription: activeSub ?? null,

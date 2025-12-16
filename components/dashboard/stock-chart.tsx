@@ -30,6 +30,7 @@ interface StockChartProps {
   symbol: string
   onRangeChange?: (range: string, interval: string) => void
   tradeSignals?: TradeSignal[]
+  onLoadMoreData?: (fromDate: string, toDate: string) => Promise<ChartData[]>
 }
 
 type ChartType = "candlestick" | "line" | "area"

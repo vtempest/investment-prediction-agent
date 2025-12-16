@@ -1,5 +1,6 @@
 ---
 title: Algorithmic Strategies
+icon: Bot
 ---
 
 # 📊 Complete Technical Indicators & Trading Strategies Guide

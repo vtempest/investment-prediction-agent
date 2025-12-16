@@ -6,6 +6,19 @@ import * as schema from "./db/schema";
 import { randomBytes } from "crypto";
 import { verifyMessage } from "ethers";
 
+import { stripe } from "@better-auth/stripe"
+import Stripe from "stripe"
+import { plans, type Plan } from "./payments/plans";
+import { headers } from "next/headers";
+
+const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  typescript: true
+})
+
+
+// https://buy.stripe.com/5kQfZgcMng3a6Xebelcs800
+// 
+
 export const auth = betterAuth({
   baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   // basePath: "/api/auth", // better-auth defaults to this, but keeping it explicit if user wants
@@ -27,24 +40,18 @@ export const auth = betterAuth({
   },
   plugins: [
     siwe({
+      // Enable anonymous mode so email is not required
+      // Users can sign in with just their Ethereum wallet
+      anonymous: true,
       domain: process.env.NEXT_PUBLIC_APP_DOMAIN || "localhost:3000",
-      anonymous: false, // Require email for non-anonymous users
       getNonce: async () => {
         // Generate a cryptographically secure random nonce
         return randomBytes(32).toString("hex");
       },
-      verifyMessage: async ({ message, signature, chainId }) => {
+      verifyMessage: async ({ message, signature }) => {
         try {
-          // Verify the signed SIWE message
+          // Verify the signed SIWE message using ethers
           const recovered = verifyMessage(message, signature);
-          
-          // Additional validation: check chainId if needed
-          if (chainId && chainId !== 1 && chainId !== 11155111 && chainId !== 31337) {
-            // Only allow Ethereum mainnet (1), Sepolia testnet (11155111), or localhost
-            console.warn(`Unsupported chain ID: ${chainId}`)
-            // return false; 
-          }
-
           return !!recovered;
         } catch (error) {
           console.error("Message verification failed:", error);
@@ -52,6 +59,40 @@ export const auth = betterAuth({
         }
       },
     }),
+
+    stripe({
+      stripeClient,
+      stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+      createCustomerOnSignUp: true,
+      subscription: {
+        enabled: true,
+        plans: plans,
+        getCheckoutSessionParams: async ({ user, plan }) => {
+          const checkoutSession: {
+            params: {
+              subscription_data?: {
+                trial_period_days: number
+              }
+            }
+          } = {
+            params: {}
+          }
+
+          if (user.trialAllowed) {
+            checkoutSession.params.subscription_data = {
+              trial_period_days: (plan as Plan).trialDays
+            }
+          }
+
+          return checkoutSession
+        },
+        onSubscriptionComplete: async ({ event }) => {
+          const eventDataObject = event.data.object as Stripe.Checkout.Session
+          // const userId = eventDataObject.metadata?.userId // Example usage
+        }
+      }
+    })
+
   ],
   emailAndPassword: {
     enabled: true,
@@ -69,3 +110,12 @@ export const auth = betterAuth({
 export type Session = typeof auth.$Infer.Session.session
 export type User = typeof auth.$Infer.Session.user
 
+
+
+export async function getActiveSubscription() {
+  const nextHeaders = await headers()
+  const subscriptions = await auth.api.listActiveSubscriptions({
+    headers: nextHeaders
+  })
+  return subscriptions.find((s) => s.status === "active")
+}

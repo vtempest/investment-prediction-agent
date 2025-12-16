@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function TermsPage({ params }: { params: { lang: string } }) {
   return (
-    <main className="max-w-[800px] mx-auto p-5 pb-12 mb-12 font-sans text-gray-800 leading-relaxed font-[Lato]">
+    <main className="max-w-[800px] mx-auto p-8 pb-12 mb-12 mt-8 font-sans text-gray-800 leading-relaxed font-[Lato] bg-white rounded-xl shadow-sm border">
       <div className="mb-8 pt-4">
         <Link
           href="/"

@@ -22,6 +22,7 @@ interface TechnicalChartProps {
     areaBottomColor?: string
   }
   onVisibleRangeChange?: (range: { from: number; to: number }) => void
+  onChartReady?: (chart: IChartApi, series: any) => void
   symbol?: string
 }
 
@@ -30,6 +31,7 @@ export function TechnicalChart({
   title = "Price Chart",
   colors = {},
   onVisibleRangeChange,
+  onChartReady,
   symbol
 }: TechnicalChartProps) {
   const {
@@ -38,6 +40,7 @@ export function TechnicalChart({
   } = colors
 
   const chartRef = useRef<IChartApi | null>(null)
+  const seriesRef = useRef<any>(null)
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Transform data to ensure it matches specific series requirements
@@ -103,6 +106,13 @@ export function TechnicalChart({
     }
   }, [onVisibleRangeChange, validData])
 
+  // Notify parent when chart and series are ready
+  useEffect(() => {
+    if (chartRef.current && seriesRef.current && onChartReady) {
+      onChartReady(chartRef.current, seriesRef.current)
+    }
+  }, [onChartReady])
+
   return (
     <div className="w-full relative h-[300px]">
        {title && <div className="absolute top-2 left-2 z-10 text-sm font-medium text-muted-foreground">{title}</div>}
@@ -134,6 +144,9 @@ export function TechnicalChart({
           }}
         >
           <CandlestickSeries
+            ref={(ref: any) => {
+              seriesRef.current = ref
+            }}
             data={validData}
             options={{
               upColor: '#26a69a',

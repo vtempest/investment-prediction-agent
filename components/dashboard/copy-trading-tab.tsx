@@ -56,10 +56,10 @@ export function CopyTradingTab() {
               <TabsTrigger value="polymarket">Polymarket</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSync} 
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSync}
             disabled={syncing}
           >
             {syncing ? (
@@ -162,7 +162,7 @@ export function CopyTradingTab() {
                           <div>
                             <h3 className="font-semibold mb-2">Trading Markets</h3>
                             <div className="flex gap-2 flex-wrap">
-                                {trader.markets?.map((market: any, i: number) => (
+                              {trader.markets?.map((market: any, i: number) => (
                                 <Badge key={i} variant="secondary">{market}</Badge>
                               ))}
                             </div>
@@ -231,23 +231,7 @@ export function CopyTradingTab() {
 
       <Card className="p-6">
         <h3 className="text-xl font-bold mb-4">Active Copy Trading</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <div className="font-semibold">Nancy Pelosi</div>
-              <div className="text-sm text-muted-foreground">Copying since Nov 15, 2024</div>
-            </div>
-            <div className="text-right">
-              <div className="font-semibold text-green-500">+$4,280</div>
-              <div className="text-xs text-muted-foreground">+12.8% return</div>
-            </div>
-            <Button variant="destructive" size="sm">Stop Copying</Button>
-          </div>
-
-          <div className="p-8 text-center text-muted-foreground">
-            <p>Configure and start copying more traders above</p>
-          </div>
-        </div>
+        <div className="space-y-3"></div>
       </Card>
     </div>
   )

@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { ExternalLink, Eye, EyeOff, Save, Moon, Sun, Monitor, Copy, RefreshCw } from "lucide-react";
 import { TeamsManager } from "@/components/settings/teams-manager";
+import { PremiumUpgrade } from "@/components/settings/premium-upgrade";
 
 const LLM_PROVIDERS = [
   {
@@ -158,7 +159,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
-  const{ theme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
@@ -262,6 +263,10 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-12">
+        <section id="premium-upgrade">
+          <PremiumUpgrade />
+        </section>
+
         {/* API Key Section */}
         <section id="api-key" className="scroll-mt-20">
           <Card>
@@ -340,9 +345,8 @@ export default function SettingsPage() {
               <div className="grid grid-cols-3 gap-4">
                 <button
                   onClick={() => setTheme("light")}
-                  className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${
-                    theme === "light" ? "border-primary" : "border-muted"
-                  }`}
+                  className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${theme === "light" ? "border-primary" : "border-muted"
+                    }`}
                 >
                   <Sun className="h-8 w-8" />
                   <span className="font-medium">Light</span>
@@ -353,9 +357,8 @@ export default function SettingsPage() {
 
                 <button
                   onClick={() => setTheme("dark")}
-                  className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${
-                    theme === "dark" ? "border-primary" : "border-muted"
-                  }`}
+                  className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${theme === "dark" ? "border-primary" : "border-muted"
+                    }`}
                 >
                   <Moon className="h-8 w-8" />
                   <span className="font-medium">Dark</span>
@@ -366,9 +369,8 @@ export default function SettingsPage() {
 
                 <button
                   onClick={() => setTheme("system")}
-                  className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${
-                    theme === "system" ? "border-primary" : "border-muted"
-                  }`}
+                  className={`relative flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-colors hover:bg-accent ${theme === "system" ? "border-primary" : "border-muted"
+                    }`}
                 >
                   <Monitor className="h-8 w-8" />
                   <span className="font-medium">System</span>
@@ -620,7 +622,7 @@ export default function SettingsPage() {
 
         {/* Teams Section */}
         <section id="teams" className="scroll-mt-20">
-             <TeamsManager />
+          <TeamsManager />
         </section>
       </div>
     </div>

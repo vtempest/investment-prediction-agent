@@ -32,14 +32,18 @@ export function SiweSignIn() {
       const chainId = Number(network.chainId)
 
       // 1. Get Nonce from backend
-      // Using direct client method which corresponds to the 'getNonce' config in auth.ts
-      const nonce = await (authClient as any).siwe.generateNonce()
-      
-      if (!nonce) {
+      const nonceResponse = await (authClient as any).siwe.nonce({
+        walletAddress: address,
+        chainId: chainId,
+      })
+
+      if (nonceResponse.error || !nonceResponse.data?.nonce) {
+        console.error("Failed to get nonce:", nonceResponse.error)
         throw new Error("Failed to generate nonce")
       }
 
-      console.log("SIWE Debug (Raw Nonce):", nonce, "Type:", typeof nonce)
+      const nonce = nonceResponse.data.nonce
+
       console.log("SIWE Debug:", { domain: window.location.host, address, uri: window.location.origin, chainId, nonce })
 
       // 2. Create SIWE Message
@@ -60,10 +64,11 @@ export function SiweSignIn() {
       const signature = await signer.signMessage(preparedMessage)
 
       // 4. Verify Signature & Create Session
-      // Using verify() which hits the correct better-auth endpoint
       const { data, error } = await (authClient as any).siwe.verify({
         message: preparedMessage,
         signature,
+        walletAddress: address,
+        chainId: chainId,
       })
 
       if (error) {
