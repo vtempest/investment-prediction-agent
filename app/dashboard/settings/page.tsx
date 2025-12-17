@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ExternalLink, Eye, EyeOff, Save, Moon, Sun, Monitor, Copy, RefreshCw } from "lucide-react";
+import { ExternalLink, Eye, EyeOff, Save, Moon, Sun, Monitor, Copy, RefreshCw, Key, Palette, Brain, TrendingUp, Database, Users } from "lucide-react";
 import { TeamsManager } from "@/components/settings/teams-manager";
 import { PremiumUpgrade } from "@/components/settings/premium-upgrade";
 
@@ -286,7 +287,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-12 pb-24">
+    <div className="mx-auto max-w-5xl space-y-6 pb-24">
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 border-b">
         <div className="flex justify-between items-center">
           <div>
@@ -300,13 +301,34 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="space-y-12">
-        <section id="premium-upgrade">
-          <PremiumUpgrade />
-        </section>
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-flex">
+          <TabsTrigger value="general" className="flex items-center gap-2">
+            <Key className="h-4 w-4" />
+            <span className="hidden sm:inline">General</span>
+          </TabsTrigger>
+          <TabsTrigger value="llm" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            <span className="hidden sm:inline">LLM</span>
+          </TabsTrigger>
+          <TabsTrigger value="brokers" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            <span className="hidden sm:inline">Brokers</span>
+          </TabsTrigger>
+          <TabsTrigger value="data" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            <span className="hidden sm:inline">Data</span>
+          </TabsTrigger>
+          <TabsTrigger value="teams" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">Teams</span>
+          </TabsTrigger>
+        </TabsList>
 
-        {/* API Key Section */}
-        <section id="api-key" className="scroll-mt-20">
+        <TabsContent value="general" className="space-y-6 mt-6">
+          <PremiumUpgrade />
+
+          {/* API Key Section */}
           <Card>
             <CardHeader>
               <CardTitle>API Key</CardTitle>
@@ -368,10 +390,8 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
-        </section>
 
-        {/* Appearance Section */}
-        <section id="appearance" className="scroll-mt-20">
+          {/* Appearance Section */}
           <Card>
             <CardHeader>
               <CardTitle>Theme</CardTitle>
@@ -444,11 +464,10 @@ export default function SettingsPage() {
               </p>
             </CardContent>
           </Card>
-        </section>
+        </TabsContent>
 
-        {/* LLM Providers Section */}
-        <section id="llm" className="scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-4">LLM Providers</h2>
+        {/* LLM Providers Tab */}
+        <TabsContent value="llm" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
               <CardTitle>LLM API Keys</CardTitle>
@@ -542,11 +561,10 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
-        </section>
+        </TabsContent>
 
-        {/* Brokers Section */}
-        <section id="brokers" className="scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-4">Brokers</h2>
+        {/* Brokers Tab */}
+        <TabsContent value="brokers" className="space-y-6 mt-6">
           <div className="grid gap-6">
             {BROKERS.map((broker) => (
               <Card key={broker.name}>
@@ -620,11 +638,10 @@ export default function SettingsPage() {
               </Card>
             ))}
           </div>
-        </section>
+        </TabsContent>
 
-        {/* Data Providers Section */}
-        <section id="data" className="scroll-mt-20">
-          <h2 className="text-2xl font-bold mb-4">Data Providers</h2>
+        {/* Data Providers Tab */}
+        <TabsContent value="data" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Data Provider API Keys</CardTitle>
@@ -676,13 +693,13 @@ export default function SettingsPage() {
               ))}
             </CardContent>
           </Card>
-        </section>
+        </TabsContent>
 
-        {/* Teams Section */}
-        <section id="teams" className="scroll-mt-20">
+        {/* Teams Tab */}
+        <TabsContent value="teams" className="space-y-6 mt-6">
           <TeamsManager />
-        </section>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
