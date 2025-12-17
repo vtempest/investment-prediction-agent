@@ -160,10 +160,27 @@ export function Header() {
               Algo Strategies
             </Link>
 
+            <Link
+              href="/api/docs"
+              className={navLinkClasses}
+            >
+              <Sparkles className="h-4 w-4" />
+              API
+            </Link>
 
-            <div className="pt-2">
-              <Button size="sm" className="w-full" asChild>
-                <Link href="/survey" target="_blank">
+            <div className="pt-4 space-y-2">
+              <Link href="/login" className="block">
+                <button className="relative inline-flex h-12 w-full overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-green-600 dark:bg-green-700 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl space-x-2">
+                    <LogIn className="h-5 w-5" />
+                    <span>Login</span>
+                  </span>
+                </button>
+              </Link>
+
+              <Button size="sm" variant="outline" className="w-full" asChild>
+                <Link href="https://takemymoney.autoinvestment.broker" target="_blank">
                   <Calendar className="mr-2 h-4 w-4" />
                   Book Demo
                 </Link>
