@@ -163,9 +163,9 @@ export function Header() {
 
             <div className="pt-2">
               <Button size="sm" className="w-full" asChild>
-                <Link href="/survey" target="_blank">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Book Demo
+                <Link href="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
                 </Link>
               </Button>
             </div>
