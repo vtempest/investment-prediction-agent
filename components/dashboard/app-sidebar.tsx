@@ -96,6 +96,34 @@ const themeNames = [
   "pastel-dreams"
 ]
 
+const themeColors: Record<string, { primary: string; secondary: string }> = {
+  "modern-minimal": { primary: "#3b82f6", secondary: "#f3f4f6" },
+  "t3-chat": { primary: "#a84370", secondary: "#f1c4e6" },
+  "twitter": { primary: "#1e9df1", secondary: "#0f1419" },
+  "mocha-mousse": { primary: "#A37764", secondary: "#BAAB92" },
+  "bubblegum": { primary: "#d04f99", secondary: "#8acfd1" },
+  "amethyst-haze": { primary: "#8a79ab", secondary: "#dfd9ec" },
+  "notebook": { primary: "#606060", secondary: "#dedede" },
+  "doom-64": { primary: "#b71c1c", secondary: "#556b2f" },
+  "catppuccin": { primary: "#8839ef", secondary: "#ccd0da" },
+  "graphite": { primary: "#606060", secondary: "#e0e0e0" },
+  "perpetuity": { primary: "#06858e", secondary: "#d9eaea" },
+  "kodama-grove": { primary: "#8d9d4f", secondary: "#decea0" },
+  "cosmic-night": { primary: "#6e56cf", secondary: "#e4dfff" },
+  "tangerine": { primary: "#e05d38", secondary: "#f3f4f6" },
+  "quantum-rose": { primary: "#e6067a", secondary: "#ffd6ff" },
+  "nature": { primary: "#2e7d32", secondary: "#e8f5e9" },
+  "bold-tech": { primary: "#8b5cf6", secondary: "#f3f0ff" },
+  "elegant-luxury": { primary: "#9b2c2c", secondary: "#fdf2d6" },
+  "amber-minimal": { primary: "#f59e0b", secondary: "#f3f4f6" },
+  "supabase": { primary: "#72e3ad", secondary: "#fdfdfd" },
+  "neo-brutalism": { primary: "#ff3333", secondary: "#ffff00" },
+  "solar-dusk": { primary: "#B45309", secondary: "#E4C090" },
+  "claymorphism": { primary: "#6366f1", secondary: "#d6d3d1" },
+  "cyberpunk": { primary: "#ff00c8", secondary: "#f0f0ff" },
+  "pastel-dreams": { primary: "#a78bfa", secondary: "#e9d8fd" }
+}
+
 const formatThemeName = (name: string) => {
   return name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
 }
@@ -241,6 +269,7 @@ function AppSidebarContent({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { theme, setTheme } = useTheme()
   const [colorTheme, setColorTheme] = React.useState("modern-minimal")
   const [mounted, setMounted] = React.useState(false)
+  const [previewTheme, setPreviewTheme] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     setMounted(true)
@@ -259,6 +288,25 @@ function AppSidebarContent({ ...props }: React.ComponentProps<typeof Sidebar>) {
     themeNames.forEach(t => document.documentElement.classList.remove(`theme-${t}`))
     // Add new theme class
     document.documentElement.classList.add(`theme-${newTheme}`)
+
+    setPreviewTheme(null)
+  }
+
+  const handleThemePreview = (themeName: string) => {
+    setPreviewTheme(themeName)
+    // Remove all theme classes
+    themeNames.forEach(t => document.documentElement.classList.remove(`theme-${t}`))
+    // Add preview theme class
+    document.documentElement.classList.add(`theme-${themeName}`)
+  }
+
+  const handlePreviewEnd = () => {
+    if (previewTheme) {
+      // Restore the actual selected theme
+      themeNames.forEach(t => document.documentElement.classList.remove(`theme-${t}`))
+      document.documentElement.classList.add(`theme-${colorTheme}`)
+      setPreviewTheme(null)
+    }
   }
 
   const toggleLightDark = () => {
@@ -365,7 +413,7 @@ function AppSidebarContent({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={(open) => !open && handlePreviewEnd()}>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
@@ -439,20 +487,37 @@ function AppSidebarContent({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         {theme === "dark" ? "Dark Mode" : "Light Mode"}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      {themeNames.map((themeName) => (
-                        <DropdownMenuItem
-                          key={themeName}
-                          onClick={() => handleThemeChange(themeName)}
-                          className={colorTheme === themeName ? "bg-accent" : ""}
-                        >
-                          <span className="flex items-center justify-between w-full">
-                            <span>{formatThemeName(themeName)}</span>
-                            {colorTheme === themeName && (
-                              <span className="text-xs ml-2">✓</span>
-                            )}
-                          </span>
-                        </DropdownMenuItem>
-                      ))}
+                      {themeNames.map((themeName) => {
+                        const colors = themeColors[themeName];
+                        return (
+                          <DropdownMenuItem
+                            key={themeName}
+                            onClick={() => handleThemeChange(themeName)}
+                            onMouseEnter={() => handleThemePreview(themeName)}
+                            onMouseLeave={handlePreviewEnd}
+                            className={colorTheme === themeName ? "bg-accent" : ""}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1">
+                                  <div
+                                    className="w-3 h-3 rounded-full border border-black/10"
+                                    style={{ backgroundColor: colors.primary }}
+                                  />
+                                  <div
+                                    className="w-3 h-3 rounded-full border border-black/10"
+                                    style={{ backgroundColor: colors.secondary }}
+                                  />
+                                </div>
+                                <span>{formatThemeName(themeName)}</span>
+                              </div>
+                              {colorTheme === themeName && (
+                                <span className="text-xs">✓</span>
+                              )}
+                            </div>
+                          </DropdownMenuItem>
+                        );
+                      })}
                     </DropdownMenuSubContent>
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
