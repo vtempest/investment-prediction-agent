@@ -26,6 +26,26 @@ export const plans: Plan[] = [
     trialDays: 7,
   },
 
+  {
+    id: 2,
+    name: "Enterprise Research Team",
+    priceId: "price_1SfItcD6sln9a8JlFRR4o83g",
+    limits: {
+      tokens: 10000
+    },
+    features: [
+      "Unlimited research access",
+      "Advanced AI strategies",
+      "Dedicated support",
+      "Team collaboration tools",
+      "Custom integrations",
+      "Advanced analytics",
+      "API access"
+    ],
+    price: 299,
+    trialDays: 14,
+  },
+
   // {
   //   id: 2,
   //   name: "pro",
