@@ -43,12 +43,31 @@ function DashboardContent() {
     router.push(`/dashboard?${currentParams.toString()}`, { scroll: false })
   }
 
-  // Initialize portfolio on first login
+  // Initialize portfolio on first login and check survey completion
   useEffect(() => {
-    if (session?.user && !isPending) {
-      initializePortfolio()
+    const checkSurveyAndInitialize = async () => {
+      if (session?.user && !isPending) {
+        // Check if user has completed the survey
+        try {
+          const response = await fetch('/api/user/check-survey')
+          const data = await response.json()
+
+          if (!data.hasCompletedSurvey) {
+            router.push("/survey")
+            return
+          }
+
+          await initializePortfolio()
+        } catch (error) {
+          console.error("Error checking survey status:", error)
+          // Continue with initialization if check fails
+          await initializePortfolio()
+        }
+      }
     }
-  }, [session, isPending])
+
+    checkSurveyAndInitialize()
+  }, [session, isPending, router])
 
   const initializePortfolio = async () => {
     try {

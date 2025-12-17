@@ -1,15 +1,35 @@
-
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { v4 as uuidv4 } from "uuid"
+import { auth } from "@/lib/auth"
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
+        // Get the session to check if user is logged in
+        const session = await auth.api.getSession({
+            headers: req.headers,
+        })
+
         const body = await req.json()
         const { email, name } = body
 
+        const surveyData = JSON.stringify(body)
+
+        // If user is logged in, update their profile with survey data
+        if (session?.user) {
+            await db.update(users)
+                .set({
+                    surveyResponse: surveyData,
+                    updatedAt: new Date(),
+                })
+                .where(eq(users.id, session.user.id))
+
+            return NextResponse.json({ success: true, id: session.user.id, status: "updated" })
+        }
+
+        // If not logged in, use email from survey
         if (!email) {
             return NextResponse.json(
                 { error: "Email is required" },
@@ -17,12 +37,10 @@ export async function POST(req: Request) {
             )
         }
 
-        // Check if user exists
+        // Check if user exists by email
         const existingUser = await db.query.users.findFirst({
             where: eq(users.email, email),
         })
-
-        const surveyData = JSON.stringify(body)
 
         if (existingUser) {
             // Update existing user with survey response
@@ -30,8 +48,6 @@ export async function POST(req: Request) {
                 .set({
                     surveyResponse: surveyData,
                     updatedAt: new Date(),
-                    // Update name/phone/org if they were provided and missing? 
-                    // For now, let's just update the survey response.
                 })
                 .where(eq(users.id, existingUser.id))
 

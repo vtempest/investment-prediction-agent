@@ -32,7 +32,6 @@ export default function LandingPage() {
         <PredictionMarketsSection />
         <StrategiesSection />
         <CTASection />
-        <GlobeDemo />
       </main>
       <Footer />
     </div>

@@ -13,9 +13,28 @@ export function GoogleSignIn() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (session?.user) {
-      router.push("/dashboard")
+    const checkUserAndRedirect = async () => {
+      if (session?.user) {
+        // Check if user has completed the survey
+        try {
+          const response = await fetch('/api/user/check-survey')
+          const data = await response.json()
+
+          if (data.hasCompletedSurvey) {
+            router.push("/dashboard")
+          } else {
+            router.push("/survey")
+          }
+        } catch (error) {
+          console.error("Error checking survey status:", error)
+          // Default to dashboard if check fails
+          router.push("/dashboard")
+        }
+      }
     }
+
+    checkUserAndRedirect()
+
     if (typeof window !== "undefined") {
       setIsLocalhost(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     }

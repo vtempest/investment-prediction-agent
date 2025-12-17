@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -20,6 +21,7 @@ const SECTIONS = [
 ]
 
 export default function InvestorSurvey() {
+  const router = useRouter()
   const [responses, setResponses] = useState<Record<string, any>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
@@ -116,6 +118,11 @@ export default function InvestorSurvey() {
 
       // Scroll to top to show success message
       window.scrollTo({ top: 0, behavior: "smooth" })
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 2000)
     } catch (error) {
       console.error("[v0] Error submitting survey:", error)
       alert("Failed to submit survey. Please try again.")

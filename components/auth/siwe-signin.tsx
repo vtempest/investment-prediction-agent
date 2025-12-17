@@ -79,7 +79,22 @@ export function SiweSignIn() {
 
       if (data) {
         router.refresh()
-        router.push("/dashboard")
+
+        // Check if user has completed the survey
+        try {
+          const surveyResponse = await fetch('/api/user/check-survey')
+          const surveyData = await surveyResponse.json()
+
+          if (surveyData.hasCompletedSurvey) {
+            router.push("/dashboard")
+          } else {
+            router.push("/survey")
+          }
+        } catch (error) {
+          console.error("Error checking survey status:", error)
+          // Default to dashboard if check fails
+          router.push("/dashboard")
+        }
       }
 
     } catch (error) {

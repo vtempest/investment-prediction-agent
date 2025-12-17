@@ -25,6 +25,11 @@ export function CTASection() {
         <div className="grid lg:grid-cols-2 gap-8 items-start">
           {/* Links and Globe Column */}
           <div className="flex flex-col gap-4">
+            {/* Globe */}
+            <div className="w-full h-[400px] mb-4">
+              <GlobeDemo />
+            </div>
+
             <Button size="lg" asChild className="w-full">
               <Link href="https://takemymoney.autoinvestment.broker" target="_blank">
                 <Calendar className="mr-2 h-5 w-5" />
@@ -58,11 +63,6 @@ export function CTASection() {
                 Login
               </Link>
             </Button>
-
-            {/* Globe */}
-            <div className="w-full h-[400px] -mt-4">
-              <GlobeDemo />
-            </div>
           </div>
 
           {/* Video Column */}
