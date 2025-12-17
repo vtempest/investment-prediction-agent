@@ -252,12 +252,86 @@ export async function removeMemberFromTeam(teamId: string, userId: string) {
                 eq(teamMembers.userId, userId)
             )
         );
-        
+
         revalidatePath("/dashboard/settings");
         return { success: true };
     } catch (error) {
         console.error("Failed to remove member:", error);
         return { success: false, error: "Failed to remove member" };
+    }
+}
+
+export async function updateTeam(teamId: string, name: string, description?: string) {
+    try {
+        const session = await auth.api.getSession({
+            headers: await headers()
+        });
+
+        if (!session) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const userId = session.user.id;
+
+        // Check if user is team lead
+        const membership = await db.query.teamMembers.findFirst({
+            where: and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.userId, userId)
+            )
+        });
+
+        if (!membership || membership.role !== "lead") {
+            return { success: false, error: "Only team leads can edit teams" };
+        }
+
+        // Update team
+        await db.update(teams).set({
+            name,
+            description,
+            updatedAt: new Date(),
+        }).where(eq(teams.id, teamId));
+
+        revalidatePath("/dashboard/settings");
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to update team:", error);
+        return { success: false, error: "Failed to update team" };
+    }
+}
+
+export async function deleteTeam(teamId: string) {
+    try {
+        const session = await auth.api.getSession({
+            headers: await headers()
+        });
+
+        if (!session) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        const userId = session.user.id;
+
+        // Check if user is team lead
+        const membership = await db.query.teamMembers.findFirst({
+            where: and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.userId, userId)
+            )
+        });
+
+        if (!membership || membership.role !== "lead") {
+            return { success: false, error: "Only team leads can delete teams" };
+        }
+
+        // Delete team (cascade will handle members)
+        await db.delete(teams).where(eq(teams.id, teamId));
+
+        revalidatePath("/dashboard/settings");
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to delete team:", error);
+        return { success: false, error: "Failed to delete team" };
     }
 }
 

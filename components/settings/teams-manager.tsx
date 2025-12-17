@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Users, UserPlus, Trash2, Check } from "lucide-react";
-import { createTeam, getUserTeams, inviteMemberToTeam, removeMemberFromTeam, searchUsers } from "@/lib/actions/teams";
+import { Plus, Users, UserPlus, Trash2, Check, Pencil } from "lucide-react";
+import { createTeam, getUserTeams, inviteMemberToTeam, removeMemberFromTeam, searchUsers, updateTeam, deleteTeam } from "@/lib/actions/teams";
 
 interface User {
   id: string;
@@ -23,6 +23,13 @@ export function TeamsManager() {
   const [newTeamName, setNewTeamName] = useState("");
   const [newTeamDesc, setNewTeamDesc] = useState("");
   const [creating, setCreating] = useState(false);
+
+  // Edit state
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<any | null>(null);
+  const [editTeamName, setEditTeamName] = useState("");
+  const [editTeamDesc, setEditTeamDesc] = useState("");
+  const [updating, setUpdating] = useState(false);
 
   // Invite state
   const [inviteEmail, setInviteEmail] = useState("");
@@ -165,6 +172,52 @@ export function TeamsManager() {
       }
   };
 
+  const handleEditTeam = (team: any) => {
+    setEditingTeam(team);
+    setEditTeamName(team.name);
+    setEditTeamDesc(team.description || "");
+    setIsEditOpen(true);
+  };
+
+  const handleUpdateTeam = async () => {
+    if (!editTeamName.trim() || !editingTeam) return;
+
+    setUpdating(true);
+    try {
+      const result = await updateTeam(editingTeam.id, editTeamName, editTeamDesc);
+      if (result.success) {
+        toast.success("Team updated successfully");
+        setIsEditOpen(false);
+        setEditingTeam(null);
+        setEditTeamName("");
+        setEditTeamDesc("");
+        fetchTeams();
+      } else {
+        toast.error(result.error || "Failed to update team");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteTeam = async (teamId: string, teamName: string) => {
+    if (!confirm(`Are you sure you want to delete "${teamName}"? This action cannot be undone.`)) return;
+
+    try {
+      const result = await deleteTeam(teamId);
+      if (result.success) {
+        toast.success("Team deleted successfully");
+        fetchTeams();
+      } else {
+        toast.error(result.error || "Failed to delete team");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
+    }
+  };
+
   if (loading) {
     return <div>Loading teams...</div>;
   }
@@ -220,6 +273,44 @@ export function TeamsManager() {
         </Dialog>
       </div>
 
+      {/* Edit Team Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Team</DialogTitle>
+            <DialogDescription>
+              Update team name and description.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Team Name</Label>
+              <Input
+                id="edit-name"
+                placeholder="e.g. Alpha Squad"
+                value={editTeamName}
+                onChange={(e) => setEditTeamName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-desc">Description (Optional)</Label>
+              <Input
+                id="edit-desc"
+                placeholder="What is this team for?"
+                value={editTeamDesc}
+                onChange={(e) => setEditTeamDesc(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+            <Button onClick={handleUpdateTeam} disabled={updating}>
+              {updating ? "Updating..." : "Update Team"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid gap-6">
         {teams.length === 0 ? (
             <Card>
@@ -229,7 +320,11 @@ export function TeamsManager() {
                 </CardContent>
             </Card>
         ) : (
-            teams.map((team) => (
+            teams.map((team) => {
+              // Check if current user is team lead
+              const isTeamLead = team.members?.some((m: any) => m.role === "lead");
+
+              return (
             <Card key={team.id}>
                 <CardHeader>
                 <div className="flex justify-between items-start">
@@ -237,8 +332,30 @@ export function TeamsManager() {
                         <CardTitle>{team.name}</CardTitle>
                         <CardDescription>{team.description}</CardDescription>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                        {team.members?.length || 0} members
+                    <div className="flex items-center gap-2">
+                        <div className="text-sm text-muted-foreground mr-2">
+                            {team.members?.length || 0} members
+                        </div>
+                        {isTeamLead && (
+                            <>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleEditTeam(team)}
+                                    title="Edit team"
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDeleteTeam(team.id, team.name)}
+                                    title="Delete team"
+                                >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </div>
                 </CardHeader>
@@ -325,7 +442,8 @@ export function TeamsManager() {
                 </div>
                 </CardContent>
             </Card>
-            ))
+              );
+            })
         )}
       </div>
     </div>
