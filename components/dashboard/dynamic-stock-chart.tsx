@@ -1,15 +1,13 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
-import { TechnicalChart } from "./technical-chart"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useMemo, useRef, useEffect, useCallback } from "react"
+import { Chart, CandlestickSeries, LineSeries, HistogramSeries, AreaSeries, TimeScale, TimeScaleFitContentTrigger, Pane } from "lightweight-charts-react-components"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Loader2, X, Search } from "lucide-react"
-import type { IChartApi, ISeriesApi } from "lightweight-charts"
-import { LineSeries } from "lightweight-charts"
-import { useTheme } from "next-themes"
+import { rsi, macd, atr, stochasticOscillator, cci, obv } from "indicatorts"
+import { TagInput, Tag } from "@/components/ui/tag-input"
+import { Loader2 } from "lucide-react"
+import { setStateInURL } from "@/lib/utils"
+import { type IChartApi, type Time, type LogicalRange } from "lightweight-charts"
 
 interface DynamicStockChartProps {
   symbol: string
@@ -18,418 +16,575 @@ interface DynamicStockChartProps {
 }
 
 interface ChartData {
-  time: string | number
+  date: string
   open: number
   high: number
   low: number
   close: number
+  volume: number
 }
 
-interface ComparisonSymbol {
-  symbol: string
-  color: string
-  data: ChartData[]
-  loading: boolean
-}
-
-// Predefined colors for comparison symbols
-const COMPARISON_COLORS = [
-  'rgb(225, 87, 90)',    // Red
-  'rgb(242, 142, 44)',   // Orange
-  'rgb(76, 175, 80)',    // Green
-  'rgb(156, 39, 176)',   // Purple
-  'rgb(33, 150, 243)',   // Blue
-  'rgb(255, 193, 7)',    // Yellow
+// Available technical indicators
+const INDICATOR_SUGGESTIONS: Tag[] = [
+  { id: "rsi", value: "rsi", label: "RSI", type: "indicator" },
+  { id: "macd", value: "macd", label: "MACD", type: "indicator" },
+  { id: "atr", value: "atr", label: "ATR", type: "indicator" },
+  { id: "stochastic", value: "stochastic", label: "Stochastic", type: "indicator" },
+  { id: "cci", value: "cci", label: "CCI", type: "indicator" },
+  { id: "obv", value: "obv", label: "OBV", type: "indicator" },
 ]
+
+type ChartType = "candlestick" | "line" | "area"
 
 export function DynamicStockChart({
   symbol,
-  initialRange = "1mo",
+  initialRange = "1y",
   interval = "1d"
 }: DynamicStockChartProps) {
-  const [data, setData] = useState<ChartData[]>([])
-  const [loading, setLoading] = useState(true)
+  const [activeTags, setActiveTags] = useState<Tag[]>([])
+  const [showVolume, setShowVolume] = useState(true)
+  const [chartType, setChartType] = useState<ChartType>("candlestick")
+  const [selectedRange, setSelectedRange] = useState(initialRange)
+  const [secondaryData, setSecondaryData] = useState<Record<string, ChartData[]>>({})
+  const [chartData, setChartData] = useState<ChartData[]>([])
+  const [loadingData, setLoadingData] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [lastFetchedRange, setLastFetchedRange] = useState<{ from: number; to: number } | null>(null)
 
-  // Comparison state
-  const [comparisonSymbols, setComparisonSymbols] = useState<ComparisonSymbol[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [showSearchResults, setShowSearchResults] = useState(false)
-  const chartRef = useRef<IChartApi | null>(null)
-  const mainSeriesRef = useRef<ISeriesApi<any> | null>(null)
-  const comparisonSeriesRefs = useRef<Map<string, ISeriesApi<any>>>(new Map())
+  const candlestickSeriesRef = useRef<any>(null)
+  const lineSeriesRef = useRef<any>(null)
+  const areaSeriesRef = useRef<any>(null)
+  const chartRef = useRef<any>(null)
+  const lastSymbol = useRef<string>(symbol)
 
-  // Fetch initial data
+  // Fetch initial data on mount or symbol change
   useEffect(() => {
-    fetchData(initialRange)
-  }, [symbol, initialRange, interval])
-
-  // Fetch data from API
-  const fetchData = async (range?: string, period1?: string, period2?: string) => {
-    try {
-      setLoading(true)
+    const fetchInitialData = async () => {
+      setLoadingData(true)
       setError(null)
-
-      let url = `/api/stocks/historical/${symbol}?interval=${interval}`
-
-      if (period1 && period2) {
-        // Use specific date range
-        url += `&period1=${period1}&period2=${period2}`
-      } else if (range) {
-        // Use relative range
-        url += `&range=${range}`
+      try {
+        const res = await fetch(`/api/stocks/historical/${symbol}?range=${selectedRange}&interval=${interval}`)
+        const json = await res.json()
+        if (json.success && json.data) {
+          const transformedData: ChartData[] = json.data.map((d: any) => ({
+            date: d.date || d.time,
+            open: d.open,
+            high: d.high,
+            low: d.low,
+            close: d.close,
+            volume: d.volume
+          })).filter((d: ChartData) => d.open && d.close)
+          setChartData(transformedData)
+        } else {
+          setError(json.error || "Failed to load data")
+        }
+      } catch (e) {
+        console.error("Error fetching initial chart data", e)
+        setError("Network error")
+      } finally {
+        setLoadingData(false)
       }
-
-      const response = await fetch(url)
-      const result = await response.json()
-
-      if (result.success && result.data) {
-        // Transform the data to match TechnicalChart format
-        const chartData: ChartData[] = result.data.map((quote: any) => ({
-          time: quote.date || quote.time,
-          open: quote.open,
-          high: quote.high,
-          low: quote.low,
-          close: quote.close
-        })).filter((d: ChartData) => d.open && d.close) // Filter out invalid data
-
-        setData(chartData)
-      } else {
-        setError(result.error || "Failed to fetch data")
-      }
-    } catch (err) {
-      console.error("Error fetching chart data:", err)
-      setError("Failed to load chart data")
-    } finally {
-      setLoading(false)
     }
+
+    // Fetch data whenever symbol, selectedRange, or interval changes
+    fetchInitialData()
+  }, [symbol, selectedRange, interval])
+
+  // Initialize indicators from URL or Default
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const urlState = setStateInURL(null) as Record<string, string>
+    const indicators = urlState.indicators
+
+    if (indicators) {
+      const initialTags = indicators.split(',').map((id: string) =>
+        INDICATOR_SUGGESTIONS.find(t => t.id === id)
+      ).filter(Boolean) as Tag[]
+
+      if (initialTags.length > 0) {
+        setActiveTags(prev => {
+          const symbolTags = prev.filter(t => t.type === 'symbol')
+          const existingIds = new Set(symbolTags.map(t => t.id));
+          const newTags = initialTags.filter(t => !existingIds.has(t.id));
+          return [...symbolTags, ...newTags]
+        })
+      }
+    } else {
+      setActiveTags(prev => {
+        if (prev.length > 0) return prev;
+        const symbolTags = prev.filter(t => t.type === 'symbol')
+        const defaultIndicators = INDICATOR_SUGGESTIONS.filter(t => t.type === 'indicator')
+        return [...symbolTags, ...defaultIndicators]
+      })
+    }
+  }, [])
+
+  // Sync indicators to URL
+  useEffect(() => {
+    const indicators = activeTags
+      .filter(t => t.type === 'indicator')
+      .map(t => t.id)
+      .join(',')
+
+    setStateInURL({ indicators })
+  }, [activeTags])
+
+  // Fetch data for new stock tags (comparison overlays)
+  useEffect(() => {
+    const fetchMissingData = async () => {
+      const stockTags = activeTags.filter(t => t.type === "symbol" && t.value !== symbol && !secondaryData[t.value])
+
+      if (stockTags.length === 0) return
+
+      try {
+        const promises = stockTags.map(async (tag) => {
+          const rangeParam = selectedRange === "1y" ? "1y" : selectedRange
+          const intervalParam = "1d"
+
+          const res = await fetch(`/api/stocks/historical/${tag.value}?range=${rangeParam}&interval=${intervalParam}`)
+          const json = await res.json()
+          if (json.success) {
+            return { symbol: tag.value, data: json.data }
+          }
+          return null
+        })
+
+        const results = await Promise.all(promises)
+        setSecondaryData(prev => {
+          const next = { ...prev }
+          results.forEach(r => {
+            if (r) next[r.symbol] = r.data
+          })
+          return next
+        })
+
+      } catch (error) {
+        console.error("Failed to fetch secondary data", error)
+      }
+    }
+
+    fetchMissingData()
+  }, [activeTags, symbol, selectedRange, secondaryData])
+
+  // Search function for TagInput
+  const handleStockSearch = useCallback(async (query: string) => {
+    const res = await fetch(`/api/stocks/autocomplete?q=${encodeURIComponent(query)}&limit=5`)
+    const json = await res.json()
+    if (json.success) {
+      return json.data.map((item: any) => ({
+        id: item.symbol,
+        value: item.symbol,
+        label: item.name,
+        type: "symbol"
+      }))
+    }
+    return []
+  }, [])
+
+  // --- Dynamic Loading / Infinite Scroll Logic ---
+  const fetchMoreData = useCallback(async (currentOldestTime: number) => {
+    if (loadingMore) return;
+
+    const currentOldestDate = new Date(currentOldestTime * 1000);
+    if (currentOldestDate.getFullYear() < 1980) return;
+
+    console.log("[DynamicStockChart] Loading more data prior to", currentOldestDate.toISOString());
+    setLoadingMore(true);
+
+    try {
+      const endDate = currentOldestTime;
+      const startDate = new Date(currentOldestDate);
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      const startDateTimestamp = Math.floor(startDate.getTime() / 1000);
+
+      const res = await fetch(`/api/stocks/historical/${symbol}?interval=1d&period1=${startDateTimestamp}&period2=${endDate}`);
+      const json = await res.json();
+
+      if (json.success && json.data && json.data.length > 0) {
+        const newPoints: ChartData[] = json.data.map((d: any) => ({
+          date: d.date || d.time,
+          open: d.open,
+          high: d.high,
+          low: d.low,
+          close: d.close,
+          volume: d.volume
+        })).filter((d: ChartData) => d.open && d.close);
+
+        // Deduplicate
+        const existingDates = new Set(chartData.map(d => d.date));
+        const uniqueNew = newPoints.filter(d => !existingDates.has(d.date));
+
+        if (uniqueNew.length > 0) {
+          // Combine and Sort
+          const combined = [...uniqueNew, ...chartData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          setChartData(combined);
+        }
+      }
+    } catch (e) {
+      console.error("[DynamicStockChart] Error fetching more data", e);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, symbol, chartData]);
+
+  // Handler for visible range changes
+  const onVisibleRangeChange = (range: LogicalRange | null) => {
+    if (!range || !candlestickSeriesRef.current || chartData.length === 0) return;
+
+    // barsInLogicalRange tells us indices
+    // Safely access barsInLogicalRange if it exists on the series API
+    const seriesApi = candlestickSeriesRef.current;
+    if (seriesApi && seriesApi.barsInLogicalRange) {
+      const barsInfo = seriesApi.barsInLogicalRange(range);
+
+      if (barsInfo && barsInfo.barsBefore !== null && barsInfo.barsBefore < 50) {
+        const firstTime = Math.floor(new Date(chartData[0].date).getTime() / 1000);
+        fetchMoreData(firstTime);
+      }
+    }
+  };
+
+  const times = useMemo(() => chartData.map(d => Math.floor(new Date(d.date).getTime() / 1000) as Time), [chartData])
+
+  const candlestickData = useMemo(() => chartData.map((item, i) => ({
+    time: times[i],
+    open: item.open,
+    high: item.high,
+    low: item.low,
+    close: item.close,
+  })), [chartData, times])
+
+  const lineData = useMemo(() => chartData.map((item, i) => ({
+    time: times[i],
+    value: item.close,
+  })), [chartData, times])
+
+  const volumeData = useMemo(() => chartData.map((item, i) => ({
+    time: times[i],
+    value: item.volume,
+    color: item.close >= item.open ? "rgba(34, 197, 94, 0.5)" : "rgba(239, 68, 68, 0.5)",
+  })).filter(item => item.value > 0), [chartData, times])
+
+  const indicatorSeries = useMemo(() => {
+    const closes = chartData.map(d => d.close)
+    const highs = chartData.map(d => d.high)
+    const lows = chartData.map(d => d.low)
+    const volumes = chartData.map(d => d.volume)
+
+    return activeTags.filter(t => t.type === "indicator").map(tag => {
+      try {
+        switch (tag.value) {
+          case "rsi": {
+            const values = rsi(closes, { period: 14 })
+            return {
+              id: tag.id,
+              type: "line",
+              name: "RSI (14)",
+              data: values.map((v: any, i: number) => ({
+                time: times[i + (closes.length - values.length)],
+                value: v
+              })).filter((x: any) => x.value != null && !isNaN(x.value)),
+              options: { color: "#2196F3", lineWidth: 2, priceScaleId: tag.id, scaleMargins: { top: 0.1, bottom: 0.1 } }
+            }
+          }
+          case "macd": {
+            const { macdLine, signalLine } = macd(closes, { fast: 12, slow: 26, signal: 9 })
+            const offset = closes.length - macdLine.length
+            const histogram = macdLine.map((m: any, i: number) => m - signalLine[i])
+
+            return {
+              id: tag.id,
+              type: "macd",
+              name: "MACD",
+              data: {
+                macd: macdLine.map((v: any, i: number) => ({ time: times[i + offset], value: v })).filter((x: any) => x.value != null && !isNaN(x.value)),
+                signal: signalLine.map((v: any, i: number) => ({ time: times[i + offset], value: v })).filter((x: any) => x.value != null && !isNaN(x.value)),
+                histogram: histogram.map((v: any, i: number) => ({
+                  time: times[i + offset],
+                  value: v,
+                  color: v >= 0 ? "rgba(34, 197, 94, 0.5)" : "rgba(239, 68, 68, 0.5)"
+                })).filter((x: any) => x.value != null && !isNaN(x.value))
+              }
+            }
+          }
+          case "atr": {
+            const { atrLine } = atr(highs, lows, closes, { period: 14 })
+            const offset = closes.length - atrLine.length
+            return {
+              id: tag.id,
+              type: "line",
+              name: "ATR (14)",
+              data: atrLine.map((v: any, i: number) => ({ time: times[i + offset], value: v })).filter((x: any) => x.value != null && !isNaN(x.value)),
+              options: { color: "#FF9800", lineWidth: 2, priceScaleId: tag.id }
+            }
+          }
+          case "stochastic": {
+            const { k, d } = stochasticOscillator(highs, lows, closes, { kPeriod: 14, dPeriod: 3 })
+            const offset = closes.length - k.length
+            return {
+              id: tag.id,
+              type: "stochastic",
+              name: "Stoch (14, 3)",
+              data: {
+                k: k.map((v: any, i: number) => ({ time: times[i + offset], value: v })).filter((x: any) => x.value != null && !isNaN(x.value)),
+                d: d.map((v: any, i: number) => ({ time: times[i + offset], value: v })).filter((x: any) => x.value != null && !isNaN(x.value)),
+              }
+            }
+          }
+          case "cci": {
+            const values = cci(highs, lows, closes, { period: 20 })
+            const offset = closes.length - values.length
+            return {
+              id: tag.id,
+              type: "line",
+              name: "CCI (20)",
+              data: values.map((v: any, i: number) => ({ time: times[i + offset], value: v })).filter((x: any) => x.value != null && !isNaN(x.value)),
+              options: { color: "#9C27B0", lineWidth: 2, priceScaleId: tag.id }
+            }
+          }
+          case "obv": {
+            const values = obv(closes, volumes)
+            return {
+              id: tag.id,
+              type: "line",
+              name: "OBV",
+              data: values.map((v: any, i: number) => ({ time: times[i], value: v })).filter((x: any) => x.value != null && !isNaN(x.value)),
+              options: { color: "#4CAF50", lineWidth: 2, priceScaleId: tag.id }
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Indicator error", e)
+      }
+      return null
+    }).filter(Boolean)
+  }, [chartData, activeTags, times])
+
+  const overlaySeries = useMemo(() => {
+    return activeTags
+      .filter(t => t.type === "symbol" && t.value !== symbol && secondaryData[t.value])
+      .map((tag, idx) => {
+        const sData = secondaryData[tag.value]
+        const color = ["#ff5722", "#e91e63", "#9c27b0"][idx % 3]
+        return {
+          id: tag.id,
+          name: tag.value,
+          data: sData.map(d => ({
+            time: Math.floor(new Date(d.date).getTime() / 1000) as Time,
+            value: d.close
+          })),
+          options: { color, lineWidth: 2 }
+        }
+      })
+  }, [activeTags, secondaryData, symbol])
+
+  const chartOptions = {
+    layout: {
+      background: { color: "transparent" },
+      textColor: "#888888",
+    },
+    grid: {
+      vertLines: { color: "#2a2a2a" },
+      horzLines: { color: "#2a2a2a" },
+    },
+    crosshair: { mode: 1 },
+    height: 500,
   }
 
-  // Search for stocks
-  const handleSearch = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([])
-      setShowSearchResults(false)
-      return
-    }
+  const candlestickOptions = {
+    upColor: "#22c55e",
+    downColor: "#ef4444",
+    borderUpColor: "#22c55e",
+    borderDownColor: "#ef4444",
+    wickUpColor: "#22c55e",
+    wickDownColor: "#ef4444",
+  }
 
-    try {
-      const res = await fetch(`/api/stocks/autocomplete?q=${encodeURIComponent(query)}&limit=5`)
-      const json = await res.json()
-      if (json.success) {
-        setSearchResults(json.data)
-        setShowSearchResults(true)
-      }
-    } catch (error) {
-      console.error("Error searching stocks:", error)
-    }
-  }, [])
+  const ranges = [
+    { value: "1d", label: "1D", interval: "5m" },
+    { value: "5d", label: "5D", interval: "15m" },
+    { value: "1mo", label: "1M", interval: "1h" },
+    { value: "6mo", label: "6M", interval: "1d" },
+    { value: "1y", label: "1Y", interval: "1d" },
+    { value: "5y", label: "5Y", interval: "1wk" },
+  ]
 
-  // Add comparison symbol
-  const addComparisonSymbol = useCallback(async (compareSymbol: string) => {
-    // Don't add if it's the same as main symbol or already added
-    if (compareSymbol === symbol || comparisonSymbols.some(c => c.symbol === compareSymbol)) {
-      return
-    }
-
-    // Get next color
-    const color = COMPARISON_COLORS[comparisonSymbols.length % COMPARISON_COLORS.length]
-
-    // Add to state with loading flag
-    const newComparison: ComparisonSymbol = {
-      symbol: compareSymbol,
-      color,
-      data: [],
-      loading: true
-    }
-
-    setComparisonSymbols(prev => [...prev, newComparison])
-    setSearchQuery("")
-    setShowSearchResults(false)
-
-    // Fetch data for the comparison symbol
-    try {
-      const res = await fetch(`/api/stocks/historical/${compareSymbol}?range=${initialRange}&interval=${interval}`)
-      const json = await res.json()
-
-      if (json.success && json.data) {
-        const chartData: ChartData[] = json.data.map((quote: any) => ({
-          time: quote.date || quote.time,
-          open: quote.open,
-          high: quote.high,
-          low: quote.low,
-          close: quote.close
-        })).filter((d: ChartData) => d.open && d.close)
-
-        setComparisonSymbols(prev => prev.map(c =>
-          c.symbol === compareSymbol ? { ...c, data: chartData, loading: false } : c
-        ))
-      }
-    } catch (error) {
-      console.error("Error fetching comparison data:", error)
-      // Remove failed comparison
-      setComparisonSymbols(prev => prev.filter(c => c.symbol !== compareSymbol))
-    }
-  }, [symbol, comparisonSymbols, initialRange, interval])
-
-  // Remove comparison symbol
-  const removeComparisonSymbol = useCallback((compareSymbol: string) => {
-    setComparisonSymbols(prev => prev.filter(c => c.symbol !== compareSymbol))
-    comparisonSeriesRefs.current.delete(compareSymbol)
-  }, [])
-
-  // Handle chart ready
-  const handleChartReady = useCallback((chart: IChartApi, series: ISeriesApi<any>) => {
-    chartRef.current = chart
-    mainSeriesRef.current = series
-  }, [])
-
-  // Handle visible range changes from the chart
-  const handleVisibleRangeChange = useCallback((range: { from: number; to: number }) => {
-    // Check if we need to fetch more data
-    // Only fetch if the range has changed significantly (more than 10% difference)
-    if (lastFetchedRange) {
-      const rangeDiff = Math.abs(range.from - lastFetchedRange.from) + Math.abs(range.to - lastFetchedRange.to)
-      const totalRange = lastFetchedRange.to - lastFetchedRange.from
-
-      if (rangeDiff / totalRange < 0.1) {
-        // Range hasn't changed significantly, skip fetching
-        return
-      }
-    }
-
-    // Convert timestamps to date strings
-    const fromDate = new Date(range.from * 1000).toISOString().split('T')[0]
-    const toDate = new Date(range.to * 1000).toISOString().split('T')[0]
-
-    console.log(`Fetching data for new range: ${fromDate} to ${toDate}`)
-
-    // Fetch data for the new range
-    // Add some buffer to the range to ensure smooth scrolling
-    const bufferDays = 7 * 24 * 60 * 60 // 7 days in seconds
-    const bufferedFrom = new Date((range.from - bufferDays) * 1000).toISOString().split('T')[0]
-    const bufferedTo = new Date((range.to + bufferDays) * 1000).toISOString().split('T')[0]
-
-    fetchData(undefined, bufferedFrom, bufferedTo)
-    setLastFetchedRange(range)
-  }, [symbol, interval, lastFetchedRange])
-
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery) {
-        handleSearch(searchQuery)
-      }
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [searchQuery, handleSearch])
+  const chartTypes = [
+    { value: "candlestick", label: "Candlestick" },
+    { value: "line", label: "Line" },
+    { value: "area", label: "Area" },
+  ]
 
   return (
-    <Card className="border-border bg-card">
-      <CardHeader>
-        <div className="flex items-center justify-between gap-4">
-          <CardTitle className="text-lg text-card-foreground flex items-center gap-2">
-            <span>{symbol} Price Chart</span>
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          </CardTitle>
+    <div className="w-full space-y-4">
+      {/* Chart Controls */}
+      <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border">
+        {/* Top Row: Tag Input + Basic Controls */}
+        <div className="flex flex-col md:flex-row gap-4 justify-between">
+          <div className="flex-1 min-w-[300px]">
+            <TagInput
+              placeholder="Add indicators (RSI, MACD) or symbols (AAPL)..."
+              tags={activeTags}
+              onTagsChange={setActiveTags}
+              suggestions={INDICATOR_SUGGESTIONS}
+              onSearch={handleStockSearch}
+            />
+          </div>
 
-          {/* Comparison Search */}
-          <div className="relative w-64">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Compare with symbol..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => searchQuery && setShowSearchResults(true)}
-                onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
-                className="pr-8"
-              />
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            </div>
-
-            {/* Search Results Dropdown */}
-            {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute top-full mt-1 w-full bg-popover border border-border rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
-                {searchResults.map((result) => (
-                  <button
-                    key={result.symbol}
-                    onClick={() => addComparisonSymbol(result.symbol)}
-                    className="w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground text-sm flex items-center justify-between"
-                  >
-                    <span className="font-medium">{result.symbol}</span>
-                    <span className="text-muted-foreground text-xs truncate ml-2">{result.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+          <div className="flex gap-2 items-center">
+            <Button
+              variant={showVolume ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowVolume(!showVolume)}
+            >
+              {showVolume ? "Hide Volume" : "Show Volume"}
+            </Button>
           </div>
         </div>
 
-        {/* Comparison Badges */}
-        {comparisonSymbols.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            <Badge variant="outline" style={{ borderColor: '#2962FF' }}>
-              {symbol}
-            </Badge>
-            {comparisonSymbols.map((comp) => (
-              <Badge
-                key={comp.symbol}
-                variant="outline"
-                style={{ borderColor: comp.color }}
-                className="flex items-center gap-1"
+        {/* Second Row: Time & Type */}
+        <div className="flex flex-wrap gap-4 items-center justify-between border-t border-border/50 pt-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium text-muted-foreground mr-1">Range:</span>
+            {ranges.map((range) => (
+              <Button
+                key={range.value}
+                variant={selectedRange === range.value ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setSelectedRange(range.value)} // Just set state, effect will load
               >
-                <span>{comp.symbol}</span>
-                {comp.loading && <Loader2 className="h-3 w-3 animate-spin" />}
-                <button
-                  onClick={() => removeComparisonSymbol(comp.symbol)}
-                  className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
+                {range.label}
+              </Button>
             ))}
           </div>
-        )}
-      </CardHeader>
-      <CardContent>
-        {error ? (
-          <div className="flex items-center justify-center h-[300px] text-destructive">
-            <p>{error}</p>
+
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium text-muted-foreground mr-1">Type:</span>
+            {chartTypes.map((type) => (
+              <Button
+                key={type.value}
+                variant={chartType === type.value ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setChartType(type.value as ChartType)}
+              >
+                {type.label}
+              </Button>
+            ))}
           </div>
-        ) : data.length > 0 ? (
-          <MultiSeriesChart
-            mainData={data}
-            mainSymbol={symbol}
-            comparisonData={comparisonSymbols}
-            interval={interval}
-            onVisibleRangeChange={handleVisibleRangeChange}
-            onChartReady={handleChartReady}
-          />
-        ) : loading ? (
-          <div className="flex items-center justify-center h-[300px]">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
+        </div>
+      </div>
+
+      {(loadingData || loadingMore) && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background/80 p-2 rounded-md flex items-center shadow-md">
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          <span className="text-xs">{loadingMore ? "Loading history..." : "Loading data..."}</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-red-500 text-center text-sm py-4">{error}</div>
+      )}
+
+      {/* Chart */}
+      <div className="relative border rounded-lg overflow-hidden bg-card">
+        {chartData.length > 0 ? (
+          <Chart
+            ref={chartRef}
+            key={`chart-${showVolume}-${activeTags.length}-${chartType}`}
+            options={chartOptions}
+          >
+
+            {/* Main price pane (Pane 0) */}
+            <Pane stretchFactor={3}>
+              {chartType === "candlestick" && (
+                <CandlestickSeries
+                  ref={candlestickSeriesRef}
+                  data={candlestickData}
+                  options={candlestickOptions}
+                />
+              )}
+              {chartType === "line" && (
+                <LineSeries
+                  ref={lineSeriesRef}
+                  data={lineData}
+                  options={{ color: "#2196F3", lineWidth: 2 as any }}
+                />
+              )}
+              {chartType === "area" && (
+                <AreaSeries
+                  ref={areaSeriesRef}
+                  data={lineData}
+                  options={{
+                    topColor: "rgba(33, 150, 243, 0.4)",
+                    bottomColor: "rgba(33, 150, 243, 0.0)",
+                    lineColor: "#2196F3",
+                    lineWidth: 2 as any
+                  }}
+                />
+              )}
+
+              {overlaySeries.map(series => (
+                <LineSeries
+                  key={series.id}
+                  data={series.data}
+                  options={series.options as any}
+                />
+              ))}
+            </Pane>
+
+            {showVolume && (
+              <Pane stretchFactor={1}>
+                <HistogramSeries
+                  data={volumeData}
+                  options={{ priceFormat: { type: "volume" } }}
+                />
+              </Pane>
+            )}
+
+            {indicatorSeries.map((indicator: any) => (
+              <Pane key={indicator.id} stretchFactor={1}>
+                {indicator.type === "macd" ? (
+                  <>
+                    <LineSeries data={indicator.data.macd} options={{ color: "#2196F3", lineWidth: 1 }} />
+                    <LineSeries data={indicator.data.signal} options={{ color: "#FF9800", lineWidth: 1 }} />
+                    <HistogramSeries data={indicator.data.histogram} />
+                  </>
+                ) : indicator.type === "stochastic" ? (
+                  <>
+                    <LineSeries data={indicator.data.k} options={{ color: "#2196F3", lineWidth: 1 }} />
+                    <LineSeries data={indicator.data.d} options={{ color: "#FF9800", lineWidth: 1 }} />
+                  </>
+                ) : (
+                  <LineSeries data={indicator.data} options={indicator.options as any} />
+                )}
+              </Pane>
+            ))}
+
+            <TimeScale
+              onVisibleLogicalRangeChange={onVisibleRangeChange}
+            >
+              <TimeScaleFitContentTrigger deps={[chartData.length > 0 ? chartData[0].date : 0, activeTags.length, showVolume, chartType]} />
+            </TimeScale>
+          </Chart>
         ) : (
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-            <p>No data available</p>
+          <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+            {!loadingData && "No data available"}
           </div>
         )}
+      </div>
 
-        {!loading && data.length > 0 && (
-          <div className="mt-4 text-sm text-muted-foreground text-center">
-            Zoom or pan the chart to load data for different time ranges
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
-
-// Multi-series chart component to render main + comparison series
-function MultiSeriesChart({
-  mainData,
-  mainSymbol,
-  comparisonData,
-  interval,
-  onVisibleRangeChange,
-  onChartReady
-}: {
-  mainData: ChartData[]
-  mainSymbol: string
-  comparisonData: ComparisonSymbol[]
-  interval: string
-  onVisibleRangeChange?: (range: { from: number; to: number }) => void
-  onChartReady?: (chart: IChartApi, series: ISeriesApi<any>) => void
-}) {
-  const chartRef = useRef<IChartApi | null>(null)
-  const mainSeriesRef = useRef<ISeriesApi<any> | null>(null)
-  const comparisonSeriesRefs = useRef<Map<string, ISeriesApi<any>>>(new Map())
-  const isChartReadyCalled = useRef(false)
-
-  // Handle chart ready - only call once
-  const handleChartReady = useCallback((chart: IChartApi, series: ISeriesApi<any>) => {
-    if (isChartReadyCalled.current) return
-
-    chartRef.current = chart
-    mainSeriesRef.current = series
-    isChartReadyCalled.current = true
-    onChartReady?.(chart, series)
-  }, [onChartReady])
-
-  // Update comparison series when data changes
-  useEffect(() => {
-    if (!chartRef.current) return
-
-    const chart = chartRef.current
-
-    // Add or update comparison series
-    comparisonData.forEach((comp) => {
-      if (comp.data.length > 0) {
-        let lineSeries = comparisonSeriesRefs.current.get(comp.symbol)
-
-        if (!lineSeries) {
-          // Add new line series for comparison
-          lineSeries = chart.addSeries(LineSeries, {
-            color: comp.color,
-            lineWidth: 2,
-            priceScaleId: 'right', // Use same price scale
-          })
-          comparisonSeriesRefs.current.set(comp.symbol, lineSeries)
-        }
-
-        if (lineSeries) {
-          // Convert data to close prices for line series
-          const lineData = comp.data.map(d => {
-            let timeVal = d.time;
-            if (typeof timeVal === 'string' && timeVal.includes('T')) {
-              const date = new Date(timeVal);
-              if (!isNaN(date.getTime())) {
-                timeVal = Math.floor(date.getTime() / 1000) as any;
-              }
-            }
-            return {
-              time: timeVal,
-              value: d.close
-            };
-          })
-
-          lineSeries.setData(lineData)
-        }
-      }
-    })
-
-    // Remove series for symbols that are no longer in comparisonData
-    const currentSymbols = new Set(comparisonData.map(c => c.symbol))
-    comparisonSeriesRefs.current.forEach((series, symbol) => {
-      if (!currentSymbols.has(symbol)) {
-        (chart as any).removeSeries(series)
-        comparisonSeriesRefs.current.delete(symbol)
-      }
-    })
-  }, [comparisonData])
-
-
-  // We need to use the Chart component from lightweight-charts-react-components
-  // but add comparison series dynamically
-  const { resolvedTheme } = useTheme()
-  const textColor = resolvedTheme === 'dark' ? '#ffffff' : '#000000'
-
-  return (
-    <div className="w-full relative">
-      <TechnicalChart
-        data={mainData}
-        title={`${mainSymbol} - ${interval}`}
-        symbol={mainSymbol}
-        onVisibleRangeChange={onVisibleRangeChange}
-        onChartReady={handleChartReady}
-        colors={{
-          backgroundColor: 'transparent',
-          textColor: textColor,
-        }}
-      />
+      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground px-2">
+        {activeTags.length > 0 && <span>Active:</span>}
+        {activeTags.map(tag => (
+          <span key={tag.id} className="flex items-center gap-1">
+            <span className={`w-2 h-2 rounded-full ${tag.type === 'indicator' ? 'bg-blue-500' : 'bg-pink-500'}`}></span>
+            {tag.label}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }

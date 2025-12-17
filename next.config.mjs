@@ -7,6 +7,7 @@ const nextConfig = {
     unoptimized: true,
   },
   transpilePackages: ['indicatorts'],
+  serverExternalPackages: ['dukascopy-node', 'fastest-validator'],
 }
 
 export default nextConfig

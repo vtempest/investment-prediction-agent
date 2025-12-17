@@ -1,7 +1,7 @@
 
 import Link from "next/link"
 import { APP_NAME } from "@/lib/customize-site"
-import { FileText, Shield, Mail, ExternalLink } from "lucide-react"
+import { FileText, Shield, Mail, ExternalLink, Bot } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function Footer() {
@@ -33,6 +33,15 @@ export function Footer() {
                             <Shield className="w-4 h-4" />
                             Privacy Policy
                         </Link>
+
+                        <Link
+                            href="https://rights.institute/ethics/"
+                            className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent/50 hover:text-primary transition-all duration-300 hover:scale-105"
+                        >
+                            <Bot className="w-4 h-4" />
+                            AI Ethics
+                        </Link>
+
                         <Link
                             href="mailto:contact@timetravel.investments"
                             className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent/50 hover:text-primary transition-all duration-300 hover:scale-105"

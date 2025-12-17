@@ -59,7 +59,7 @@ export function StockChart({ data: initialData, symbol, onRangeChange, tradeSign
   const candlestickSeriesRef = useRef<any>(null)
   const lineSeriesRef = useRef<any>(null)
   const areaSeriesRef = useRef<any>(null)
-  const chartRef = useRef<IChartApi>(null)
+  const chartRef = useRef<any>(null)
 
   // Update internal state when props change, but being careful not to overwrite cumulative data unless symbol changes
   useEffect(() => {
@@ -141,7 +141,7 @@ export function StockChart({ data: initialData, symbol, onRangeChange, tradeSign
           const rangeParam = selectedRange === "1y" ? "1y" : selectedRange
           const intervalParam = "1d"
 
-          const res = await fetch(`/api/stocks/history/${tag.value}?range=${rangeParam}&interval=${intervalParam}`)
+          const res = await fetch(`/api/stocks/historical/${tag.value}?range=${rangeParam}&interval=${intervalParam}`)
           const json = await res.json()
           if (json.success) {
             return { symbol: tag.value, data: json.data }

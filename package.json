@@ -60,6 +60,7 @@
     "axios": "^1.13.2",
     "better-auth": "^1.4.7",
     "class-variance-authority": "^0.7.1",
+    "cli-highlight": "^2.1.11",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "4.1.0",
