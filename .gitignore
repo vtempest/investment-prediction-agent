@@ -58,3 +58,4 @@ supabase/**/*.env
 local.db
 *.db
 drizzle/
+.source/
