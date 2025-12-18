@@ -2,7 +2,6 @@ import { DocsLayout } from 'fumadocs-ui/layouts/notebook'
 import { AISearchTrigger } from '@/components/fumadocs/ai/search'
 import { baseOptions, linkItems, logo } from '@/lib/layout.shared'
 import { source } from '@/lib/source'
-import 'katex/dist/katex.min.css'
 import type { CSSProperties } from 'react'
 import { DOCS_TITLE } from '@/lib/constants'
 
