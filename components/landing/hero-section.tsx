@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient"
 import { Spotlight } from "@/components/ui/spotlight-new"
 import {
@@ -20,6 +21,12 @@ import Link from "next/link"
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden sm:px-6 py-10 lg:px-8 min-h-[90vh] flex items-center bg-white dark:bg-black/[0.96] antialiased bg-grid-black/[0.02] dark:bg-grid-white/[0.02]">
+      <Image
+        src="/images/bg-purple-lines.jpeg"
+        alt="Background"
+        fill
+        className="absolute inset-0 object-cover z-0 opacity-20 dark:opacity-20"
+      />
       <Spotlight />
 
       <div className="mx-auto max-w-7xl px-6 relative z-10">
@@ -70,7 +77,8 @@ export function HeroSection() {
 
               <Button variant="outline" size="lg" asChild>
                 <Link href="https://drive.google.com/file/d/1haVl0uguVYnLh8D3EUdaIyi3Tl4kSOIP/view?usp=drive_link" target="_blank" rel="noopener noreferrer">
-                  Research Paper
+                  <FileText className="mr-2 h-5 w-5" />
+                  Whitepaper
                 </Link>
               </Button>
 
@@ -114,3 +122,4 @@ export function HeroSection() {
     </section >
   )
 }
+Paper
