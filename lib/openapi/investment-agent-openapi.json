@@ -984,17 +984,76 @@
         "tags": [
           "Trading Agents"
         ],
-        "summary": "Groq AI debate analysis",
-        "description": "Fast AI-powered stock analysis using Groq",
+        "summary": "Multi-agent debate analysis",
+        "description": "Comprehensive multi-agent stock analysis system using Bull vs Bear debate, Risk Management consensus, and Memory-based learning. Supports Groq, OpenAI, and Anthropic LLMs.",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["symbol"],
                 "properties": {
                   "symbol": {
                     "type": "string",
-                    "example": "AAPL"
+                    "example": "AAPL",
+                    "description": "Stock ticker symbol"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-12-19",
+                    "description": "Analysis date (defaults to today)"
+                  },
+                  "max_debate_rounds": {
+                    "type": "integer",
+                    "default": 2,
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 2,
+                    "description": "Number of debate rounds between Bull and Bear analysts"
+                  },
+                  "llm_provider": {
+                    "type": "string",
+                    "enum": ["groq", "openai", "anthropic"],
+                    "default": "groq",
+                    "description": "LLM provider to use"
+                  },
+                  "deep_think_llm": {
+                    "type": "string",
+                    "example": "llama-3.3-70b-versatile",
+                    "description": "Model for complex reasoning (defaults to provider's best model)"
+                  },
+                  "quick_think_llm": {
+                    "type": "string",
+                    "example": "llama-3.1-8b-instant",
+                    "description": "Model for fast analysis (defaults to provider's fast model)"
+                  }
+                }
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Basic analysis with Groq",
+                  "value": {
+                    "symbol": "AAPL"
+                  }
+                },
+                "extended": {
+                  "summary": "Extended debate analysis",
+                  "value": {
+                    "symbol": "TSLA",
+                    "date": "2024-12-19",
+                    "max_debate_rounds": 3,
+                    "llm_provider": "groq"
+                  }
+                },
+                "custom_models": {
+                  "summary": "Custom model configuration",
+                  "value": {
+                    "symbol": "NVDA",
+                    "llm_provider": "anthropic",
+                    "deep_think_llm": "claude-3-5-sonnet-20241022",
+                    "quick_think_llm": "claude-3-5-haiku-20241022"
                   }
                 }
               }
@@ -1003,11 +1062,96 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful debate analysis with comprehensive multi-agent consensus",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DebateAnalysisResponse"
+                },
+                "examples": {
+                  "successful_analysis": {
+                    "summary": "Example successful analysis",
+                    "value": {
+                      "success": true,
+                      "symbol": "AAPL",
+                      "date": "2024-12-19",
+                      "analysis": {
+                        "bull_arguments": [
+                          "Strong fundamentals with consistent 15% YoY revenue growth",
+                          "Leading market position in premium smartphone segment",
+                          "Services revenue growing 20% annually with high margins"
+                        ],
+                        "bear_arguments": [
+                          "P/E ratio of 28 above historical average of 22",
+                          "iPhone revenue growth slowing in key markets",
+                          "Regulatory pressure in EU and China"
+                        ],
+                        "final_decision": "BUY",
+                        "confidence_level": "Medium-High",
+                        "reasoning": "Bull case stronger based on fundamental analysis and growth trajectory despite valuation concerns"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "500": {
+            "description": "Analysis failed due to server error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Trading Agents"
+        ],
+        "summary": "Get debate analysis system info",
+        "description": "Retrieve information about available agents, models, and system capabilities",
+        "responses": {
+          "200": {
+            "description": "System information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "system": {
+                      "type": "string",
+                      "example": "Multi-Agent Debate Analysis"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "2.4"
+                    },
+                    "agents": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "Market Analyst",
+                        "News Analyst",
+                        "Fundamentals Analyst",
+                        "Bull Researcher",
+                        "Bear Researcher",
+                        "Research Manager",
+                        "Trader",
+                        "Risk Managers (Conservative/Neutral/Aggressive)",
+                        "Portfolio Manager",
+                        "External Consultant"
+                      ]
+                    },
+                    "supported_providers": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": ["groq", "openai", "anthropic"]
+                    }
+                  }
                 }
               }
             }
@@ -1484,15 +1628,158 @@
   },
   "DebateAnalysisResponse": {
     "type": "object",
+    "required": ["success", "symbol", "date"],
     "properties": {
-      "decision": {
-        "type": "string"
+      "success": {
+        "type": "boolean",
+        "description": "Whether the analysis completed successfully"
       },
-      "confidence": {
-        "type": "number"
+      "symbol": {
+        "type": "string",
+        "example": "AAPL",
+        "description": "Stock ticker symbol analyzed"
+      },
+      "date": {
+        "type": "string",
+        "format": "date",
+        "example": "2024-12-19",
+        "description": "Analysis date"
       },
       "analysis": {
-        "type": "string"
+        "type": "object",
+        "required": ["final_decision", "confidence_level", "reasoning"],
+        "properties": {
+          "bull_arguments": {
+            "type": "array",
+            "description": "Bullish arguments from Bull Researcher",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Strong fundamentals with 15% YoY revenue growth",
+              "Leading market position in premium smartphone segment"
+            ]
+          },
+          "bear_arguments": {
+            "type": "array",
+            "description": "Bearish arguments from Bear Researcher",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "P/E ratio of 28 above historical average",
+              "Regulatory pressure in key markets"
+            ]
+          },
+          "final_decision": {
+            "type": "string",
+            "enum": ["BUY", "SELL", "HOLD", "REJECT"],
+            "description": "Final investment decision from Research Manager",
+            "example": "BUY"
+          },
+          "confidence_level": {
+            "type": "string",
+            "enum": ["High", "Medium-High", "Medium", "Medium-Low", "Low"],
+            "description": "Confidence in the decision",
+            "example": "Medium-High"
+          },
+          "reasoning": {
+            "type": "string",
+            "description": "Detailed reasoning for the decision",
+            "example": "Bull case stronger based on fundamental analysis and growth trajectory"
+          },
+          "risk_assessment": {
+            "type": "string",
+            "description": "Risk management assessment",
+            "example": "Medium risk with controlled position sizing recommended"
+          },
+          "thesis_compliance": {
+            "type": "object",
+            "description": "Thesis compliance metrics",
+            "properties": {
+              "financial_health": {
+                "type": "string",
+                "example": "9/12"
+              },
+              "growth_score": {
+                "type": "string",
+                "example": "4/6"
+              },
+              "pe_ratio": {
+                "type": "number",
+                "example": 16
+              },
+              "adr_status": {
+                "type": "string",
+                "example": "None"
+              },
+              "analyst_coverage": {
+                "type": "integer",
+                "example": 3
+              },
+              "compliance_percentage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "example": 85
+              }
+            }
+          }
+        }
+      },
+      "debate_history": {
+        "type": "array",
+        "description": "Full debate conversation history",
+        "items": {
+          "type": "object",
+          "properties": {
+            "agent": {
+              "type": "string",
+              "example": "bull_researcher"
+            },
+            "message": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      },
+      "metadata": {
+        "type": "object",
+        "description": "Execution metadata",
+        "properties": {
+          "llm_provider": {
+            "type": "string",
+            "example": "groq"
+          },
+          "deep_think_model": {
+            "type": "string",
+            "example": "llama-3.3-70b-versatile"
+          },
+          "quick_think_model": {
+            "type": "string",
+            "example": "llama-3.1-8b-instant"
+          },
+          "debate_rounds": {
+            "type": "integer",
+            "example": 2
+          },
+          "total_tokens": {
+            "type": "integer",
+            "example": 15420
+          },
+          "execution_time_ms": {
+            "type": "integer",
+            "example": 8500
+          }
+        }
+      },
+      "error": {
+        "type": "string",
+        "description": "Error message if analysis failed"
       }
     }
   },

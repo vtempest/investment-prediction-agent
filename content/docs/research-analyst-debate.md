@@ -135,19 +135,83 @@ The Next.js app will start on `http://localhost:3000`
 
 ### Using the Next.js API Endpoint
 
-The new `/api/groq-debate` endpoint provides a simplified interface:
+The `/api/groq-debate` endpoint provides a comprehensive multi-agent debate analysis interface.
+
+**Base URL**: `https://autoinvestment.broker/api` or `http://localhost:3000/api`
+
+#### Get System Information
 
 ```bash
-# Get API information
-curl http://localhost:3000/api/groq-debate
+# Get API information about available agents and models
+curl https://autoinvestment.broker/api/groq-debate
 
-# Analyze a stock
-curl -X POST http://localhost:3000/api/groq-debate \
+# Response:
+{
+  "system": "Multi-Agent Debate Analysis",
+  "version": "2.4",
+  "agents": [
+    "Market Analyst",
+    "News Analyst",
+    "Fundamentals Analyst",
+    "Bull Researcher",
+    "Bear Researcher",
+    "Research Manager",
+    "Trader",
+    "Risk Managers",
+    "Portfolio Manager",
+    "External Consultant"
+  ],
+  "supported_providers": ["groq", "openai", "anthropic"]
+}
+```
+
+#### Example 1: Basic Analysis (Groq Default)
+
+```bash
+curl -X POST https://autoinvestment.broker/api/groq-debate \
   -H "Content-Type: application/json" \
   -d '{
-    "symbol": "AAPL",
-    "date": "2024-12-11",
+    "symbol": "AAPL"
+  }'
+```
+
+#### Example 2: Extended Debate Analysis
+
+```bash
+curl -X POST https://autoinvestment.broker/api/groq-debate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "TSLA",
+    "date": "2024-12-19",
+    "max_debate_rounds": 3,
+    "llm_provider": "groq"
+  }'
+```
+
+#### Example 3: Custom Models with Anthropic
+
+```bash
+curl -X POST https://autoinvestment.broker/api/groq-debate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "NVDA",
+    "llm_provider": "anthropic",
+    "deep_think_llm": "claude-3-5-sonnet-20241022",
+    "quick_think_llm": "claude-3-5-haiku-20241022",
     "max_debate_rounds": 2
+  }'
+```
+
+#### Example 4: OpenAI Models
+
+```bash
+curl -X POST https://autoinvestment.broker/api/groq-debate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "MSFT",
+    "llm_provider": "openai",
+    "deep_think_llm": "gpt-4o",
+    "quick_think_llm": "gpt-4o-mini"
   }'
 ```
 
@@ -157,28 +221,51 @@ curl -X POST http://localhost:3000/api/groq-debate \
 {
   "success": true,
   "symbol": "AAPL",
-  "date": "2024-12-11",
+  "date": "2024-12-19",
   "analysis": {
     "bull_arguments": [
-      "Strong fundamentals with consistent revenue growth...",
-      "Leading position in smartphone market with 50%+ profit share..."
+      "Strong fundamentals with consistent 15% YoY revenue growth",
+      "Leading market position in premium smartphone segment with 50%+ profit share",
+      "Services revenue growing 20% annually with high margins"
     ],
     "bear_arguments": [
-      "High valuation multiples compared to historical averages...",
-      "Increasing regulatory pressure in key markets..."
+      "P/E ratio of 28 above historical average of 22",
+      "iPhone revenue growth slowing in key markets",
+      "Increasing regulatory pressure in EU and China markets"
     ],
-    "risk_assessment": "Medium risk with controlled position sizing recommended",
-    "final_decision": "BUY with 60% confidence",
+    "final_decision": "BUY",
     "confidence_level": "Medium-High",
-    "reasoning": "The bull case is stronger based on fundamental analysis..."
+    "reasoning": "The bull case is stronger based on fundamental analysis and growth trajectory despite valuation concerns",
+    "risk_assessment": "Medium risk with controlled position sizing recommended",
+    "thesis_compliance": {
+      "financial_health": "9/12",
+      "growth_score": "4/6",
+      "pe_ratio": 28,
+      "adr_status": "NYSE: AAPL",
+      "analyst_coverage": 45,
+      "compliance_percentage": 45
+    }
   },
   "debate_history": [
     {
       "agent": "bull_researcher",
-      "message": "...",
-      "timestamp": "..."
+      "message": "THESIS COMPLIANCE:\n✓ Financial Health: 9/12\n✓ Growth Score: 4/6\n...",
+      "timestamp": "2024-12-19T10:00:00Z"
+    },
+    {
+      "agent": "bear_researcher",
+      "message": "BEAR CASE SUMMARY:\nP/E of 28 exceeds historical average...",
+      "timestamp": "2024-12-19T10:01:30Z"
     }
-  ]
+  ],
+  "metadata": {
+    "llm_provider": "groq",
+    "deep_think_model": "llama-3.3-70b-versatile",
+    "quick_think_model": "llama-3.1-8b-instant",
+    "debate_rounds": 2,
+    "total_tokens": 15420,
+    "execution_time_ms": 8500
+  }
 }
 ```
 
