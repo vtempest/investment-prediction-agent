@@ -123,4 +123,3 @@ export function HeroSection() {
     </section >
   )
 }
-Paper
