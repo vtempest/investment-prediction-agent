@@ -327,13 +327,16 @@ function AppSidebarContent({ ...props }: React.ComponentProps<typeof Sidebar>) {
     .toUpperCase()
     .substring(0, 2) || "GU"
 
+  // Determine logo link based on current page
+  const logoHref = pathname.startsWith('/docs') ? '/dashboard' : '/'
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href={logoHref}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground">
                   <Image
                     src="/apple-touch-icon.png"
