@@ -76,11 +76,11 @@ export function Header() {
           </Link>
 
           <Link
-            href="/api/docs"
+            href="/docs"
             className={navLinkClasses}
           >
             <Sparkles className="h-4 w-4" />
-            API
+            Docs
           </Link>
         </nav>
 
@@ -156,11 +156,11 @@ export function Header() {
             </Link>
 
             <Link
-              href="/api/docs"
+              href="/docs"
               className={navLinkClasses}
             >
               <Sparkles className="h-4 w-4" />
-              API
+              Docs
             </Link>
 
             <div className="pt-4">

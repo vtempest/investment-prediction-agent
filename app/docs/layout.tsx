@@ -13,6 +13,7 @@ import 'katex/dist/katex.min.css'
 import type { CSSProperties } from 'react'
 import { DOCS_TITLE } from '@/lib/constants'
 
+
 export default function Layout({ children }: LayoutProps<'/docs'>) {
   const base = baseOptions()
 

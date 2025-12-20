@@ -87,10 +87,10 @@ export function HeroSection() {
               </Button>
 
               <Button variant="outline" size="lg" asChild>
-                <Link href="/api/docs" target="_blank" rel="noopener noreferrer">
+                <Link href="/docs" target="_blank" rel="noopener noreferrer">
                   <Target className="mr-2 h-5 w-5" />
 
-                  API Docs
+                  Docs
                 </Link>
               </Button>
 
