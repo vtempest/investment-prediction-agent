@@ -30,7 +30,7 @@
     </a>
 </p>
 <h3 align="center">
-    <a href="https://docs.autoinvestment.broker/"> 📑 Docs </a> <a href="https://autoinvestment.broker/api/docs"> API </a>
+    <a href="https://docs.autoinvestment.broker/"> 📑 Docs </a> <a href="https://autoinvestment.broker/api/docs"> 🎯 API </a>
  <a href="https://autoinvestment.broker"> 🚀 Demo</a></h3>
 
 # Investment Prediction Agent
