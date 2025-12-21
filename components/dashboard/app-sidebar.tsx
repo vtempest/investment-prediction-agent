@@ -32,7 +32,8 @@ import {
   Moon,
   Sun,
   ChevronRight,
-  Database
+  Database,
+  Trophy
 } from 'lucide-react'
 import { useSession, signOut } from "@/lib/auth-client"
 import { useTheme } from "next-themes"
@@ -246,6 +247,7 @@ const navigationGroups = [
   {
     title: "Trading",
     items: [
+      { name: "Leaders", tab: "leaders", icon: Trophy },
       { name: "Orders", tab: "orders", icon: TrendingUp },
       { name: "Copy Trading", tab: "copy-trading", icon: Copy },
       { name: "Prediction Markets", tab: "prediction-markets", icon: Target },

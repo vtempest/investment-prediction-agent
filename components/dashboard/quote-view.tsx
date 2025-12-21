@@ -118,6 +118,7 @@ export function QuoteView({ symbol, showBackButton = true, tradeSignals = [] }: 
     const fetchQuote = async () => {
       try {
         setLoading(true)
+        setError("") // Clear any previous errors
 
         // const res = await fetch(`/api/stocks/quote/${symbol}`)
         const json = await Broker.getStocksQuoteBySymbol({
@@ -131,6 +132,7 @@ export function QuoteView({ symbol, showBackButton = true, tradeSignals = [] }: 
 
         if (json.success && json.data) {
           setData(json.data)
+          setError("") // Clear error on success
         } else {
           setError(json.error || "Failed to fetch quote data")
         }

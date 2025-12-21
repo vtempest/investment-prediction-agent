@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { ExternalLink, Eye, EyeOff, Save, Moon, Sun, Monitor, Copy, RefreshCw, Key, Palette, Brain, TrendingUp, Database, Users } from "lucide-react";
 import { TeamsManager } from "@/components/settings/teams-manager";
 import { PremiumUpgrade } from "@/components/settings/premium-upgrade";
+import { ThirdPartySyncTab } from "@/components/dashboard/third-party-sync-tab";
 
 
 const LLM_PROVIDERS = [
@@ -356,7 +357,7 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-flex">
+        <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-flex">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Key className="h-4 w-4" />
             <span className="hidden sm:inline">General</span>
@@ -372,6 +373,10 @@ export default function SettingsPage() {
           <TabsTrigger value="data" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
             <span className="hidden sm:inline">Data</span>
+          </TabsTrigger>
+          <TabsTrigger value="sync" className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            <span className="hidden sm:inline">Sync</span>
           </TabsTrigger>
           <TabsTrigger value="teams" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -792,6 +797,11 @@ export default function SettingsPage() {
               ))}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Sync Tab */}
+        <TabsContent value="sync" className="space-y-6 mt-6">
+          <ThirdPartySyncTab />
         </TabsContent>
 
         {/* Teams Tab */}
