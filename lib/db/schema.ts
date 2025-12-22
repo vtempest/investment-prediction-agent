@@ -419,6 +419,37 @@ export const zuluCurrencyStats = sqliteTable("zulu_currency_stats", {
 })
 
 // ============================================================================
+// NVSTLY Traders Tracking
+// ============================================================================
+
+// NVSTLY Leaders/Traders
+export const nvstlyLeaders = sqliteTable("nvstly_leaders", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  rank: integer("rank"),
+  rep: integer("rep"),
+  trades: integer("trades"),
+  winRate: real("win_rate"),
+  totalGain: real("total_gain"),
+  avgReturn: real("avg_return"),
+  broker: text("broker"),
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
+})
+
+// NVSTLY Trader Orders
+export const nvstlyOrders = sqliteTable("nvstly_orders", {
+  id: text("id").primaryKey(),
+  traderId: text("trader_id").notNull().references(() => nvstlyLeaders.id, { onDelete: "cascade" }),
+  symbol: text("symbol").notNull(),
+  type: text("type").notNull(), // buy, sell, short
+  price: real("price").notNull(),
+  time: integer("time", { mode: "timestamp" }).notNull(),
+  gain: real("gain"),
+  previousPrice: real("previous_price"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+})
+
+// ============================================================================
 // Agent API Logs
 // ============================================================================
 

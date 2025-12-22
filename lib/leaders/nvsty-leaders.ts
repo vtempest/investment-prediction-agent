@@ -1,7 +1,7 @@
 import { grab, log } from "grab-url";
-import fs from "fs/promises";
-
-const LEADERS_FILE = "./data/leaders.json";
+import { db } from "@/lib/db";
+import { nvstlyLeaders, nvstlyOrders } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 
 interface Trader {
@@ -118,20 +118,75 @@ export const myLeadersAPI = new LeadersAPI();
 
 export async function syncCopyTradingLeadersOrders() {
   const traders = await myLeadersAPI.getTraderRankings();
-  traders.forEach((trader) => {
-  });
   console.log(`Found ${traders.length} traders`);
+
+  let totalOrders = 0;
 
   for (let i = 0; i < traders.length; i++) {
     const trader = traders[i];
     const traderId = trader.id;
-    traders[i].orders = await myLeadersAPI.getTraderTrades(traderId);
-    console.log(
-      `  Added ${traders[i].orders.length} trades for ${traders[i].name}`
-    );
-    await fs.writeFile(LEADERS_FILE, JSON.stringify(traders, null, 2));
 
-    var t = traders[i].orders[2];
+    // Fetch trader's orders
+    const orders = await myLeadersAPI.getTraderTrades(traderId);
+    traders[i].orders = orders;
+
+    console.log(`  Adding ${orders.length} trades for ${trader.name}`);
+
+    // Save trader to database (upsert)
+    await db.insert(nvstlyLeaders)
+      .values({
+        id: trader.id,
+        name: trader.name,
+        rank: trader.rank,
+        rep: trader.rep,
+        trades: trader.trades,
+        winRate: trader.winRate,
+        totalGain: trader.totalGain,
+        avgReturn: trader.avgReturn,
+        broker: "NVSTLY",
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: nvstlyLeaders.id,
+        set: {
+          name: trader.name,
+          rank: trader.rank,
+          rep: trader.rep,
+          trades: trader.trades,
+          winRate: trader.winRate,
+          totalGain: trader.totalGain,
+          avgReturn: trader.avgReturn,
+          updatedAt: new Date(),
+        },
+      });
+
+    // Save trader's orders to database
+    for (const order of orders) {
+      await db.insert(nvstlyOrders)
+        .values({
+          id: `${trader.id}-${order.symbol}-${new Date(order.time).getTime()}`,
+          traderId: trader.id,
+          symbol: order.symbol,
+          type: order.type,
+          price: order.price,
+          time: new Date(order.time),
+          gain: order.gain,
+          previousPrice: order.previousPrice,
+          createdAt: new Date(),
+        })
+        .onConflictDoNothing();
+
+      totalOrders++;
+    }
+
+    // Rate limiting: wait 1 second between traders
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
+
+  console.log(`Synced ${traders.length} traders with ${totalOrders} total orders`);
+
+  return {
+    traderCount: traders.length,
+    orderCount: totalOrders,
+  };
 }

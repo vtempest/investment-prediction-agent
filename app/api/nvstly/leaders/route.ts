@@ -1,28 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs/promises'
-import path from 'path'
+import { db } from '@/lib/db'
+import { nvstlyLeaders, nvstlyOrders } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
   try {
-    const leadersFilePath = path.join(process.cwd(), 'data', 'leaders.json')
+    // Fetch all leaders from database, ordered by rank
+    const leaders = await db.select()
+      .from(nvstlyLeaders)
+      .orderBy(nvstlyLeaders.rank)
 
-    // Check if file exists
-    try {
-      await fs.access(leadersFilePath)
-    } catch {
-      // If file doesn't exist, return empty array
-      return NextResponse.json({
-        success: true,
-        data: []
+    // Fetch orders for each leader
+    const leadersWithOrders = await Promise.all(
+      leaders.map(async (leader) => {
+        const orders = await db.select()
+          .from(nvstlyOrders)
+          .where(eq(nvstlyOrders.traderId, leader.id))
+          .orderBy(desc(nvstlyOrders.time))
+
+        return {
+          ...leader,
+          orders: orders.map(order => ({
+            symbol: order.symbol,
+            type: order.type,
+            price: order.price,
+            time: order.time?.toISOString(),
+            gain: order.gain,
+            previousPrice: order.previousPrice,
+          }))
+        }
       })
-    }
-
-    const fileContent = await fs.readFile(leadersFilePath, 'utf-8')
-    const leaders = JSON.parse(fileContent)
+    )
 
     return NextResponse.json({
       success: true,
-      data: leaders
+      data: leadersWithOrders
     })
   } catch (error: any) {
     console.error('Failed to fetch NVSTLY leaders:', error)
