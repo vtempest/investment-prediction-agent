@@ -199,7 +199,7 @@ export function StrategiesSection() {
           </div>
           <div className="relative h-48 w-72 overflow-hidden rounded-xl border border-border lg:h-56 lg:w-80">
             <Image
-              src="/images/banner-trading-floor.jpeg"
+              src="/images/algo-bot-timing.png"
               alt="AI Trading Floor with Multiple Agents"
               width={400}
               height={400}

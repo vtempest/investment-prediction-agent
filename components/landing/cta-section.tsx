@@ -85,6 +85,14 @@ export function CTASection() {
             </video>
           </div>
         </div>
+
+        <div className="mt-12 w-full">
+          <img
+            src="https://i.imgur.com/02tH2b5.png"
+            alt="Trading Banner"
+            className="w-full rounded-lg shadow-lg border border-border/50"
+          />
+        </div>
       </div>
     </section>
   )

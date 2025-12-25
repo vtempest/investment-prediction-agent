@@ -7,11 +7,6 @@ import Image from "next/image"
 import { usePathname, useSearchParams, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  Signal,
-  Users,
   Zap,
   Target,
   Copy,
@@ -25,15 +20,10 @@ import {
   CreditCard,
   Search,
   Bell,
-  Star,
-  Trash2,
   BarChart3,
   Palette,
   Moon,
-  Sun,
-  ChevronRight,
-  Database,
-  Trophy
+  Sun
 } from 'lucide-react'
 import { useSession, signOut } from "@/lib/auth-client"
 import { useTheme } from "next-themes"
@@ -247,8 +237,8 @@ const navigationGroups = [
   {
     title: "Trading",
     items: [
-      { name: "Copy Trading", tab: "copy-trading", icon: Copy },
-      { name: "Orders", tab: "orders", icon: TrendingUp },
+      { name: "Copy Trade Leaders", tab: "copy-trading", icon: Copy },
+      // { name: "Orders", tab: "orders", icon: TrendingUp },
       { name: "Prediction Markets", tab: "prediction-markets", icon: Target },
     ],
   },
