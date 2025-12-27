@@ -1,15 +1,6 @@
 {
   "pages": [
-    "index",
-    "research-analyst-debate",
-    "debate-agents-prompts",
-    "fundamentals",
-    "technical-indicators",
-    "trading-strategies",
-    "timeseries-correlations",
-    "brokers",
-    "initialization-and-usage",
-    "investment-dictionary",
-    "risk-disclosure"
+    "(index)",
+    "api-reference"
   ]
 }
