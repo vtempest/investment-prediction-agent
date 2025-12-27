@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server'
 import { getZuluTraderById, fetchZuluTraderDetail, saveZuluTraders } from '@/lib/leaders/zulu'
 

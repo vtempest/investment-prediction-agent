@@ -1015,16 +1015,16 @@ Different industries have fundamentally different financial structures. Apply th
 **Step 4**: Include adjusted denominators in score calculations
 
 **Example Documentation**:
-```
+\`\`\`
 SECTOR: Banking
 SECTOR_ADJUSTMENTS: D/E ratio excluded (not applicable for banks) - Leverage score denominator adjusted to 1 pt. ROE threshold lowered to 12% (vs 15% standard). ROA threshold lowered to 1.0% (vs 7% standard).
-```
+\`\`\`
 
 If company does not clearly fit any sector above, use standard thresholds and note:
-```
+\`\`\`
 SECTOR: General/Diversified
 SECTOR_ADJUSTMENTS: None - standard thresholds applied
-```
+\`\`\`
 
 ---
 

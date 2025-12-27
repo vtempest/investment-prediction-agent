@@ -10,24 +10,24 @@ Get up and running with the JavaScript Multi-Agent Trading System in 5 minutes.
 
 ## Step 1: Install Dependencies (30 seconds)
 
-```bash
+\`\`\`bash
 cd lib/debate-agents/debate-agents-js
 npm install
-```
+\`\`\`
 
 ## Step 2: Configure API Keys (2 minutes)
 
-```bash
+\`\`\`bash
 cp .env.example .env
-```
+\`\`\`
 
 Edit `.env` and add **at minimum**:
 
-```bash
+\`\`\`bash
 GOOGLE_API_KEY=your_gemini_api_key_here
 FINNHUB_API_KEY=your_finnhub_key_here
 TAVILY_API_KEY=your_tavily_key_here
-```
+\`\`\`
 
 ### Get Free API Keys
 
@@ -37,21 +37,21 @@ TAVILY_API_KEY=your_tavily_key_here
 
 ## Step 3: Test Installation (30 seconds)
 
-```bash
+\`\`\`bash
 node health_check.js
-```
+\`\`\`
 
 You should see:
-```
+\`\`\`
 ✓ Overall health check: PASSED
 System is ready to run analyses.
-```
+\`\`\`
 
 ## Step 4: Try the System (1 minute)
 
 Create a test file `test.js`:
 
-```javascript
+\`\`\`javascript
 import {
   initialize,
   createQuickThinkingLLM,
@@ -89,16 +89,16 @@ async function test() {
 }
 
 test().catch(console.error);
-```
+\`\`\`
 
 Run it:
 
-```bash
+\`\`\`bash
 node test.js
-```
+\`\`\`
 
 Expected output:
-```
+\`\`\`
 Multi-Agent Trading System initialized successfully
 JavaScript version: 1.0.0
 Based on Python version: 7.0
@@ -109,13 +109,13 @@ Based on Python version: 7.0
 ✓ Token tracker ready
 
 ✅ All systems operational!
-```
+\`\`\`
 
 ## What You Can Do Now
 
 ### 1. Use Individual Modules
 
-```javascript
+\`\`\`javascript
 import {
   createQuickThinkingLLM,
   getPrompt,
@@ -138,11 +138,11 @@ const usdValue = 10000 * jpyToUsd; // ¥10,000 -> USD
 // Store memories
 const memory = new FinancialSituationMemory('my_memory');
 await memory.addSituations(['Market analysis from 2024-12-19']);
-```
+\`\`\`
 
 ### 2. Track Token Usage
 
-```javascript
+\`\`\`javascript
 import { getTracker } from './index.js';
 
 const tracker = getTracker();
@@ -153,11 +153,11 @@ console.log(`Total tokens: ${stats.total_tokens}`);
 console.log(`Estimated cost: $${stats.total_cost_usd}`);
 
 tracker.printSummary(); // Pretty print
-```
+\`\`\`
 
 ### 3. Generate Reports
 
-```javascript
+\`\`\`javascript
 import { QuietModeReporter } from './index.js';
 
 const reporter = new QuietModeReporter('AAPL', 'Apple Inc.');
@@ -168,7 +168,7 @@ const analysisResult = {
 
 const markdown = reporter.generateReport(analysisResult);
 console.log(markdown);
-```
+\`\`\`
 
 ## Next Steps
 
@@ -194,13 +194,13 @@ See [COMPLETION_SUMMARY.md](COMPLETION_SUMMARY.md) for details.
 
 The JavaScript version can work alongside Python:
 
-```bash
+\`\`\`bash
 # Share prompts
 cd ../
 python -c "from prompts import export_prompts; export_prompts()"
 
 # JavaScript will auto-load from ../prompts/*.json
-```
+\`\`\`
 
 Both versions can:
 - Share ChromaDB memory collections
@@ -229,26 +229,26 @@ Check API keys are valid and have correct format.
 
 ### 1. Quick LLM Test
 
-```javascript
+\`\`\`javascript
 import { createQuickThinkingLLM } from './index.js';
 
 const llm = createQuickThinkingLLM();
 const answer = await llm.invoke('What is the capital of France?');
 console.log(answer.content);
-```
+\`\`\`
 
 ### 2. Check System Info
 
-```javascript
+\`\`\`javascript
 import { getSystemInfo } from './index.js';
 
 const info = getSystemInfo();
 console.log(JSON.stringify(info, null, 2));
-```
+\`\`\`
 
 ### 3. Validate Configuration
 
-```javascript
+\`\`\`javascript
 import { config, validateEnvironmentVariables } from './index.js';
 
 try {
@@ -259,7 +259,7 @@ try {
 } catch (error) {
   console.error('✗ Configuration error:', error.message);
 }
-```
+\`\`\`
 
 ## Get Help
 

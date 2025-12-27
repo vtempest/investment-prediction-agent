@@ -40,7 +40,7 @@ Chan, E. P. (2013). *Algorithmic trading: Winning strategies and their rationale
 
 #### 📊 Asset
 The Asset interface represents price/volume data:
-```
+\`\`\`
 interface Asset {
   dates: Date[]           // Trading dates
   openings: number[]      // Opening prices
@@ -49,23 +49,23 @@ interface Asset {
   lows: number[]          // Period lows
   volumes: number[]       // Trading volumes
 }
-```
+\`\`\`
 
 #### 🎯 Action
 Trading signals:
-```
+\`\`\`
 enum Action {
   SELL = -1              // Exit/short signal
   HOLD = 0               // No action
   BUY = 1                // Entry/long signal
 }
-```
+\`\`\`
 
 #### 🔄 Strategy Function
 Converts indicators into actions:
-```
+\`\`\`
 type StrategyFunction = (asset: Asset) => Action[]
-```
+\`\`\`
 
 Takes price/volume data, applies indicators, returns buy/sell signals for each period.
 

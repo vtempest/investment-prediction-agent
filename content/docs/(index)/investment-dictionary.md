@@ -109,5 +109,3 @@ title: Investment Dictionary
 - **Yield** – The income an investment generates over a period, usually expressed as a percentage of its price or value. [More](https://investor.vanguard.com/investor-resources-education/article/bond-yields-explained)
 - **Yield Curve** – A graph that shows interest rates for bonds of the same credit quality but different maturities. [More](https://www.investopedia.com/terms/y/yieldcurve.asp)
 - **Zero‑Coupon Bond** – A bond that pays no periodic interest and is issued at a discount, returning its full face value at maturity. [More](https://www.investopedia.com/terms/z/zero-couponbond.asp)
-
-

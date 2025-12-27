@@ -144,7 +144,7 @@ Successfully created a comprehensive JavaScript port of the Multi-Agent Trading 
 
 ### Immediately Usable ✅
 
-```javascript
+\`\`\`javascript
 import {
   initialize,
   config,
@@ -185,7 +185,7 @@ const result = TickerCorrector.correctAndValidate('NOVN.VX');
 // Token tracking
 const tracker = getTracker();
 const stats = tracker.getTotalStats();
-```
+\`\`\`
 
 ## 🚧 Remaining Work
 
@@ -232,26 +232,26 @@ To complete the full trading system, these modules are needed:
 
 ### Install Dependencies
 
-```bash
+\`\`\`bash
 cd lib/debate-agents/debate-agents-js
 npm install
-```
+\`\`\`
 
 ### Configure Environment
 
-```bash
+\`\`\`bash
 cp .env.example .env
 # Edit .env and add your API keys
-```
+\`\`\`
 
 ### Run Health Check
 
-```bash
+\`\`\`bash
 node health_check.js
-```
+\`\`\`
 
 Expected output:
-```
+\`\`\`
 ╔════════════════════════════════════════════════════════════════╗
 ║   Multi-Agent Trading System - Health Check (JavaScript)      ║
 ╚════════════════════════════════════════════════════════════════╝
@@ -279,7 +279,7 @@ HEALTH CHECK SUMMARY
 ✓ Overall health check: PASSED
 
 System is ready to run analyses.
-```
+\`\`\`
 
 ## 🔄 Shared Resources with Python
 
@@ -287,13 +287,13 @@ System is ready to run analyses.
 
 Both Python and JavaScript load prompts from `../prompts/*.json`:
 
-```bash
+\`\`\`bash
 # Export Python prompts to JSON (from Python directory)
 cd ../
 python -c "from prompts import export_prompts; export_prompts()"
 
 # JavaScript will auto-load these files
-```
+\`\`\`
 
 ### ChromaDB
 

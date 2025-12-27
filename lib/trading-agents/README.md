@@ -36,7 +36,7 @@ A JavaScript/TypeScript implementation of the TradingAgents framework, converted
 
 ### API Endpoint
 
-```
+\`\`\`
 POST /api/trading-agents
 
 Request Body:
@@ -73,11 +73,11 @@ Response:
     "traderDecision": "..."
   }
 }
-```
+\`\`\`
 
 ### Programmatic Usage
 
-```
+\`\`\`
 import { TradingAgentsGraph } from '@/lib/trading-agents'
 
 // Initialize the graph
@@ -104,7 +104,7 @@ console.log('Market Report:', state.marketReport)
 
 // Learn from the outcome
 await graph.reflectAndRemember(5.2)  // 5.2% return
-```
+\`\`\`
 
 ## Technical Indicators
 
@@ -139,14 +139,14 @@ The system uses similarity matching to retrieve relevant past experiences.
 
 ### Environment Variables
 
-```bash
+\`\`\`bash
 OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key  # if using Anthropic
-```
+\`\`\`
 
 ### Default Configuration
 
-```
+\`\`\`
 {
   llmProvider: 'openai',
   deepThinkLLM: 'gpt-4o',  // For complex analysis
@@ -154,7 +154,7 @@ ANTHROPIC_API_KEY=your_anthropic_key  # if using Anthropic
   temperature: 0.3,
   projectDir: './data'
 }
-```
+\`\`\`
 
 ## Workflow
 

@@ -1,4 +1,4 @@
- {/* Strategy Tabs */}
+{/* Strategy Tabs */}
         <div className=" mb-8 flex flex-wrap justify-center gap-3">
           {strategies.map((strategy) => {
             const strategyColors = colorVariants[strategy.color as keyof typeof colorVariants]

@@ -148,7 +148,7 @@ The debate system uses a multi-stage analysis pipeline:
 6. **Recommendation**: BUY/HOLD with reasoning
 
 **Example Output**:
-```
+\`\`\`
 THESIS COMPLIANCE:
 ✓ Financial Health: 9/12 (≥7 required)
 ✓ Growth Score: 4/6 (≥3 required)
@@ -163,7 +163,7 @@ this company offers compelling value. The undiscovered status
 
 CONVICTION: High
 RECOMMENDATION: BUY
-```
+\`\`\`
 
 ---
 
@@ -211,7 +211,7 @@ RECOMMENDATION: BUY
 5. **Recommendation**: SELL/HOLD with reasoning
 
 **Example Output**:
-```
+\`\`\`
 BEAR CASE SUMMARY:
 This stock violates the thesis on valuation: P/E is 22
 (vs. threshold of 18) with PEG of 1.5 (above 1.2 threshold).
@@ -225,7 +225,7 @@ KEY RISKS:
 
 CONVICTION: High
 RECOMMENDATION: SELL
-```
+\`\`\`
 
 ---
 
@@ -355,7 +355,7 @@ RECOMMENDATION: SELL
 3. **Challenge the Synthesis**: Review Research Manager's logic
 
 **Output Structure**:
-```
+\`\`\`
 CONSULTANT REVIEW: [APPROVED / CONDITIONAL APPROVAL / MAJOR CONCERNS]
 
 SECTION 1: FACTUAL VERIFICATION
@@ -371,7 +371,7 @@ Research Manager Recommendation: [BUY/HOLD/REJECT]
 Consultant Assessment: [✓ AGREE / ✗ DISAGREE / ⚠ RESERVATIONS]
 
 FINAL CONSULTANT VERDICT: [Overall assessment]
-```
+\`\`\`
 
 **Special Features**:
 - Uses different AI model (OpenAI) to cross-validate Gemini outputs
@@ -405,17 +405,17 @@ This thesis ensures the system focuses on undiscovered, high-quality value oppor
 
 ### Example 1: Basic Analysis
 
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/groq-debate \
   -H "Content-Type: application/json" \
   -d '{
     "symbol": "AAPL"
   }'
-```
+\`\`\`
 
 ### Example 2: Extended Debate
 
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/groq-debate \
   -H "Content-Type: application/json" \
   -d '{
@@ -424,11 +424,11 @@ curl -X POST http://localhost:3000/api/groq-debate \
     "max_debate_rounds": 3,
     "llm_provider": "groq"
   }'
-```
+\`\`\`
 
 ### Example 3: Custom Models
 
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/groq-debate \
   -H "Content-Type: application/json" \
   -d '{
@@ -437,11 +437,11 @@ curl -X POST http://localhost:3000/api/groq-debate \
     "deep_think_llm": "claude-3-5-sonnet-20241022",
     "quick_think_llm": "claude-3-5-haiku-20241022"
   }'
-```
+\`\`\`
 
 ### Example 4: JavaScript/TypeScript
 
-```typescript
+\`\`\`typescript
 async function analyzeStock(symbol: string) {
   const response = await fetch('/api/groq-debate', {
     method: 'POST',
@@ -468,13 +468,13 @@ async function analyzeStock(symbol: string) {
 
 // Usage
 const analysis = await analyzeStock('AAPL')
-```
+\`\`\`
 
 ---
 
 ## Response Format
 
-```json
+\`\`\`json
 {
   "success": true,
   "symbol": "AAPL",
@@ -519,7 +519,7 @@ const analysis = await analyzeStock('AAPL')
     "execution_time_ms": 8500
   }
 }
-```
+\`\`\`
 
 ---
 

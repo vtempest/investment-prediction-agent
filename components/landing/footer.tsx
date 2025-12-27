@@ -1,4 +1,3 @@
-
 import Link from "next/link"
 import { FileText, Shield, Mail, ExternalLink, Bot } from "lucide-react"
 import { Button } from "@/components/ui/button"

@@ -10,7 +10,7 @@ The multi-agent system operates in three distinct phases with specialized teams:
 2. **Research Phase**: Bull and Bear researchers debate, managed by Research Manager
 3. **Execution Phase**: Trader proposes, Risk Team debates sizing, Portfolio Manager decides
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────────┐
 │                      ANALYSIS PHASE                             │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌─────────┐│
@@ -44,7 +44,7 @@ The multi-agent system operates in three distinct phases with specialized teams:
 │                              │                                 │
 │                    FINAL DECISION: BUY/SELL/HOLD              │
 └─────────────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
@@ -71,7 +71,7 @@ The multi-agent system operates in three distinct phases with specialized teams:
 - Liquidity metrics (average daily volume, spread)
 
 **Output Format**:
-```
+\`\`\`
 MARKET ANALYSIS
 - Current Price: $XXX
 - Trend: Bullish/Bearish/Neutral
@@ -79,7 +79,7 @@ MARKET ANALYSIS
 - Volume: Above/Below average
 - Liquidity: High/Medium/Low
 - Technical Signal: BUY/SELL/HOLD with confidence
-```
+\`\`\`
 
 **Data Sources**:
 - Yahoo Finance (price, volume, historical data)
@@ -110,7 +110,7 @@ MARKET ANALYSIS
 - Discovery score (institutional vs retail attention)
 
 **Output Format**:
-```
+\`\`\`
 SENTIMENT ANALYSIS
 - Overall Sentiment: Bullish/Bearish/Mixed
 - Social Volume: High/Medium/Low
@@ -118,7 +118,7 @@ SENTIMENT ANALYSIS
 - Key Themes: [List of discussion topics]
 - Influencer Sentiment: Positive/Negative/Neutral
 - Momentum: Increasing/Stable/Declining
-```
+\`\`\`
 
 **Data Sources**:
 - StockTwits API
@@ -150,7 +150,7 @@ SENTIMENT ANALYSIS
 - Analyst upgrades/downgrades
 
 **Output Format**:
-```
+\`\`\`
 NEWS ANALYSIS
 - Recent Headlines: [Key stories]
 - Upcoming Catalysts: [Events with dates]
@@ -158,7 +158,7 @@ NEWS ANALYSIS
 - Regulatory Status: Clear/Under Review/Problematic
 - Industry Trends: [Sector dynamics]
 - Sentiment: Positive/Negative/Neutral
-```
+\`\`\`
 
 **Data Sources**:
 - Tavily news search
@@ -191,7 +191,7 @@ NEWS ANALYSIS
 - Dividend: Yield, payout ratio, dividend growth
 
 **Output Format**:
-```
+\`\`\`
 FUNDAMENTALS ANALYSIS - DATA_BLOCK
 
 VALUATION:
@@ -216,7 +216,7 @@ FINANCIAL HEALTH:
 - Interest Coverage: XX.X
 
 SCORE: X/10 (Value-to-Growth fit)
-```
+\`\`\`
 
 **Data Sources**:
 - Yahoo Finance financials
@@ -248,7 +248,7 @@ SCORE: X/10 (Value-to-Growth fit)
 - Focus on underappreciated growth drivers
 
 **Output Format**:
-```
+\`\`\`
 BULL THESIS
 
 INVESTMENT CASE:
@@ -270,7 +270,7 @@ UPSIDE POTENTIAL:
 
 REBUTTAL TO BEAR CONCERNS:
 [Address each bear concern with counter-argument]
-```
+\`\`\`
 
 ---
 
@@ -301,7 +301,7 @@ REBUTTAL TO BEAR CONCERNS:
 5. **Liquidity Issues**: Low volume, wide spreads
 
 **Output Format**:
-```
+\`\`\`
 BEAR THESIS
 
 RISK ASSESSMENT:
@@ -328,7 +328,7 @@ THESIS VIOLATIONS:
 
 REBUTTAL TO BULL CLAIMS:
 [Address each bull claim with counter-argument]
-```
+\`\`\`
 
 ---
 
@@ -361,7 +361,7 @@ The stock must meet these criteria to be a BUY:
 6. Make preliminary recommendation
 
 **Output Format**:
-```
+\`\`\`
 RESEARCH SYNTHESIS
 
 BULL CASE SUMMARY:
@@ -387,7 +387,7 @@ CONFIDENCE: High/Medium/Low
 
 RATIONALE:
 [Balanced explanation of recommendation]
-```
+\`\`\`
 
 ---
 
@@ -414,7 +414,7 @@ RATIONALE:
 - Urgency vs price improvement tradeoff
 
 **Output Format**:
-```
+\`\`\`
 TRADE PROPOSAL
 
 EXECUTION PLAN:
@@ -437,7 +437,7 @@ MARKET CONDITIONS:
 - Current Volatility: High/Medium/Low
 - Liquidity Assessment: Sufficient/Limited
 - Optimal Timing: [Recommendation]
-```
+\`\`\`
 
 ---
 
@@ -483,7 +483,7 @@ MARKET CONDITIONS:
 - Account size and diversification
 
 **Output Format**:
-```
+\`\`\`
 RISK TEAM DEBATE
 
 RISKY MANAGER:
@@ -504,7 +504,7 @@ NEUTRAL MANAGER:
 CONSENSUS RECOMMENDATION: X-X% of portfolio
 POSITION SIZE: X shares at $XXX = $XX,XXX total
 MAX LOSS: $X,XXX (X% of portfolio)
-```
+\`\`\`
 
 ---
 
@@ -544,7 +544,7 @@ MAX LOSS: $X,XXX (X% of portfolio)
 - How does this fit the portfolio?
 
 **Output Format**:
-```
+\`\`\`
 FINAL TRADE DECISION
 
 DECISION: BUY / SELL / HOLD
@@ -581,7 +581,7 @@ EXECUTION AUTHORIZATION:
 
 Portfolio Manager: [Name]
 Date: [Timestamp]
-```
+\`\`\`
 
 ---
 
@@ -589,7 +589,7 @@ Date: [Timestamp]
 
 ### Full Analysis Workflow
 
-```
+\`\`\`
 1. USER INPUT
    └─> Ticker symbol (e.g., AAPL)
 
@@ -624,7 +624,7 @@ Date: [Timestamp]
 
 9. OUTPUT
    └─> Complete analysis report with decision and rationale
-```
+\`\`\`
 
 ### Communication Protocol
 
@@ -663,7 +663,7 @@ Each agent has a carefully crafted system prompt that defines:
 
 ### Example: Market Analyst Prompt Structure
 
-```
+\`\`\`
 You are the Market Analyst in a multi-agent trading system.
 
 ROLE:
@@ -693,7 +693,7 @@ You have access to:
 - Yahoo Finance API for quotes and historical data
 - Technical indicator calculations
 - Volume and liquidity metrics
-```
+\`\`\`
 
 ---
 
@@ -716,10 +716,10 @@ You have access to:
 ### Parallel Execution
 
 Analysts run in parallel to minimize latency:
-```
+\`\`\`
 Sequential: 4 agents × 10s = 40s
 Parallel: max(10s, 10s, 10s, 10s) = 10s
-```
+\`\`\`
 
 ### Caching and Memory
 

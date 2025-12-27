@@ -6,7 +6,7 @@ A custom tooltip plugin for Lightweight Charts that displays price, date, and ti
 
 ### Basic Usage
 
-```tsx
+\`\`\`tsx
 import { createChart } from 'lightweight-charts';
 import { TooltipPrimitive } from '@/lib/lightweight-charts/plugins/tooltip';
 
@@ -32,11 +32,11 @@ candlestickSeries.setData([
   { time: '2023-01-01', open: 100, high: 105, low: 95, close: 102 },
   // ... more data
 ]);
-```
+\`\`\`
 
 ### With Custom Price Extractor
 
-```tsx
+\`\`\`tsx
 const tooltipPrimitive = new TooltipPrimitive({
   lineColor: 'rgba(0, 0, 0, 0.2)',
   tooltip: {
@@ -51,7 +51,7 @@ const tooltipPrimitive = new TooltipPrimitive({
     return '';
   },
 });
-```
+\`\`\`
 
 ## Options
 

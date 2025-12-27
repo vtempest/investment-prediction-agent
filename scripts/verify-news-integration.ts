@@ -1,4 +1,3 @@
-
 import { TradingAgentsGraph } from '../lib/trading-agents/graph/trading-graph'
 
 async function main() {

@@ -15,9 +15,9 @@ This module provides real-time and historical forex data using the Dukascopy Nod
 
 ### Get Real-Time Data
 
-```
+\`\`\`
 GET /api/forex/realtime/[instrument]
-```
+\`\`\`
 
 **Parameters:**
 - `instrument` - Forex pair (e.g., `eurusd`, `btcusd`, `xauusd`)
@@ -28,19 +28,19 @@ GET /api/forex/realtime/[instrument]
 - `volumes` - Optional: Include volume data (default: `true`)
 
 **Example:**
-```bash
+\`\`\`bash
 # Get last 100 tick prices for EUR/USD
 curl http://localhost:3000/api/forex/realtime/eurusd?last=100&timeframe=tick
 
 # Get last 50 1-minute candles for BTC/USD
 curl http://localhost:3000/api/forex/realtime/btcusd?last=50&timeframe=m1
-```
+\`\`\`
 
 ### Get Historical Data
 
-```
+\`\`\`
 GET /api/forex/historical/[instrument]
-```
+\`\`\`
 
 **Parameters:**
 - `instrument` - Forex pair
@@ -52,19 +52,19 @@ GET /api/forex/historical/[instrument]
 - `priceType` - Optional: `bid`, `ask` (default: `bid`)
 
 **Example:**
-```bash
+\`\`\`bash
 # Get 1 month of daily data for EUR/USD
 curl "http://localhost:3000/api/forex/historical/eurusd?range=1mo"
 
 # Get specific date range
 curl "http://localhost:3000/api/forex/historical/eurusd?from=2024-01-01&to=2024-01-31&timeframe=h1"
-```
+\`\`\`
 
 ### Get Supported Instruments
 
-```
+\`\`\`
 GET /api/forex/instruments
-```
+\`\`\`
 
 Returns list of all supported forex pairs and commodities.
 
@@ -72,7 +72,7 @@ Returns list of all supported forex pairs and commodities.
 
 ### Basic Usage
 
-```tsx
+\`\`\`tsx
 import { ForexLiveChart } from '@/components/dashboard/forex-live-chart';
 
 export default function ForexPage() {
@@ -86,7 +86,7 @@ export default function ForexPage() {
     </div>
   );
 }
-```
+\`\`\`
 
 ### Props
 
@@ -98,7 +98,7 @@ export default function ForexPage() {
 
 ### Get Real-Time Tick Data
 
-```typescript
+\`\`\`typescript
 import { getForexRealTimeData } from '@/lib/forex/dukascopy-client';
 
 const result = await getForexRealTimeData({
@@ -109,11 +109,11 @@ const result = await getForexRealTimeData({
 });
 
 console.log(result.data);
-```
+\`\`\`
 
 ### Get Historical Data
 
-```typescript
+\`\`\`typescript
 import { getForexHistoricalData } from '@/lib/forex/dukascopy-client';
 
 const result = await getForexHistoricalData({
@@ -127,7 +127,7 @@ const result = await getForexHistoricalData({
 });
 
 console.log(result.data);
-```
+\`\`\`
 
 ## Supported Instruments
 
@@ -158,7 +158,7 @@ console.log(result.data);
 
 ### Tick Data (JSON)
 
-```typescript
+\`\`\`typescript
 {
   timestamp: 1704067200000,
   askPrice: 1.0945,
@@ -166,11 +166,11 @@ console.log(result.data);
   askVolume: 10.5,
   bidVolume: 12.3
 }
-```
+\`\`\`
 
 ### OHLC Data (JSON)
 
-```typescript
+\`\`\`typescript
 {
   timestamp: 1704067200000,
   open: 1.0945,
@@ -179,18 +179,18 @@ console.log(result.data);
   close: 1.0948,
   volume: 123.45
 }
-```
+\`\`\`
 
 ## Integration with Lightweight Charts
 
 The data is automatically converted to the format expected by Lightweight Charts:
 
-```typescript
+\`\`\`typescript
 import { convertToChartData } from '@/lib/forex/dukascopy-client';
 
 const chartData = convertToChartData(result.data);
 // Ready to use with TechnicalChart component
-```
+\`\`\`
 
 ## Notes
 

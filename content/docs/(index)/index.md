@@ -77,4 +77,4 @@ The **Investment Prediction Agent** is a sophisticated platform combining 8 spec
 
 ## 🤝 Contributing & License
 
-Contributions are welcome! Please open an issue or PR. 
+Contributions are welcome! Please open an issue or PR.

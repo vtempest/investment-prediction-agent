@@ -12,7 +12,7 @@ The debate-agents-js library is now accessible via:
 
 ## Architecture
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────┐
 │                     Next.js Dashboard                       │
 │                                                             │
@@ -50,7 +50,7 @@ The debate-agents-js library is now accessible via:
 │  │    • yahoo-finance2 - Market data                   │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ## Files Created
 
@@ -59,7 +59,7 @@ The debate-agents-js library is now accessible via:
 
 Provides REST API access to debate agents analysis:
 
-```typescript
+\`\`\`typescript
 // POST request
 POST /api/debate-agents
 {
@@ -70,7 +70,7 @@ POST /api/debate-agents
 
 // GET request (uses quick mode by default)
 GET /api/debate-agents?ticker=AAPL
-```
+\`\`\`
 
 **Features**:
 - Ticker validation
@@ -85,10 +85,10 @@ GET /api/debate-agents?ticker=AAPL
 
 Lightweight runner that uses available debate-agents-js modules:
 
-```bash
+\`\`\`bash
 node simple-runner.js --ticker AAPL
 node simple-runner.js --ticker NVDA --quick
-```
+\`\`\`
 
 **Features**:
 - System initialization
@@ -136,7 +136,7 @@ Added prominent call-to-action card:
 
 ### POST Request Example
 
-```javascript
+\`\`\`javascript
 const response = await fetch('/api/debate-agents', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -167,20 +167,20 @@ const data = await response.json()
     "timestamp": "2025-12-21T..."
   }
 }
-```
+\`\`\`
 
 ### GET Request Example
 
-```javascript
+\`\`\`javascript
 const response = await fetch('/api/debate-agents?ticker=AAPL')
 const data = await response.json()
-```
+\`\`\`
 
 ## Environment Variables Required
 
 The following environment variables must be set for the debate agents to work:
 
-```bash
+\`\`\`bash
 # Required
 GOOGLE_API_KEY=your_gemini_api_key
 FINNHUB_API_KEY=your_finnhub_key
@@ -194,7 +194,7 @@ OPENAI_API_KEY=your_openai_key
 DEEP_MODEL=gemini-3-pro-preview
 QUICK_MODEL=gemini-2.0-flash
 GEMINI_RPM_LIMIT=15
-```
+\`\`\`
 
 ## How to Use
 
@@ -211,7 +211,7 @@ GEMINI_RPM_LIMIT=15
 
 ### From the API
 
-```bash
+\`\`\`bash
 # Using curl
 curl -X POST http://localhost:3000/api/debate-agents \
   -H "Content-Type: application/json" \
@@ -219,15 +219,15 @@ curl -X POST http://localhost:3000/api/debate-agents \
 
 # Using curl with GET
 curl http://localhost:3000/api/debate-agents?ticker=AAPL
-```
+\`\`\`
 
 ### From Command Line
 
-```bash
+\`\`\`bash
 cd lib/debate-agents-js
 node simple-runner.js --ticker AAPL
 node simple-runner.js --ticker AAPL --quick
-```
+\`\`\`
 
 ## Current Capabilities
 
@@ -288,7 +288,7 @@ See [COMPLETION_SUMMARY.md](COMPLETION_SUMMARY.md) for details.
 
 ### Test the API endpoint
 
-```bash
+\`\`\`bash
 # In project root
 npm run dev
 
@@ -296,14 +296,14 @@ npm run dev
 curl -X POST http://localhost:3000/api/debate-agents \
   -H "Content-Type: application/json" \
   -d '{"ticker": "AAPL", "quickMode": true}'
-```
+\`\`\`
 
 ### Test the runner directly
 
-```bash
+\`\`\`bash
 cd lib/debate-agents-js
 node simple-runner.js --ticker AAPL --quick
-```
+\`\`\`
 
 ### Test from dashboard
 

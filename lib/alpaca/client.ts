@@ -62,4 +62,3 @@ export function createAlpacaBrokerClient(config?: Partial<AlpacaConfig>) {
     paper: false, // Broker API doesn't use paper trading flag
   })
 }
-

@@ -129,7 +129,7 @@ The API heavily relies on the `quoteSummary` service from Yahoo Finance. Here ar
 ## 📝 Example Response Structures
 
 ### Quote Response
-```json
+\`\`\`json
 {
   "symbol": "AAPL",
   "data": {
@@ -138,10 +138,10 @@ The API heavily relies on the `quoteSummary` service from Yahoo Finance. Here ar
     "defaultKeyStatistics": { "trailingEps": 5.27 }
   }
 }
-```
+\`\`\`
 
 ### Historical Response
-```json
+\`\`\`json
 {
   "symbol": "MSFT",
   "data": [
@@ -152,10 +152,10 @@ The API heavily relies on the `quoteSummary` service from Yahoo Finance. Here ar
     }
   ]
 }
-```
+\`\`\`
 
 ### P/E Ratio Response
-```json
+\`\`\`json
 {
   "symbol": "GOOGL",
   "statistics": {
@@ -171,4 +171,4 @@ The API heavily relies on the `quoteSummary` service from Yahoo Finance. Here ar
     }
   ]
 }
-```
+\`\`\`

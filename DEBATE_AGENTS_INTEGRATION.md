@@ -35,11 +35,11 @@ For detailed agent descriptions, see [lib/debate-agents-js/AGENTS.md](lib/debate
 - **Endpoint**: `/api/debate-agents`
 - **Methods**: POST, GET
 - **Example**:
-  ```bash
+  \`\`\`bash
   curl -X POST http://localhost:3000/api/debate-agents \
     -H "Content-Type: application/json" \
     -d '{"ticker": "AAPL", "quickMode": true}'
-  ```
+  \`\`\`
 
 ## What Was Added
 
@@ -77,9 +77,9 @@ For detailed agent descriptions, see [lib/debate-agents-js/AGENTS.md](lib/debate
 
 ## How It Works
 
-```
+\`\`\`
 User (Dashboard) → API Endpoint → simple-runner.js → Debate Agents Modules → LLM Analysis → Results
-```
+\`\`\`
 
 1. User enters ticker symbol in dashboard
 2. API endpoint receives request
@@ -114,7 +114,7 @@ See [lib/debate-agents-js/COMPLETION_SUMMARY.md](lib/debate-agents-js/COMPLETION
 
 Required in `.env` or `.env.local`:
 
-```bash
+\`\`\`bash
 # Required
 GOOGLE_API_KEY=your_gemini_api_key
 FINNHUB_API_KEY=your_finnhub_key (optional for simple runner)
@@ -124,7 +124,7 @@ TAVILY_API_KEY=your_tavily_key (optional for simple runner)
 OPENAI_API_KEY=your_openai_key
 DEEP_MODEL=gemini-3-pro-preview
 QUICK_MODEL=gemini-2.0-flash
-```
+\`\`\`
 
 ## Usage Examples
 
@@ -136,7 +136,7 @@ QUICK_MODEL=gemini-2.0-flash
 5. View BUY/SELL/HOLD recommendation with analysis
 
 ### From API (JavaScript)
-```javascript
+\`\`\`javascript
 const response = await fetch('/api/debate-agents', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -150,14 +150,14 @@ const response = await fetch('/api/debate-agents', {
 const { result } = await response.json()
 console.log(result.decision) // BUY, SELL, or HOLD
 console.log(result.analysis) // Full analysis text
-```
+\`\`\`
 
 ### From Command Line
-```bash
+\`\`\`bash
 cd lib/debate-agents-js
 node simple-runner.js --ticker AAPL
 node simple-runner.js --ticker NVDA --quick
-```
+\`\`\`
 
 ## Performance
 
@@ -168,7 +168,7 @@ node simple-runner.js --ticker NVDA --quick
 
 ## Testing
 
-```bash
+\`\`\`bash
 # Start dev server
 npm run dev
 
@@ -180,7 +180,7 @@ curl -X POST http://localhost:3000/api/debate-agents \
 # Test runner directly
 cd lib/debate-agents-js
 node simple-runner.js --ticker AAPL --quick
-```
+\`\`\`
 
 ## Next Steps
 

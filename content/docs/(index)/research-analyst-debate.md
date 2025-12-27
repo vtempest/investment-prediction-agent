@@ -16,7 +16,7 @@ This project now includes a powerful stock analysis system using **Groq LLMs** w
 
 ## 🏗️ Architecture
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────┐
 │                    Stock Analysis Request                   │
 └────────────────────┬────────────────────────────────────────┘
@@ -63,13 +63,13 @@ This project now includes a powerful stock analysis system using **Groq LLMs** w
 │            │  Risk Manager    │ (Judge final risk level)   │
 │            └──────────────────┘                             │
 └─────────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ## 📦 Installation
 
 ### 1. Install Python Dependencies
 
-```bash
+\`\`\`bash
 cd agents/debate-analyst
 
 # Create virtual environment
@@ -78,29 +78,29 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies (includes langchain-groq)
 pip install -r requirements.txt
-```
+\`\`\`
 
 ### 2. Configure Environment
 
 The environment has been configured to use Groq by default:
 
 **Main Project `.env`** (create this file):
-```bash
+\`\`\`bash
 GROQ_API_KEY=your_groq_api_key_here
 NEXT_PUBLIC_DEBATE_ANALYST_URL=http://localhost:8001
-```
+\`\`\`
 
 **Debate-Analyst `.env`** (create at `agents/debate-analyst/.env`):
-```bash
+\`\`\`bash
 GROQ_API_KEY=your_groq_api_key_here
 LLM_PROVIDER=groq
 DEEP_THINK_LLM=llama-3.1-70b-versatile
 QUICK_THINK_LLM=llama-3.1-8b-instant
 MAX_DEBATE_ROUNDS=2
-```
+\`\`\`
 
 **Default Configuration** (`agents/debate-analyst/tradingagents/default_config.py`):
-```python
+\`\`\`python
 DEFAULT_CONFIG = {
     "llm_provider": "groq",
     "deep_think_llm": "llama-3.1-70b-versatile",
@@ -108,26 +108,26 @@ DEFAULT_CONFIG = {
     "max_debate_rounds": 2,
     # ... other settings
 }
-```
+\`\`\`
 
 ## 🚦 Running the Service
 
 ### Start the Debate-Analyst API Server
 
-```bash
+\`\`\`bash
 cd agents/debate-analyst
 source venv/bin/activate
 python api_server.py
-```
+\`\`\`
 
 The server will start on `http://localhost:8001`
 
 ### Start the Next.js Application
 
-```bash
+\`\`\`bash
 # From project root
 npm run dev
-```
+\`\`\`
 
 The Next.js app will start on `http://localhost:3000`
 
@@ -141,7 +141,7 @@ The `/api/groq-debate` endpoint provides a comprehensive multi-agent debate anal
 
 #### Get System Information
 
-```bash
+\`\`\`bash
 # Get API information about available agents and models
 curl https://autoinvestment.broker/api/groq-debate
 
@@ -163,21 +163,21 @@ curl https://autoinvestment.broker/api/groq-debate
   ],
   "supported_providers": ["groq", "openai", "anthropic"]
 }
-```
+\`\`\`
 
 #### Example 1: Basic Analysis (Groq Default)
 
-```bash
+\`\`\`bash
 curl -X POST https://autoinvestment.broker/api/groq-debate \
   -H "Content-Type: application/json" \
   -d '{
     "symbol": "AAPL"
   }'
-```
+\`\`\`
 
 #### Example 2: Extended Debate Analysis
 
-```bash
+\`\`\`bash
 curl -X POST https://autoinvestment.broker/api/groq-debate \
   -H "Content-Type: application/json" \
   -d '{
@@ -186,11 +186,11 @@ curl -X POST https://autoinvestment.broker/api/groq-debate \
     "max_debate_rounds": 3,
     "llm_provider": "groq"
   }'
-```
+\`\`\`
 
 #### Example 3: Custom Models with Anthropic
 
-```bash
+\`\`\`bash
 curl -X POST https://autoinvestment.broker/api/groq-debate \
   -H "Content-Type: application/json" \
   -d '{
@@ -200,11 +200,11 @@ curl -X POST https://autoinvestment.broker/api/groq-debate \
     "quick_think_llm": "claude-3-5-haiku-20241022",
     "max_debate_rounds": 2
   }'
-```
+\`\`\`
 
 #### Example 4: OpenAI Models
 
-```bash
+\`\`\`bash
 curl -X POST https://autoinvestment.broker/api/groq-debate \
   -H "Content-Type: application/json" \
   -d '{
@@ -213,11 +213,11 @@ curl -X POST https://autoinvestment.broker/api/groq-debate \
     "deep_think_llm": "gpt-4o",
     "quick_think_llm": "gpt-4o-mini"
   }'
-```
+\`\`\`
 
 ### Response Format
 
-```json
+\`\`\`json
 {
   "success": true,
   "symbol": "AAPL",
@@ -267,11 +267,11 @@ curl -X POST https://autoinvestment.broker/api/groq-debate \
     "execution_time_ms": 8500
   }
 }
-```
+\`\`\`
 
 ### Using JavaScript/TypeScript
 
-```
+\`\`\`
 interface GroqDebateRequest {
   symbol: string
   date?: string
@@ -305,13 +305,13 @@ async function analyzeStock(symbol: string) {
 analyzeStock('AAPL').then(result => {
   console.log('Analysis complete:', result)
 })
-```
+\`\`\`
 
 ### Direct API Server Usage
 
 You can also call the debate-analyst service directly:
 
-```bash
+\`\`\`bash
 # Direct call to debate-analyst
 curl -X POST http://localhost:8001/analyze \
   -H "Content-Type: application/json" \
@@ -319,7 +319,7 @@ curl -X POST http://localhost:8001/analyze \
     "symbol": "AAPL",
     "date": "2024-12-11"
   }'
-```
+\`\`\`
 
 
 ## 🧠 How It Works

@@ -128,7 +128,7 @@ Successfully created a JavaScript port of the Multi-Agent Trading System from Py
 
 Both Python and JavaScript load agent prompts from this shared location:
 
-```
+\`\`\`
 ../prompts/
 ├── market_analyst.json
 ├── sentiment_analyst.json
@@ -143,16 +143,16 @@ Both Python and JavaScript load agent prompts from this shared location:
 ├── neutral_analyst.json
 ├── portfolio_manager.json
 └── consultant.json
-```
+\`\`\`
 
 **To sync prompts**:
-```bash
+\`\`\`bash
 # From Python version
 cd ../
 python -c "from prompts import export_prompts; export_prompts()"
 
 # JavaScript will auto-load these JSON files
-```
+\`\`\`
 
 ### ChromaDB Directory (`./chroma_db/`)
 
@@ -230,7 +230,7 @@ JSON output format is identical:
 
 ## Usage Example (Current State)
 
-```javascript
+\`\`\`javascript
 // Initialize system
 import { initialize, getSystemInfo } from './index.js';
 
@@ -252,7 +252,7 @@ import { createQuickThinkingLLM } from './index.js';
 const llm = createQuickThinkingLLM();
 const result = await llm.invoke('Hello, analyze AAPL');
 console.log(result.content);
-```
+\`\`\`
 
 ## Benefits of Dual Implementation
 

@@ -20,9 +20,9 @@ This guide explains how to initialize PineTS and run indicators or strategies wi
 
 ## Installation
 
-```bash
+\`\`\`bash
 npm install pinets
-```
+\`\`\`
 
 ---
 
@@ -32,7 +32,7 @@ The `PineTS` class is the main entry point for working with indicators and strat
 
 ### Syntax
 
-```typescript
+\`\`\`typescript
 const pineTS = new PineTS(
     source: IProvider | any[],
     tickerId?: string,
@@ -41,7 +41,7 @@ const pineTS = new PineTS(
     sDate?: number,
     eDate?: number
 );
-```
+\`\`\`
 
 ### Parameters
 
@@ -62,11 +62,11 @@ const pineTS = new PineTS(
 
 When you specify a `limit` without date ranges, PineTS fetches the **most recent candles working backwards** from the current time:
 
-```typescript
+\`\`\`typescript
 // Fetches the last 100 daily candles (most recent)
 const pineTS = new PineTS(Provider.Binance, 'BTCUSDT', 'D', 100);
 // Result: 100 candles from ~100 days ago until now
-```
+\`\`\`
 
 **Important notes:**
 
@@ -78,7 +78,7 @@ const pineTS = new PineTS(Provider.Binance, 'BTCUSDT', 'D', 100);
 
 When you specify `sDate` and `eDate`, PineTS fetches all candles within that date range:
 
-```typescript
+\`\`\`typescript
 const startDate = new Date('2024-01-01').getTime(); // Start: Jan 1, 2024
 const endDate = new Date('2024-12-31').getTime(); // End: Dec 31, 2024
 
@@ -91,7 +91,7 @@ const pineTS = new PineTS(
     endDate
 );
 // Result: All daily candles from Jan 1 to Dec 31, 2024
-```
+\`\`\`
 
 **Date range behavior:**
 
@@ -113,7 +113,7 @@ const pineTS = new PineTS(
 
 Regardless of how data is fetched, PineTS ensures the data is in **chronological order**:
 
-```typescript
+\`\`\`typescript
 // After initialization, data is ordered: [oldest ... newest]
 const pineTS = new PineTS(Provider.Binance, 'BTCUSDT', 'D', 100);
 
@@ -128,7 +128,7 @@ await pineTS.run((context) => {
     console.log('Current close:', close[0]);
     console.log('Previous close:', close[1]);
 });
-```
+\`\`\`
 
 **Time series indexing:**
 
@@ -139,7 +139,7 @@ await pineTS.run((context) => {
 
 #### Examples of Different Fetching Scenarios
 
-```typescript
+\`\`\`typescript
 // Example 1: Last 100 candles (from now backwards)
 const recent = new PineTS(Provider.Binance, 'BTCUSDT', '1h', 100);
 // Gets: ~100 hours of data up to current time
@@ -155,7 +155,7 @@ const maxData = new PineTS(Provider.Binance, 'BTCUSDT', '1h', 10000);
 // Example 4: No limit (provider default)
 const defaultData = new PineTS(Provider.Binance, 'BTCUSDT', 'D');
 // Gets: Provider default amount (typically 500-1000 candles)
-```
+\`\`\`
 
 ---
 
@@ -165,7 +165,7 @@ const defaultData = new PineTS(Provider.Binance, 'BTCUSDT', 'D');
 
 The easiest way to initialize PineTS is using a built-in data provider:
 
-```typescript
+\`\`\`typescript
 import { PineTS, Provider } from 'pinets';
 
 // Basic initialization with limit
@@ -182,7 +182,7 @@ const pineTSWithDateRange = new PineTS(
     startDate,
     endDate
 );
-```
+\`\`\`
 
 #### Available Providers
 
@@ -212,7 +212,7 @@ The following timeframes are supported with Binance provider:
 
 You can also provide your own OHLCV data as an array:
 
-```typescript
+\`\`\`typescript
 import { PineTS } from 'pinets';
 
 const customData = [
@@ -229,7 +229,7 @@ const customData = [
 ];
 
 const pineTS = new PineTS(customData);
-```
+\`\`\`
 
 #### Custom Data Format
 
@@ -253,12 +253,12 @@ The `run()` method executes your indicator or strategy code across all candles i
 
 ### Syntax
 
-```typescript
+\`\`\`typescript
 const context = await pineTS.run(
     pineTSCode: Function | String,
     n?: number
 ): Promise<Context>
-```
+\`\`\`
 
 ### Parameters
 
@@ -284,7 +284,7 @@ The context object is passed to your indicator function and contains all the dat
 
 ### Available Properties
 
-```typescript
+\`\`\`typescript
 interface Context {
     // Market data (time-series arrays)
     data: {
@@ -337,11 +337,11 @@ interface Context {
     sDate: number; // Start date
     eDate: number; // End date
 }
-```
+\`\`\`
 
 ### Quick Access to Common Data
 
-```typescript
+\`\`\`typescript
 const { result } = await pineTS.run((context) => {
     // Destructure commonly used items
     const { ta, math, core } = context;
@@ -353,7 +353,7 @@ const { result } = await pineTS.run((context) => {
 
     return { ema9, ema21 };
 });
-```
+\`\`\`
 
 ---
 
@@ -365,7 +365,7 @@ The `run()` method returns different formats depending on what your indicator re
 
 If your indicator returns a single value, `context.result` will be an array:
 
-```typescript
+\`\`\`typescript
 const { result } = await pineTS.run((context) => {
     const { ta } = context;
     const { close } = context.data;
@@ -376,13 +376,13 @@ const { result } = await pineTS.run((context) => {
 
 // result is an array of numbers
 console.log(result); // [45123.5, 45234.2, 45345.8, ...]
-```
+\`\`\`
 
 ### Object Return (Multiple Values)
 
 If your indicator returns an object, `context.result` will be an object with arrays:
 
-```typescript
+\`\`\`typescript
 const { result } = await pineTS.run((context) => {
     const { ta } = context;
     const { close } = context.data;
@@ -398,13 +398,13 @@ const { result } = await pineTS.run((context) => {
 console.log(result.ema9); // [45123.5, 45234.2, ...]
 console.log(result.ema21); // [44987.3, 45098.7, ...]
 console.log(result.rsi); // [65.4, 67.2, ...]
-```
+\`\`\`
 
 ### Accessing the Full Context
 
 You can access the entire context object for more information:
 
-```typescript
+\`\`\`typescript
 const context = await pineTS.run((context) => {
     const { ta } = context;
     const { close } = context.data;
@@ -418,7 +418,7 @@ console.log(context.data); // Market data
 console.log(context.tickerId); // 'BTCUSDT'
 console.log(context.timeframe); // 'D'
 console.log(context.marketData); // Raw OHLCV data
-```
+\`\`\`
 
 ---
 
@@ -426,7 +426,7 @@ console.log(context.marketData); // Raw OHLCV data
 
 ### Example 1: Simple Moving Average
 
-```typescript
+\`\`\`typescript
 import { PineTS, Provider } from 'pinets';
 
 async function runSMA() {
@@ -446,11 +446,11 @@ async function runSMA() {
 }
 
 runSMA();
-```
+\`\`\`
 
 ### Example 2: Multiple Indicators
 
-```typescript
+\`\`\`typescript
 import { PineTS, Provider } from 'pinets';
 
 async function runMultipleIndicators() {
@@ -485,11 +485,11 @@ async function runMultipleIndicators() {
 }
 
 runMultipleIndicators();
-```
+\`\`\`
 
 ### Example 3: With Date Range
 
-```typescript
+\`\`\`typescript
 import { PineTS, Provider } from 'pinets';
 
 async function runWithDateRange() {
@@ -525,11 +525,11 @@ async function runWithDateRange() {
 }
 
 runWithDateRange();
-```
+\`\`\`
 
 ### Example 4: Custom Data
 
-```typescript
+\`\`\`typescript
 import { PineTS } from 'pinets';
 
 async function runWithCustomData() {
@@ -553,11 +553,11 @@ async function runWithCustomData() {
 }
 
 runWithCustomData();
-```
+\`\`\`
 
 ### Example 5: Processing Last N Periods Only
 
-```typescript
+\`\`\`typescript
 import { PineTS, Provider } from 'pinets';
 
 async function runLastNPeriods() {
@@ -577,11 +577,11 @@ async function runLastNPeriods() {
 }
 
 runLastNPeriods();
-```
+\`\`\`
 
 ### Example 6: Using TA Cache for Performance
 
-```typescript
+\`\`\`typescript
 import { PineTS, Provider } from 'pinets';
 
 async function runWithCache() {
@@ -606,11 +606,11 @@ async function runWithCache() {
 }
 
 runWithCache();
-```
+\`\`\`
 
 ### Example 7: Complex Strategy
 
-```typescript
+\`\`\`typescript
 import { PineTS, Provider } from 'pinets';
 
 async function runComplexStrategy() {
@@ -661,7 +661,7 @@ async function runComplexStrategy() {
 }
 
 runComplexStrategy();
-```
+\`\`\`
 
 ---
 
@@ -671,19 +671,19 @@ runComplexStrategy();
 
 Always use `await` with `pineTS.run()` since data fetching is asynchronous:
 
-```typescript
+\`\`\`typescript
 // ✅ Correct
 const { result } = await pineTS.run((context) => { ... });
 
 // ❌ Wrong - will not work properly
 const { result } = pineTS.run((context) => { ... }); // Missing await
-```
+\`\`\`
 
 ### 2. Destructuring for Cleaner Code
 
 Destructure the context for more readable code:
 
-```typescript
+\`\`\`typescript
 const { result } = await pineTS.run((context) => {
     // Destructure for cleaner access
     const { ta, math } = context;
@@ -693,37 +693,37 @@ const { result } = await pineTS.run((context) => {
     const sma = ta.sma(close, 20);
     return sma;
 });
-```
+\`\`\`
 
 ### 3. Return Objects for Multiple Values
 
 When calculating multiple indicators, return them as an object:
 
-```typescript
+\`\`\`typescript
 // ✅ Return multiple values as object
 return { sma, ema, rsi };
 
 // ❌ Less convenient - only returns one value
 return sma;
-```
+\`\`\`
 
 ### 4. Performance Optimization
 
 For large datasets or complex calculations:
 
-```typescript
+\`\`\`typescript
 // Enable TA cache
 const { result } = await pineTS.run(indicatorFn, undefined, true);
 
 // Or process fewer periods
 const { result } = await pineTS.run(indicatorFn, 100); // Last 100 periods only
-```
+\`\`\`
 
 ### 5. Error Handling
 
 Always wrap your PineTS code in try-catch blocks:
 
-```typescript
+\`\`\`typescript
 try {
     const pineTS = new PineTS(Provider.Binance, 'BTCUSDT', 'D', 100);
     const { result } = await pineTS.run((context) => {
@@ -733,7 +733,7 @@ try {
 } catch (error) {
     console.error('Error running indicator:', error);
 }
-```
+\`\`\`
 
 ---
 
@@ -772,19 +772,19 @@ PineTS distinguishes between `let` and `var` declarations to mimic Pine Script's
 
 **Pine Script:**
 
-```javascript
+\`\`\`javascript
 // 'sum' retains its value across bars
 var float sum = 0.0
 sum := sum + close
-```
+\`\`\`
 
 **PineTS:**
 
-```javascript
+\`\`\`javascript
 // 'sum' retains its value across bars
 var sum = 0.0;
 sum = sum + close;
-```
+\`\`\`
 
 ## Loops
 
@@ -799,20 +799,20 @@ PineTS supports standard JavaScript loops, which map to Pine Script's loops.
 
 **Pine Script:**
 
-```javascript
+\`\`\`javascript
 float sum = 0.0
 for i = 0 to 9
     sum := sum + close[i]
-```
+\`\`\`
 
 **PineTS:**
 
-```javascript
+\`\`\`javascript
 let sum = 0.0;
 for (let i = 0; i < 10; i++) {
     sum += close[i];
 }
-```
+\`\`\`
 
 ## Control Structures
 
@@ -822,16 +822,16 @@ PineTS supports the JavaScript `switch` statement, which is equivalent to Pine S
 
 **Pine Script:**
 
-```javascript
+\`\`\`javascript
 switch type
     "ema" => ta.ema(close, len)
     "sma" => ta.sma(close, len)
     => ta.rma(close, len)
-```
+\`\`\`
 
 **PineTS:**
 
-```javascript
+\`\`\`javascript
 switch (type) {
     case 'ema':
         return ta.ema(close, len);
@@ -840,7 +840,7 @@ switch (type) {
     default:
         return ta.rma(close, len);
 }
-```
+\`\`\`
 
 ## Functions
 
@@ -848,18 +848,18 @@ User-defined functions in PineTS are written as standard JavaScript functions.
 
 **Pine Script:**
 
-```javascript
+\`\`\`javascript
 f_ma(source, length) =>
     ta.sma(source, length)
-```
+\`\`\`
 
 **PineTS:**
 
-```javascript
+\`\`\`javascript
 function f_ma(source, length) {
     return ta.sma(source, length);
 }
-```
+\`\`\`
 
 ## Tuples and Multiple Return Values
 
@@ -867,15 +867,15 @@ Pine Script allows functions to return multiple values (tuples). PineTS handles 
 
 **Pine Script:**
 
-```javascript
+\`\`\`javascript
 [macdLine, signalLine, histLine] = ta.macd(close, 12, 26, 9)
-```
+\`\`\`
 
 **PineTS:**
 
-```javascript
+\`\`\`javascript
 const [macdLine, signalLine, histLine] = ta.macd(close, 12, 26, 9);
-```
+\`\`\`
 
 ## Series and History Access
 
@@ -889,10 +889,10 @@ Accessing historical values is done using the `[]` operator in Pine Script. In P
 
 **PineTS:**
 
-```javascript
+\`\`\`javascript
 // Calculate momentum
 let mom = close - close[10];
-```
+\`\`\`
 
 ## Conditional Logic
 
@@ -907,22 +907,22 @@ PineTS supports standard JavaScript control flow, which maps to Pine Script's ex
 
 **Pine Script:**
 
-```javascript
+\`\`\`javascript
 if close > open
     direction := 1
 else
     direction := -1
-```
+\`\`\`
 
 **PineTS:**
 
-```javascript
+\`\`\`javascript
 if (close > open) {
     direction = 1;
 } else {
     direction = -1;
 }
-```
+\`\`\`
 
 ## Built-in Variables
 
@@ -939,10 +939,10 @@ PineTS exposes Pine Script's built-in variables through the `context` object, bu
 
 **PineTS Setup:**
 
-```javascript
+\`\`\`javascript
 const { close, high, low } = context.data;
 const { bar_index } = context.pine;
-```
+\`\`\`
 
 ## Functions and Namespaces
 
@@ -956,11 +956,11 @@ PineTS organizes built-in functions into namespaces similar to Pine Script v5.
 
 **PineTS Setup:**
 
-```javascript
+\`\`\`javascript
 const { ta, math } = context.pine;
 // Usage
 const sma = ta.sma(close, 14);
-```
+\`\`\`
 
 ## Full Example: Parabolic SAR
 
@@ -968,7 +968,7 @@ This example demonstrates `var` for state, `if/else` logic, and history access.
 
 **Pine Script:**
 
-```javascript
+\`\`\`javascript
 pine_sar(start, inc, max) =>
     var float result = na
     var float maxMin = na
@@ -990,11 +990,11 @@ pine_sar(start, inc, max) =>
 
     // ... logic continues ...
     result
-```
+\`\`\`
 
 **PineTS:**
 
-```javascript
+\`\`\`javascript
 function pine_sar(start, inc, max) {
     // Use 'var' for state variables (persistent)
     var result = na;
@@ -1023,4 +1023,4 @@ function pine_sar(start, inc, max) {
 
     return result;
 }
-```
+\`\`\`

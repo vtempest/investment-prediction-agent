@@ -11,15 +11,15 @@ This is a **JavaScript/Node.js port** of the Python debate-agents system located
 The system implements a multi-agent architecture with specialized roles
 ## Installation
 
-```bash
+\`\`\`bash
 npm install
-```
+\`\`\`
 
 ## Configuration
 
 Create a `.env` file based on `.env.example`:
 
-```bash
+\`\`\`bash
 # Required API Keys
 GOOGLE_API_KEY=your_gemini_api_key
 FINNHUB_API_KEY=your_finnhub_key
@@ -39,13 +39,13 @@ GEMINI_RPM_LIMIT=15
 # Features
 ENABLE_MEMORY=true
 ENABLE_CONSULTANT=true
-```
+\`\`\`
 
 ## Usage
 
 ### Basic Analysis
 
-```javascript
+\`\`\`javascript
 import { runAnalysis } from './main.js';
 
 const result = await runAnalysis({
@@ -54,11 +54,11 @@ const result = await runAnalysis({
 });
 
 console.log(result.final_trade_decision);
-```
+\`\`\`
 
 ### CLI Usage
 
-```bash
+\`\`\`bash
 # Basic analysis
 node main.js --ticker AAPL
 
@@ -67,13 +67,13 @@ node main.js --ticker NVDA --quick
 
 # Quiet mode (markdown report only)
 node main.js --ticker AAPL --quiet
-```
+\`\`\`
 
 ### Health Check
 
-```bash
+\`\`\`bash
 npm run health-check
-```
+\`\`\`
 
 ## Key Differences from Python Version
 
@@ -85,7 +85,7 @@ npm run health-check
 
 ## Module Structure
 
-```
+\`\`\`
 debate-agents-js/
 ├── config.js           # Configuration and env management
 ├── llms.js             # LLM initialization (Gemini & OpenAI)
@@ -98,7 +98,7 @@ debate-agents-js/
 ├── main.js             # CLI entry point
 ├── health_check.js     # System health check
 └── package.json        # Dependencies
-```
+\`\`\`
 
 ## Prompts Compatibility
 
@@ -116,7 +116,7 @@ To ensure consistency, the Python `prompts.py` file is the source of truth. You 
 
 ## Data Flow
 
-```
+\`\`\`
 User Input (Ticker)
   ↓
 Market Analyst → tools → report
@@ -140,7 +140,7 @@ Trader → execution plan
 Risk Team → sizing debate
   ↓
 Portfolio Manager → FINAL DECISION
-```
+\`\`\`
 
 ## Memory System
 
@@ -153,30 +153,30 @@ The system uses ChromaDB for vector-based memory storage:
 
 ## Testing
 
-```bash
+\`\`\`bash
 npm test
-```
+\`\`\`
 
 Run specific test:
 
-```bash
+\`\`\`bash
 npm test -- agents.test.js
-```
+\`\`\`
 
 ## Development
 
 ### Watch Mode
 
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 ### Linting
 
-```bash
+\`\`\`bash
 npm run lint
 npm run format
-```
+\`\`\`
 
 ## Python Interoperability
 

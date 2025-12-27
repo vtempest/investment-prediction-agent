@@ -4,13 +4,13 @@
 Fetch the latest data from offical APIs of NASDAQ, NYSE, and AMEX.
 
 ## Output
-  ```json
+  \`\`\`json
   [
     ["AAPL", "Apple Inc.", 1, 5, 3000000, 320193],
     ["MSFT", "Microsoft Corporation", 1, 6, 2800000, 789019],
     ...
   ]
-  ```
+  \`\`\`
   Fields: [symbol, name, sectorId, industryId, marketCap, cik]
 
 ## Sectors & Industries Mapping

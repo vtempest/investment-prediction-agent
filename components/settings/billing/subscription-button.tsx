@@ -75,4 +75,4 @@ export default function SubscriptionButton({
             {isPending ? "Processing..." : buttonText}
         </Button>
     )
-} 
+}

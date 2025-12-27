@@ -68,7 +68,7 @@ Each brings unique viewpoint, ensuring comprehensive risk assessment.
 - Direct engagement with opposing viewpoints
 
 **Example Structure**:
-```
+\`\`\`
 ### THOUGHT PROCESS
 [Reasoning approach]
 
@@ -81,7 +81,7 @@ Each brings unique viewpoint, ensuring comprehensive risk assessment.
 
 ### CONCLUSION
 [Clear recommendation]
-```
+\`\`\`
 
 ### 6. Backbone LLM Selection Strategy ✅
 
@@ -100,12 +100,12 @@ Each brings unique viewpoint, ensuring comprehensive risk assessment.
 ## Architecture Comparison
 
 ### Before (Original Implementation)
-```
+\`\`\`
 Market Analyst → Bull/Bear Debate → Investment Judge → Trader → DONE
-```
+\`\`\`
 
 ### After (Improved Implementation)
-```
+\`\`\`
 Analyst Team (Structured Reports)
     ↓
 Bull ←→ Bear (Facilitated Debate with structured arguments)
@@ -121,7 +121,7 @@ Risk Facilitator (Risk-adjusted plan)
 Fund Manager (Final approval with execution params)
     ↓
 EXECUTE or HOLD
-```
+\`\`\`
 
 ## Benefits
 
@@ -136,7 +136,7 @@ EXECUTE or HOLD
 
 ## Usage Example
 
-```typescript
+\`\`\`typescript
 import { ImprovedTradingAgentsGraph } from './graph/improved-trading-graph'
 
 const graph = new ImprovedTradingAgentsGraph(
@@ -155,7 +155,7 @@ console.log(`Decision: ${signal.action}`)
 console.log(`Confidence: ${signal.confidence}`)
 console.log(`Fund Manager: ${state.finalApproval}`)
 console.log(`Position Size: ${state.approvedPositionSize}`)
-```
+\`\`\`
 
 ## Next Steps
 

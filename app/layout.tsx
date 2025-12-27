@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   viewport: "width=device-width, initial-scale=1",
+    generator: 'v0.app'
 };
 
 export default async function RootLayout({

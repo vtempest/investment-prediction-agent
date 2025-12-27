@@ -19,7 +19,7 @@ Professional real-time forex charting powered by Dukascopy's free tick data API 
 
 ### Basic Usage
 
-```tsx
+\`\`\`tsx
 import { RealtimeForexChart } from '@/components/dashboard/realtime-forex-chart';
 
 export default function TradingPage() {
@@ -31,7 +31,7 @@ export default function TradingPage() {
     />
   );
 }
-```
+\`\`\`
 
 ### Props
 
@@ -43,7 +43,7 @@ export default function TradingPage() {
 
 ### Supported Instruments
 
-```typescript
+\`\`\`typescript
 // Major Forex Pairs
 "eurusd" | "gbpusd" | "usdjpy" | "audusd" | "usdcad" | "usdchf" | "nzdusd"
 
@@ -55,16 +55,16 @@ export default function TradingPage() {
 
 // Commodities
 "xauusd" | "xagusd" | "wtiusd"
-```
+\`\`\`
 
 ### Supported Timeframes
 
-```typescript
+\`\`\`typescript
 "m1"   // 1 minute
 "m5"   // 5 minutes
 "m15"  // 15 minutes
 "h1"   // 1 hour
-```
+\`\`\`
 
 ## How It Works
 
@@ -72,10 +72,10 @@ export default function TradingPage() {
 
 When the component mounts, it fetches the last 500 candles:
 
-```typescript
+\`\`\`typescript
 const url = `/api/forex/realtime/${instrument}?timeframe=${timeframe}&last=500`
 const response = await fetch(url)
-```
+\`\`\`
 
 This provides historical context for the chart.
 
@@ -83,10 +83,10 @@ This provides historical context for the chart.
 
 The component polls for updates every 1-5 seconds (depending on timeframe):
 
-```typescript
+\`\`\`typescript
 const updateInterval = timeframe === 'm1' ? 1000 : 5000
 setInterval(fetchRealtimeUpdate, updateInterval)
-```
+\`\`\`
 
 Each update:
 1. Fetches the latest candle
@@ -95,7 +95,7 @@ Each update:
 
 ### 3. Candle Update Logic
 
-```typescript
+\`\`\`typescript
 if (newCandle.time === lastCandle.time) {
   // Same time = update existing candle (price changed)
   series.update(newCandle)
@@ -104,7 +104,7 @@ if (newCandle.time === lastCandle.time) {
   series.update(newCandle)
   lastCandle = newCandle
 }
-```
+\`\`\`
 
 This follows the Lightweight Charts real-time update pattern.
 
@@ -112,9 +112,9 @@ This follows the Lightweight Charts real-time update pattern.
 
 ### Real-Time Endpoint
 
-```
+\`\`\`
 GET /api/forex/realtime/[instrument]
-```
+\`\`\`
 
 **Query Parameters:**
 - `timeframe` - Candle period (m1, m5, m15, h1)
@@ -122,7 +122,7 @@ GET /api/forex/realtime/[instrument]
 - `format` - Data format (json, array, csv)
 
 **Response:**
-```json
+\`\`\`json
 {
   "success": true,
   "data": [
@@ -136,7 +136,7 @@ GET /api/forex/realtime/[instrument]
     }
   ]
 }
-```
+\`\`\`
 
 ## Features Breakdown
 
@@ -144,53 +144,53 @@ GET /api/forex/realtime/[instrument]
 
 Shows animated "LIVE" badge when updates are active:
 
-```tsx
+\`\`\`tsx
 {isLive && (
   <Badge variant="default" className="animate-pulse">
     <Activity className="w-3 h-3 mr-1" />
     LIVE
   </Badge>
 )}
-```
+\`\`\`
 
 ### 2. Current Price Display
 
 Shows real-time price updates:
 
-```tsx
+\`\`\`tsx
 {currentPrice !== null && (
   <div className="text-2xl font-mono">
     ${currentPrice.toFixed(5)}
   </div>
 )}
-```
+\`\`\`
 
 ### 3. Go to Realtime Button
 
 Scrolls chart to show latest data:
 
-```tsx
+\`\`\`tsx
 <Button onClick={() => chart.timeScale().scrollToRealTime()}>
   Go to Realtime
 </Button>
-```
+\`\`\`
 
 ### 4. Pause/Resume Controls
 
 Toggle live updates:
 
-```tsx
+\`\`\`tsx
 const toggleLive = () => {
   setIsLive(!isLive)
   // Interval automatically starts/stops via useEffect
 }
-```
+\`\`\`
 
 ### 5. Interactive Tooltip
 
 Shows OHLC data on hover using our custom tooltip plugin:
 
-```typescript
+\`\`\`typescript
 const tooltipPrimitive = new TooltipPrimitive({
   tooltip: {
     title: instrument.toUpperCase(),
@@ -199,13 +199,13 @@ const tooltipPrimitive = new TooltipPrimitive({
   priceExtractor: (data) => `$${data.close.toFixed(5)}`,
 })
 candlestickSeries.attachPrimitive(tooltipPrimitive)
-```
+\`\`\`
 
 ## Advanced Usage
 
 ### Custom Update Interval
 
-```tsx
+\`\`\`tsx
 const [updateInterval, setUpdateInterval] = useState(5000)
 
 useEffect(() => {
@@ -214,26 +214,26 @@ useEffect(() => {
     return () => clearInterval(interval)
   }
 }, [isLive, updateInterval])
-```
+\`\`\`
 
 ### Multiple Charts
 
 Display multiple instruments side-by-side:
 
-```tsx
+\`\`\`tsx
 <div className="grid grid-cols-2 gap-4">
   <RealtimeForexChart instrument="eurusd" />
   <RealtimeForexChart instrument="gbpusd" />
   <RealtimeForexChart instrument="usdjpy" />
   <RealtimeForexChart instrument="btcusd" />
 </div>
-```
+\`\`\`
 
 ### With Tabs
 
 Switch between instruments:
 
-```tsx
+\`\`\`tsx
 <Tabs defaultValue="eurusd">
   <TabsList>
     <TabsTrigger value="eurusd">EUR/USD</TabsTrigger>
@@ -246,7 +246,7 @@ Switch between instruments:
     <RealtimeForexChart instrument="btcusd" />
   </TabsContent>
 </Tabs>
-```
+\`\`\`
 
 ## Performance Considerations
 
@@ -258,29 +258,29 @@ Lower timeframes update more frequently:
 
 Adjust based on your needs:
 
-```typescript
+\`\`\`typescript
 const updateInterval = timeframe === 'm1' ? 1000 :
                        timeframe === 'm5' ? 5000 :
                        10000 // h1, h4
-```
+\`\`\`
 
 ### 2. Data Volume
 
 Initial load fetches 500 candles. Adjust for performance:
 
-```typescript
+\`\`\`typescript
 // Lighter load
 const url = `...&last=100` // Only 100 candles
 
 // Heavier load for more context
 const url = `...&last=1000` // 1000 candles
-```
+\`\`\`
 
 ### 3. Memory Management
 
 Cleanup on unmount:
 
-```typescript
+\`\`\`typescript
 useEffect(() => {
   return () => {
     if (intervalRef.current) {
@@ -291,7 +291,7 @@ useEffect(() => {
     }
   }
 }, [])
-```
+\`\`\`
 
 ## Troubleshooting
 

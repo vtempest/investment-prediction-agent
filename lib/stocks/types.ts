@@ -309,4 +309,3 @@ export interface Quote {
   marketState?: string;
   symbol?: string;
 }
-

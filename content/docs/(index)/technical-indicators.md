@@ -14,40 +14,40 @@ title: Technical Indicators
 ## 📖 Quick Reference
 
 ### Moving Averages
-```
+\`\`\`
 SMA(N) = SUM(Close, N) / N
 EMA(N) = (Close × α) + (Previous EMA × (1-α)), α = 2/(N+1)
 DEMA = (2 × EMA) - EMA(EMA)
 TEMA = (3 × EMA1) - (3 × EMA2) + EMA3
 VWMA(N) = SUM(Close × Volume, N) / SUM(Volume, N)
-```
+\`\`\`
 
 ### Momentum
-```
+\`\`\`
 RSI(14) = 100 - (100 / (1 + RS)), RS = Avg Gain / Avg Loss
 MACD = EMA(12) - EMA(26), Signal = EMA(9, MACD)
 APO = EMA(14) - EMA(30)
 Stochastic %K = ((C - LOW14) / (HIGH14 - LOW14)) × 100
 %D = SMA(%K, 3)
-```
+\`\`\`
 
 ### Volatility
-```
+\`\`\`
 ATR(14) = SMA(True Range, 14)
 TR = MAX(H-L, |H-C_prev|, |L-C_prev|)
 BB Upper = SMA(20) + (2 × STDEV)
 BB Lower = SMA(20) - (2 × STDEV)
 Keltner = EMA ± (2 × ATR)
-```
+\`\`\`
 
 ### Volume
-```
+\`\`\`
 OBV = Previous OBV ± Volume (+ if close > prev, - if close < prev)
 CMF = SUM((CLR × Volume), 14) / SUM(Volume, 14)
 AD = Previous AD + (CLR × Volume)
 CLR = ((C-L) - (H-C)) / (H-L)
 MFI = 100 - (100 / (1 + Money Ratio))
-```
+\`\`\`
 
 
 ## 🎯 Trend Indicators
